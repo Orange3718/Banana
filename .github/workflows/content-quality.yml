@@ -1,0 +1,23 @@
+name: Content Quality Gate
+
+on:
+  push:
+    branches: [ main, feat/automated-content-quality ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit blog structure and SEO
+        run: python scripts/site_audit.py
