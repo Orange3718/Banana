@@ -23,10 +23,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enrich SEO metadata, sitemap and robots
+        run: python scripts/enrich_html.py
+      - name: Block low-quality content
+        run: python scripts/site_audit.py
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
