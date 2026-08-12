@@ -19,5 +19,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Enrich SEO and discovery metadata
+        run: python scripts/enrich_html.py
       - name: Audit blog structure and SEO
         run: python scripts/site_audit.py
