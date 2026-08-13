@@ -1,0 +1,20 @@
+남는 Mac을 24시간 AI 자동화 서버로 바꾸는 순서
+
+Docker·n8n·PostgreSQL·Ollama·Tailscale을 무엇부터 설치해야 꼬이지 않는지 설명합니다.
+
+따라 하는 순서
+1. macOS 업데이트와 저장공간 30GB 이상 확인
+2. Docker Desktop 설치 후 컨테이너 실행 확인
+3. n8n과 PostgreSQL을 Docker Compose로 실행
+4. Ollama 설치와 소형 모델 테스트
+5. Tailscale로 외부 노트북 연결
+6. 백업과 재부팅 후 자동 시작 확인
+
+완료 전 확인
+• 비밀번호와 API 키를 문서나 Git에 저장하지 않았는가
+• 공유기 포트를 인터넷에 직접 열지 않았는가
+• 재부팅 뒤 Docker와 자동화가 다시 실행되는가
+
+전체 글: https://orange3718.github.io/Banana/guides/mac-ai-server-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

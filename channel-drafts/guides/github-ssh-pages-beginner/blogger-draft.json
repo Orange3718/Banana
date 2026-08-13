@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "GitHub 비밀번호 없이 SSH로 clone·pull·push하고 Pages까지 공개하기",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>SSH 키의 공개키와 개인키 차이, 연결 확인, 안전한 정적 사이트 배포를 한 번에 정리합니다.</p><h2>따라 하는 순서</h2><ol><li>기존 SSH 키 확인</li><li>기기별 새 Ed25519 키 생성</li><li>개인키는 Mac에 두고 공개키만 GitHub에 등록</li><li>ssh -T로 GitHub 연결 검사</li><li>SSH 주소로 저장소 clone</li><li>pull·commit·push 후 Pages 배포 확인</li></ol><h2>완료 전 확인</h2><ul><li>개인키 파일 내용을 GitHub나 채팅에 붙이지 않았는가</li><li>2FA 코드는 GitHub 화면에만 입력했는가</li><li>push 전 git status로 비밀 파일을 확인했는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/github-ssh-pages-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.github.com/en/authentication/connecting-to-github-with-ssh\">GitHub SSH 연결</a></li><li><a href=\"https://docs.github.com/en/pages\">GitHub Pages</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/github-ssh-pages-beginner.html",
+    "isDraft": true
+  }
+}

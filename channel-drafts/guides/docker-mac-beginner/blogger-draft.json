@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "Docker가 뭔지도 몰라도 Mac에 안전하게 설치하는 법",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>Apple Silicon과 Intel 확인부터 설치 완료 검사까지 초보자 화면 기준으로 정리합니다.</p><h2>따라 하는 순서</h2><ol><li>Apple 메뉴 → 이 Mac에 관하여에서 칩 종류 확인</li><li>공식 페이지에서 Apple Silicon 또는 Intel 설치 파일 선택</li><li>Docker.dmg를 열고 Docker를 응용 프로그램으로 이동</li><li>Docker를 실행하고 약관·권한 화면을 직접 확인</li><li>터미널에서 docker version과 docker ps 확인</li></ol><h2>완료 전 확인</h2><ul><li>공식 Docker 사이트에서 받았는가</li><li>지원되는 macOS와 4GB 이상 RAM 조건을 확인했는가</li><li>회사 사용이라면 Docker Desktop 라이선스를 확인했는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/docker-mac-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.docker.com/desktop/setup/install/mac-install/\">Docker Desktop for Mac</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/docker-mac-beginner.html",
+    "isDraft": true
+  }
+}

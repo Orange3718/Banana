@@ -1,0 +1,20 @@
+GitHub 비밀번호 없이 SSH로 clone·pull·push하고 Pages까지 공개하기
+
+SSH 키의 공개키와 개인키 차이, 연결 확인, 안전한 정적 사이트 배포를 한 번에 정리합니다.
+
+따라 하는 순서
+1. 기존 SSH 키 확인
+2. 기기별 새 Ed25519 키 생성
+3. 개인키는 Mac에 두고 공개키만 GitHub에 등록
+4. ssh -T로 GitHub 연결 검사
+5. SSH 주소로 저장소 clone
+6. pull·commit·push 후 Pages 배포 확인
+
+완료 전 확인
+• 개인키 파일 내용을 GitHub나 채팅에 붙이지 않았는가
+• 2FA 코드는 GitHub 화면에만 입력했는가
+• push 전 git status로 비밀 파일을 확인했는가
+
+전체 글: https://orange3718.github.io/Banana/guides/github-ssh-pages-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

@@ -1,0 +1,20 @@
+n8n과 PostgreSQL을 Docker로 같이 띄우는 초보자 가이드
+
+자동화 화면과 장기 데이터 저장소를 분리하는 이유부터 백업까지 설명합니다.
+
+따라 하는 순서
+1. 작업 폴더와 compose 파일 준비
+2. PostgreSQL 비밀번호는 환경변수 파일에 저장
+3. PostgreSQL healthcheck 구성
+4. n8n이 PostgreSQL을 사용하도록 연결
+5. localhost에서 n8n 초기 계정 생성
+6. 볼륨과 DB 백업 경로 확인
+
+완료 전 확인
+• DB 포트를 인터넷에 공개하지 않았는가
+• compose 파일에 실제 비밀번호를 넣지 않았는가
+• 볼륨을 지워도 되는지 확인하지 않고 삭제 명령을 쓰지 않았는가
+
+전체 글: https://orange3718.github.io/Banana/guides/n8n-postgres-docker-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

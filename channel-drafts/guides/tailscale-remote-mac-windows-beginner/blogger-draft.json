@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "외부 Windows에서 집의 Mac에 안전하게 접속하는 가장 쉬운 구조",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>공유기 포트포워딩 없이 Tailscale로 대시보드·SSH·화면공유에 접근합니다.</p><h2>따라 하는 순서</h2><ol><li>Mac과 Windows에 Tailscale 설치</li><li>두 기기에서 같은 계정으로 로그인</li><li>Machines 화면에서 두 기기 확인</li><li>Mac의 Tailscale IP 또는 MagicDNS 이름 확인</li><li>필요한 서비스만 해당 주소와 포트로 접속</li><li>접근정책·기기 만료·업데이트 확인</li></ol><h2>완료 전 확인</h2><ul><li>공유기에서 22·5900 포트를 공개하지 않았는가</li><li>모르는 기기가 Tailnet에 들어와 있지 않은가</li><li>Mac 화면공유·SSH는 필요한 사용자에게만 허용했는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/tailscale-remote-mac-windows-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://tailscale.com/kb/1452/connect-to-devices\">Tailscale 기기 연결</a></li><li><a href=\"https://tailscale.com/docs/reference/ssh-over-tailscale\">Tailscale SSH 보안</a></li><li><a href=\"https://tailscale.com/kb/1212/shared-responsibility\">Tailscale 책임 모델</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/tailscale-remote-mac-windows-beginner.html",
+    "isDraft": true
+  }
+}

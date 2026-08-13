@@ -1,0 +1,20 @@
+외부 Windows에서 집의 Mac에 안전하게 접속하는 가장 쉬운 구조
+
+공유기 포트포워딩 없이 Tailscale로 대시보드·SSH·화면공유에 접근합니다.
+
+따라 하는 순서
+1. Mac과 Windows에 Tailscale 설치
+2. 두 기기에서 같은 계정으로 로그인
+3. Machines 화면에서 두 기기 확인
+4. Mac의 Tailscale IP 또는 MagicDNS 이름 확인
+5. 필요한 서비스만 해당 주소와 포트로 접속
+6. 접근정책·기기 만료·업데이트 확인
+
+완료 전 확인
+• 공유기에서 22·5900 포트를 공개하지 않았는가
+• 모르는 기기가 Tailnet에 들어와 있지 않은가
+• Mac 화면공유·SSH는 필요한 사용자에게만 허용했는가
+
+전체 글: https://orange3718.github.io/Banana/guides/tailscale-remote-mac-windows-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

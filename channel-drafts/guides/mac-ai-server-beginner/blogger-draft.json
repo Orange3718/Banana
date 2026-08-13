@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "남는 Mac을 24시간 AI 자동화 서버로 바꾸는 순서",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>Docker·n8n·PostgreSQL·Ollama·Tailscale을 무엇부터 설치해야 꼬이지 않는지 설명합니다.</p><h2>따라 하는 순서</h2><ol><li>macOS 업데이트와 저장공간 30GB 이상 확인</li><li>Docker Desktop 설치 후 컨테이너 실행 확인</li><li>n8n과 PostgreSQL을 Docker Compose로 실행</li><li>Ollama 설치와 소형 모델 테스트</li><li>Tailscale로 외부 노트북 연결</li><li>백업과 재부팅 후 자동 시작 확인</li></ol><h2>완료 전 확인</h2><ul><li>비밀번호와 API 키를 문서나 Git에 저장하지 않았는가</li><li>공유기 포트를 인터넷에 직접 열지 않았는가</li><li>재부팅 뒤 Docker와 자동화가 다시 실행되는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/mac-ai-server-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.docker.com/desktop/setup/install/mac-install/\">Docker Mac 설치</a></li><li><a href=\"https://docs.n8n.io/hosting/installation/docker/\">n8n Docker 설치</a></li><li><a href=\"https://docs.ollama.com/macos\">Ollama macOS</a></li><li><a href=\"https://tailscale.com/kb/1452/connect-to-devices\">Tailscale 기기 연결</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/mac-ai-server-beginner.html",
+    "isDraft": true
+  }
+}

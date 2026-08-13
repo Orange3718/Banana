@@ -1,0 +1,20 @@
+API 요금 없이 Mac에서 로컬 AI 시작하기: Ollama 입문
+
+내 Mac에 맞는 작은 모델부터 설치하고 n8n에서 호출하기 전까지의 기본 과정입니다.
+
+따라 하는 순서
+1. macOS와 칩·메모리 확인
+2. 공식 Ollama DMG를 응용 프로그램에 설치
+3. 터미널에서 ollama 명령 확인
+4. 작은 모델을 먼저 내려받아 질문 테스트
+5. localhost API 응답 확인
+6. 모델 저장공간과 로그 위치 확인
+
+완료 전 확인
+• 처음부터 너무 큰 모델을 받지 않았는가
+• 모델 파일이 수십 GB가 될 수 있음을 확인했는가
+• Ollama 포트를 공용 인터넷에 열지 않았는가
+
+전체 글: https://orange3718.github.io/Banana/guides/ollama-local-ai-mac-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

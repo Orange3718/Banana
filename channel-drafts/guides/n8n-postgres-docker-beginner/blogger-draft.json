@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "n8n과 PostgreSQL을 Docker로 같이 띄우는 초보자 가이드",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>자동화 화면과 장기 데이터 저장소를 분리하는 이유부터 백업까지 설명합니다.</p><h2>따라 하는 순서</h2><ol><li>작업 폴더와 compose 파일 준비</li><li>PostgreSQL 비밀번호는 환경변수 파일에 저장</li><li>PostgreSQL healthcheck 구성</li><li>n8n이 PostgreSQL을 사용하도록 연결</li><li>localhost에서 n8n 초기 계정 생성</li><li>볼륨과 DB 백업 경로 확인</li></ol><h2>완료 전 확인</h2><ul><li>DB 포트를 인터넷에 공개하지 않았는가</li><li>compose 파일에 실제 비밀번호를 넣지 않았는가</li><li>볼륨을 지워도 되는지 확인하지 않고 삭제 명령을 쓰지 않았는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/n8n-postgres-docker-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.n8n.io/hosting/installation/docker/\">n8n Docker 설치</a></li><li><a href=\"https://docs.docker.com/compose/\">Docker Compose</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/n8n-postgres-docker-beginner.html",
+    "isDraft": true
+  }
+}
