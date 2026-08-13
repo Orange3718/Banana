@@ -1,0 +1,58 @@
+name: atemoya
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atemoya-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-n8n}
+    volumes:
+      - atemoya-postgres:/var/lib/postgresql/data
+    networks:
+      - atemoya-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: atemoya-n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-n8n}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?keep the existing key in .env}
+      N8N_HOST: ${N8N_HOST:-orange-imac.tail14202a.ts.net}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-https}
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL:?set N8N_EDITOR_BASE_URL in .env}
+      WEBHOOK_URL: ${WEBHOOK_URL:?set WEBHOOK_URL in .env}
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-Asia/Seoul}
+      ATEMOYA_TELEGRAM_CHAT_ID: ${ATEMOYA_TELEGRAM_CHAT_ID:?set locally in .env}
+    ports:
+      - "127.0.0.1:5678:5678"
+    volumes:
+      - atemoya-n8n:/home/node/.n8n
+    networks:
+      - atemoya-net
+
+networks:
+  atemoya-net:
+    name: atemoya-net
+
+volumes:
+  atemoya-postgres:
+    name: atemoya-postgres
+  atemoya-n8n:
+    name: atemoya-n8n

@@ -1,0 +1,88 @@
+{
+  "name": "Atemoya Business Scout (baseline)",
+  "id": "AtemoyaScout001",
+  "versionId": "17fef318-5a69-4b4b-8f1c-d8adbde9a001",
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "hours", "hoursInterval": 6}]}},
+      "id": "schedule",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss",
+        "options": {"timeout": 30000}
+      },
+      "id": "collect",
+      "name": "Collect Public Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [220, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set(); return items.filter(({json}) => { const key = json.link || json.guid || json.title; if (!key || seen.has(key)) return false; seen.add(key); json.external_key = key; return true; });"
+      },
+      "id": "dedup",
+      "name": "Dedup Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => ({json: {...item.json, evaluation: {status: 'placeholder', note: 'Connect an approved AI credential after Owner review'}, score: null}}));"
+      },
+      "id": "evaluate",
+      "name": "AI Evaluate Placeholder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO business_ideas (external_key,title,summary,source_url,source_name,score,evaluation) VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb) ON CONFLICT (external_key) DO UPDATE SET title=EXCLUDED.title, summary=EXCLUDED.summary, updated_at=now() RETURNING id,title,status",
+        "options": {"queryReplacement": "={{ [$json.external_key, $json.title, $json.contentSnippet || $json.content || '', $json.link || '', 'Hacker News RSS', $json.score, JSON.stringify($json.evaluation)] }}"}
+      },
+      "id": "postgres",
+      "name": "Upsert Business Idea",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [880, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {"postgres": {"name": "Atemoya PostgreSQL"}}
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.ATEMOYA_TELEGRAM_CHAT_ID }}",
+        "text": "={{ 'Business Scout saved: ' + $json.title + ' (' + $json.status + ')' }}",
+        "additionalFields": {"appendAttribution": false}
+      },
+      "id": "telegram",
+      "name": "Telegram Summary",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1100, 0],
+      "credentials": {"telegramApi": {"name": "Telegram API"}}
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": {"main": [[{"node": "Collect Public Feed", "type": "main", "index": 0}]]},
+    "Collect Public Feed": {"main": [[{"node": "Dedup Batch", "type": "main", "index": 0}]]},
+    "Dedup Batch": {"main": [[{"node": "AI Evaluate Placeholder", "type": "main", "index": 0}]]},
+    "AI Evaluate Placeholder": {"main": [[{"node": "Upsert Business Idea", "type": "main", "index": 0}]]},
+    "Upsert Business Idea": {"main": [[{"node": "Telegram Summary", "type": "main", "index": 0}]]}
+  },
+  "tags": []
+}

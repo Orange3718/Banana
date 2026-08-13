@@ -1,0 +1,48 @@
+{
+  "name": "Atemoya Business Scout Error Handler (baseline)",
+  "id": "AtemoyaScoutErr1",
+  "versionId": "17fef318-5a69-4b4b-8f1c-d8adbde9e002",
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "error-trigger",
+      "name": "Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO executions (workflow_key,n8n_execution_id,status,finished_at,error_summary,input_summary) VALUES ($1,$2,'failed',now(),$3,$4::jsonb)",
+        "options": {"queryReplacement": "={{ [$json.workflow?.name || 'unknown', String($json.execution?.id || ''), $json.execution?.error?.message || 'Unknown error', JSON.stringify({lastNodeExecuted: $json.execution?.lastNodeExecuted || null})] }}"}
+      },
+      "id": "log-error",
+      "name": "Log Failure",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [240, 0],
+      "credentials": {"postgres": {"name": "Atemoya PostgreSQL"}}
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.ATEMOYA_TELEGRAM_CHAT_ID }}",
+        "text": "={{ 'Atemoya workflow failed: ' + ($json.workflow?.name || 'unknown') + '\n' + ($json.execution?.error?.message || 'Unknown error') }}",
+        "additionalFields": {"appendAttribution": false}
+      },
+      "id": "alert",
+      "name": "Telegram Error Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [480, 0],
+      "credentials": {"telegramApi": {"name": "Telegram API"}}
+    }
+  ],
+  "connections": {
+    "Workflow Error": {"main": [[{"node": "Log Failure", "type": "main", "index": 0}]]},
+    "Log Failure": {"main": [[{"node": "Telegram Error Alert", "type": "main", "index": 0}]]}
+  },
+  "tags": []
+}
