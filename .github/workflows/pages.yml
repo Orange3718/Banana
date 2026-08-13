@@ -35,6 +35,16 @@ jobs:
           ATEMOYA_CONTACT_EMAIL: ${{ vars.ATEMOYA_CONTACT_EMAIL }}
           ATEMOYA_GOOGLE_VERIFY: ${{ vars.ATEMOYA_GOOGLE_VERIFY }}
           ATEMOYA_NAVER_VERIFY: ${{ vars.ATEMOYA_NAVER_VERIFY }}
+          AFFILIATE_HUMIDIFIER: ${{ vars.AFFILIATE_HUMIDIFIER }}
+          AFFILIATE_HEATING: ${{ vars.AFFILIATE_HEATING }}
+          AFFILIATE_PURIFIER: ${{ vars.AFFILIATE_PURIFIER }}
+          AFFILIATE_DISPOSER: ${{ vars.AFFILIATE_DISPOSER }}
+          AFFILIATE_ROBOT: ${{ vars.AFFILIATE_ROBOT }}
+          AFFILIATE_BEAUTY: ${{ vars.AFFILIATE_BEAUTY }}
+          AFFILIATE_FEEDER: ${{ vars.AFFILIATE_FEEDER }}
+          AFFILIATE_LLM: ${{ vars.AFFILIATE_LLM }}
+          AFFILIATE_TRAVEL: ${{ vars.AFFILIATE_TRAVEL }}
+          AFFILIATE_BLACKFRIDAY: ${{ vars.AFFILIATE_BLACKFRIDAY }}
         run: node scripts/configure-site.mjs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

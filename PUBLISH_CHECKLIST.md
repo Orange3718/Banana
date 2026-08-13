@@ -11,6 +11,12 @@
 | `ATEMOYA_GOOGLE_VERIFY` | Search Console HTML 태그의 content 값 | DNS 인증을 안 쓸 때 |
 | `ATEMOYA_NAVER_VERIFY` | Naver Search Advisor HTML 태그의 content 값 | 사이트 등록 시 |
 
+쿠팡파트너스에서는 카테고리별 링크를 만든 뒤 아래 변수에 넣는다. 하나의 공통 링크보다 글의 문제와 정확히 맞는 검색결과·제품군 링크를 사용한다.
+
+`AFFILIATE_HUMIDIFIER`, `AFFILIATE_HEATING`, `AFFILIATE_PURIFIER`, `AFFILIATE_DISPOSER`, `AFFILIATE_ROBOT`, `AFFILIATE_BEAUTY`, `AFFILIATE_FEEDER`, `AFFILIATE_LLM`, `AFFILIATE_TRAVEL`, `AFFILIATE_BLACKFRIDAY`
+
+연결 전에는 글의 버튼이 무료 계산기로 이동한다. 연결 후에는 경제적 이해관계 고지가 나타나고 해당 카테고리의 쿠팡파트너스 링크로 이동한다.
+
 외부 채널은 추가로 다음 연결만 한다.
 
 | 채널 | Owner가 연결할 것 | 자동화 수준 |

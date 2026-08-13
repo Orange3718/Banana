@@ -7,7 +7,7 @@ function calculate(){
  $('#output').innerHTML=`${fmt(output)} <span>mL/h 권장 범위 중심값</span>`;$('#range').textContent=`${fmt(output*.8)}~${fmt(output*1.2)} mL/h`;$('#tank').textContent=`${tank.toFixed(1)} L/일`;$('#energy').textContent=`${kwh.toFixed(1)} kWh/월`;$('#cost').textContent=`약 ${fmt(cost)}원/월`;$('#goal').textContent=`${target}% 이하로 관리`;track('tool_complete',{tool:'humidifier',area,target});
 }
 function setup(){
- const c=window.ATEMOYA_CONFIG||{};if(c.affiliateUrl){$('#affiliate').classList.add('active');$('#affiliate-link').href=c.affiliateUrl;$('#disclosure').textContent=c.affiliateDisclosure}
+ const c=window.ATEMOYA_CONFIG||{},affiliateUrl=c.affiliateUrls?.humidifier||c.affiliateUrl;if(affiliateUrl){$('#affiliate').classList.add('active');$('#affiliate-link').href=affiliateUrl;$('#disclosure').textContent=c.affiliateDisclosure}
  if(c.gaMeasurementId){let s=document.createElement('script');s.async=true;s.src=`https://www.googletagmanager.com/gtag/js?id=${c.gaMeasurementId}`;document.head.appendChild(s);window.dataLayer=[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',c.gaMeasurementId)}
  if(c.adsenseClient){let a=document.createElement('script');a.async=true;a.crossOrigin='anonymous';a.src=`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${c.adsenseClient}`;document.head.appendChild(a)}
  $('#calc').addEventListener('click',calculate);document.querySelectorAll('input,select').forEach(x=>x.addEventListener('change',calculate));$('#affiliate-link').addEventListener('click',()=>track('affiliate_click',{tool:'humidifier'}));calculate();track('tool_start',{tool:'humidifier'});
