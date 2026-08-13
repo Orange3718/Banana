@@ -1,0 +1,9 @@
+{
+  "name":"Atemoya Blogger Draft Publisher",
+  "mode":"draft-only",
+  "required_connection":["Google Blogger OAuth","Blogger Blog ID"],
+  "input":{"title":"게시 제목","content":"플랫폼 맞춤 HTML","labels":["Atemoya","구매계산기"],"sourceUrl":"원본 Tool URL"},
+  "request":{"method":"POST","url":"https://www.googleapis.com/blogger/v3/blogs/{BLOG_ID}/posts","query":{"isDraft":true}},
+  "approval":"Telegram 승인 후 Blogger에서 공개",
+  "official_docs":"https://developers.google.com/blogger/docs/3.0/reference/posts/insert"
+}
