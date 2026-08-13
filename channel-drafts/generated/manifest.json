@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-13T03:33:26.104Z",
+  "baseUrl": "https://orange3718.github.io/Banana",
+  "mode": "publish-ready",
+  "policy": {
+    "externalPublishing": false,
+    "canonicalOwner": "atemoya-web",
+    "duplicateProtection": "channel-specific copy + SHA-256 fingerprint",
+    "affiliateDisclosureRequired": true
+  },
+  "totals": {
+    "stories": 10,
+    "assets": 70,
+    "ready": 10,
+    "needsConfiguration": 0
+  },
+  "items": [
+    {
+      "slug": "humidifier-hidden-cost",
+      "category": "humidifier",
+      "title": "10만원 싸게 샀는데, 겨울마다 더 귀찮아진 이유",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/humidifier-hidden-cost.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "12fd2d6cc175bb47e1ed7dc1a1b0343840f5b2499a833b746cebf6e80982de1a",
+        "blogger-draft.json": "2eed49e72b33846a4383558527072f7da149ec31e23cfa3e62bb23b3898ffd4b",
+        "tistory-copy-paste.html": "a27aa7b03ac9a8738e6c94cdc3b72d0b120e2dbd3f3a059ef056c4dfd137c6ed",
+        "naver-draft.txt": "5fb6b2163d1889b2abe74112dc1a8eab4c701c591a8fbd904dbe24ae0f5722a1",
+        "social-drafts.json": "683a6a37dda098d691dc44270d90dfeae866cd8d5bc075bb2ee15c4a956a0b90",
+        "youtube-package.json": "c10a077d0df8e746edb6d23824541a42c4defbd16e1bc202310af6d0bf87b1ac"
+      }
+    },
+    {
+      "slug": "heating-bill-shock",
+      "category": "heating",
+      "title": "둘 다 따뜻한데, 한 달 전기료는 10배가 될 수 있다",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/heating-bill-shock.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "ada310bf9ffa68fa624f8ab2b42109c3d9ea4b19333fdb5c826026333d78c178",
+        "blogger-draft.json": "b4e64b505e56131531ccf513cd000108b40bdfe5659b695fcaabd1f1657b37aa",
+        "tistory-copy-paste.html": "39363cd15d9ba3c9640e5f4e3689db996179d72dd6c9b63b6925ee55dee1e3d3",
+        "naver-draft.txt": "2f1410a86c06b4e6fe352f1fce70c9c62313100f8c13fabea17f52eecb674f6c",
+        "social-drafts.json": "278b59e01c96030a2603b16b525f152041dda2ead4660d8178418c79876e13e9",
+        "youtube-package.json": "28d2a0f6c81152cda90f5e30f9c601e1bceb69892be4326d95955495af3de18f"
+      }
+    },
+    {
+      "slug": "air-purifier-filter-trap",
+      "category": "purifier",
+      "title": "본체 할인보다 필터값이 더 무서운 제품",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/air-purifier-filter-trap.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "0431109aa5897ec748b2b0d5cc8f414caf80c42766c91924cb31fffcdb2df6a3",
+        "blogger-draft.json": "550579f162722162a64b35bda864446dc9eb0bd2abbb666789fb26508e0d1474",
+        "tistory-copy-paste.html": "d1862b89d3adc1b7ddb57a87ca74c0f0848be04dd6d900e655d62610f0efbb22",
+        "naver-draft.txt": "ca469e4e15b6bf1de2966ba01930d546d7db49b6da41a68d46c8c6b4eb380b1f",
+        "social-drafts.json": "b7305b4af7b980f225145c9b826569452919d4cf84f0e1792c8357e186012854",
+        "youtube-package.json": "cf7cd17c453e3af578eb33960d0ee31faab0088316993ead22c19c616df7dc9c"
+      }
+    },
+    {
+      "slug": "food-disposer-monthly-rent",
+      "category": "disposer",
+      "title": "60만원짜리 기계가 매달 월세를 요구한다면",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/food-disposer-monthly-rent.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "7118a7ee6467884b949b8f909c6ad3206a96b106e69f6866f8a0c77dc542f470",
+        "blogger-draft.json": "843b15df24136ed0c289d1ba40d1d02644bce702f5db6a1cbc7448998737fc27",
+        "tistory-copy-paste.html": "63b73f821057313c07b7f73027ed4b1b3dc6d17a14de45f43457c5acc8d42292",
+        "naver-draft.txt": "52e0531e578406cdd8a70e8e71cbcba053ce061de19cee2937729840cdbc1e83",
+        "social-drafts.json": "ac6928a4340fdafd83165353030963d32f2e825d7a93f37ace62555936c787d0",
+        "youtube-package.json": "a7612a9f62d4f0ca7f2df2269ef3505c5849d456c4144c35500e95ed6de11b0c"
+      }
+    },
+    {
+      "slug": "robot-vacuum-threshold",
+      "category": "robot",
+      "title": "흡입력보다 2cm 문턱에서 멈추는 로봇청소기",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/robot-vacuum-threshold.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "284d3b834c6890723d786fea6868202f50da0dd82acbfdf41082545dbbe0c183",
+        "blogger-draft.json": "9065d762f5bb5cb633f752b3051cdcc89ed68e83cd652700d5b53819b5b116a9",
+        "tistory-copy-paste.html": "2cfa52909146f84aaabd36826627e483181fd6add7f27a6672cb1cedcadf5899",
+        "naver-draft.txt": "25a17170f20f60a235abdd014dab8b08d20e442070aeabeee3725b80c65f72f0",
+        "social-drafts.json": "8c88cfb925221d6338575b15968264458b36e76f11bbc6adbdca56f4eb6ba890",
+        "youtube-package.json": "a2c7ebc384e23faec1b0f64a467a8113e35b6a15d6fa1a3256c8ead56b543b69"
+      }
+    },
+    {
+      "slug": "beauty-device-consumable",
+      "category": "beauty",
+      "title": "기기는 한 번 샀는데 젤과 팁은 계속 결제된다",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/beauty-device-consumable.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "d14a88da384790c297762eb60b79cd3a9b7d8d8763b76717150ca3fe7fdc00ff",
+        "blogger-draft.json": "ec82fd948ac96c5363c97015806ac569df30ed1f4ff1beea182b9bccc0bce6d8",
+        "tistory-copy-paste.html": "3f5f68c10dfa203fd2477a4396e44f2874e6624a61a202206d86528759ef5d05",
+        "naver-draft.txt": "c5d038e34079fe82b35a4e6e743fe05929ee86d4556efd82f1f04c8bf04b2afd",
+        "social-drafts.json": "67edf8255c524627d521d44abd1bacf01495ff385eb3d5c02d9ac161ba331f24",
+        "youtube-package.json": "51fdfd62a7cc17fc4fb365960ecb35d04cd286bd7b7e4db40424cd304380ce7a"
+      }
+    },
+    {
+      "slug": "pet-feeder-days",
+      "category": "feeder",
+      "title": "4L 자동급식기면 정말 한 달 외출이 가능할까?",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/pet-feeder-days.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "9c66aeeed90ed12bfec313a40894f6a830a1f4b7a275b1785688f1a83eb62eba",
+        "blogger-draft.json": "21592c480977b0735db581cb5993c1d88dd22fda7c7750756f2e7df400b61d3c",
+        "tistory-copy-paste.html": "8bb572772615e113d18144d2e980e5aca4e693489c096604da5ae41d7933ed00",
+        "naver-draft.txt": "650638b6fb123fb56edbe18e08647551e291c3145082a8ac2582d8efa9ca5382",
+        "social-drafts.json": "03d183c50bdee941a0b01201d1e16acd693873fc7ae7268043c96c5742961594",
+        "youtube-package.json": "c07bc4c864bcceca4cb95e679afb3901777fefef3d7a1a1faf73efdb6d0f1db2"
+      }
+    },
+    {
+      "slug": "llm-memory-myth",
+      "category": "llm",
+      "title": "8B 모델이면 8GB 메모리로 충분하다는 착각",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/llm-memory-myth.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "26abca659b3d641086d3f538626d7c26c46135b6059430df90fe205dbde4a072",
+        "blogger-draft.json": "08d01f5dcc5db99ce531b4d5868e37eef15f2a03f7affd9abee85c22080fc615",
+        "tistory-copy-paste.html": "c603867f42f73b0c1870b9eadf621cae76117916cb2a3eb9e74811032ee27066",
+        "naver-draft.txt": "16bdac0c80cccd1acf0b8ba90c4e812e77abfbc169ffa52cd4ad02aa385ccfbc",
+        "social-drafts.json": "38df89daab2e98d3ca0092df61fd812e4be6ed6852f3a08d9ebf8b6fd1fa0415",
+        "youtube-package.json": "3936953b3ca94495bffd485fff63c59475f05df43dfb726e34aaf235078be3d8"
+      }
+    },
+    {
+      "slug": "power-bank-real-capacity",
+      "category": "travel",
+      "title": "20,000mAh인데 휴대폰을 네 번 못 채우는 이유",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/power-bank-real-capacity.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "4703b7e882a6a31915a97d48ae50102c42377a0831d3f4a8d9b026f9b515a13d",
+        "blogger-draft.json": "70c5e28dc1e84bda161707f468108b4206f16db4c99187742104b9fdbead281a",
+        "tistory-copy-paste.html": "a3d5509d66f46105c03a250bbb79d0c9e2c03fb44084a56097960041ce55389e",
+        "naver-draft.txt": "4f1e6aa1dd7a8c927d4c8b1b162b6768ddc9e7ba5bcd25a39b7d1c1eb5d6a365",
+        "social-drafts.json": "bf75da9f8d63b7d1f0d39fd2dcd59f91fa1c61a48f2e1cf22ea283982a76422f",
+        "youtube-package.json": "7842e751b436f51999ba29b34f78f26fda558b63c1ef3dc4af05ff3778bf7693"
+      }
+    },
+    {
+      "slug": "black-friday-fake-discount",
+      "category": "blackfriday",
+      "title": "30% 할인인데 평소보다 비싸게 사는 방법",
+      "canonicalUrl": "https://orange3718.github.io/Banana/stories/black-friday-fake-discount.html",
+      "status": "ready-for-review",
+      "publishing": {
+        "web": "not-published",
+        "blogger": "draft-only",
+        "tistory": "copy-paste-only",
+        "naver": "copy-paste-only",
+        "threads": "draft-only",
+        "instagram": "draft-only",
+        "youtube": "script-only"
+      },
+      "fingerprints": {
+        "web.json": "58b51eed63860645fc676412d5aca4df07225df4ea4b69a78c8bffe6ca613d78",
+        "blogger-draft.json": "5b2b67e03c301af6f9e750c4c96072310ab80b1079b64d2522fe7e542fb2c1bf",
+        "tistory-copy-paste.html": "a1b13a1c52e1997e65ec84e2d6ea8069333f127dde886de322b5dc0ae7afa7e1",
+        "naver-draft.txt": "c15b1e611389ec8084e2dde97b5cab72a72e949e572b8a2eca1b4e57dff410c3",
+        "social-drafts.json": "5b72d574b23420749f88c6322020c09979dade1ecbede2506791058a89165ef8",
+        "youtube-package.json": "8647aefbdedeea6f7f85c14cef4397e5807efdc9ab82a88fda91c1a105c0351a"
+      }
+    }
+  ]
+}

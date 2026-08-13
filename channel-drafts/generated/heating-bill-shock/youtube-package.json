@@ -1,0 +1,46 @@
+{
+  "status": "script-ready",
+  "productionMode": "no-video-generated",
+  "titleOptions": [
+    "둘 다 따뜻한데, 한 달 전기료는 10배가 될 수 있다",
+    "온열가전 사기 전 이 숫자부터 보세요",
+    "온열가전, 가격만 보고 사면 생기는 일"
+  ],
+  "thumbnailBrief": {
+    "style": "따뜻한 아마존 편집 삽화풍, 손그림 잉크선, 크림색 종이 질감, 사이버펑크 금지",
+    "composition": "온열가전 제품과 숨은 비용을 상징하는 영수증 또는 경고 표식을 좌우 대비로 배치",
+    "textOptions": [
+      "이 비용, 보셨나요?",
+      "싸게 샀는데 왜?",
+      "150W"
+    ],
+    "safeArea": "1280×720, 텍스트는 중앙 80% 영역, 모바일에서도 3초 안에 읽히게 6단어 이하"
+  },
+  "script": [
+    {
+      "section": "0:00 Hook",
+      "text": "추운 방에서 작은 온풍기를 하루 종일 켰다가 다음 고지서에서 놀라는 일이 생깁니다. 제품 크기가 작으면 전기도 적게 쓸 것 같지만, 실제 비용을 결정하는 숫자는 정격 소비전력과 사용시간입니다."
+    },
+    {
+      "section": "0:12 Problem",
+      "text": "150W 전기매트를 하루 8시간 쓰면 월 36kWh입니다. 1,500W 온풍기를 같은 시간 정격으로 사용하면 단순 계산상 360kWh입니다. 실제 온도조절 작동률은 다르지만, 구매 전 차이의 크기는 알아야 합니다."
+    },
+    {
+      "section": "0:45 Numbers",
+      "text": "150W, 전기매트 예시. 1,500W, 온풍기 예시. 8시간, 하루 사용 가정"
+    },
+    {
+      "section": "1:15 Decision",
+      "text": "몸을 데우는 국소 난방과 방 전체 공기를 데우는 난방을 같은 기준으로 비교하면 안 됩니다. 면적, 단열, 사용시간, 자동꺼짐을 먼저 정하고 제품을 보세요."
+    },
+    {
+      "section": "1:45 Checklist",
+      "text": "정격 소비전력을 확인했는가. 방 전체와 국소 난방 중 무엇이 필요한가. 자동꺼짐과 과열방지가 있는가"
+    },
+    {
+      "section": "2:10 CTA",
+      "text": "설명란의 무료 계산기에서 내 조건으로 확인하세요. 이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다."
+    }
+  ],
+  "description": "전기매트와 온풍기는 같은 ‘난방가전’이지만 소비전력과 쓰임이 완전히 다릅니다.\n\n무료 계산기·전체 근거: https://orange3718.github.io/Banana/stories/heating-bill-shock.html?utm_source=youtube&utm_medium=video&utm_campaign=commerce_heating&utm_content=description\n원문: https://orange3718.github.io/Banana/stories/heating-bill-shock.html\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\n\n#온열가전 #구매가이드 #Atemoya"
+}

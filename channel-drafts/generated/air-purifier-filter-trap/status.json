@@ -1,0 +1,24 @@
+{
+  "slug": "air-purifier-filter-trap",
+  "category": "purifier",
+  "title": "본체 할인보다 필터값이 더 무서운 제품",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/air-purifier-filter-trap.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "0431109aa5897ec748b2b0d5cc8f414caf80c42766c91924cb31fffcdb2df6a3",
+    "blogger-draft.json": "550579f162722162a64b35bda864446dc9eb0bd2abbb666789fb26508e0d1474",
+    "tistory-copy-paste.html": "d1862b89d3adc1b7ddb57a87ca74c0f0848be04dd6d900e655d62610f0efbb22",
+    "naver-draft.txt": "ca469e4e15b6bf1de2966ba01930d546d7db49b6da41a68d46c8c6b4eb380b1f",
+    "social-drafts.json": "b7305b4af7b980f225145c9b826569452919d4cf84f0e1792c8357e186012854",
+    "youtube-package.json": "cf7cd17c453e3af578eb33960d0ee31faab0088316993ead22c19c616df7dc9c"
+  }
+}

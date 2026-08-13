@@ -1,0 +1,24 @@
+{
+  "slug": "robot-vacuum-threshold",
+  "category": "robot",
+  "title": "흡입력보다 2cm 문턱에서 멈추는 로봇청소기",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/robot-vacuum-threshold.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "284d3b834c6890723d786fea6868202f50da0dd82acbfdf41082545dbbe0c183",
+    "blogger-draft.json": "9065d762f5bb5cb633f752b3051cdcc89ed68e83cd652700d5b53819b5b116a9",
+    "tistory-copy-paste.html": "2cfa52909146f84aaabd36826627e483181fd6add7f27a6672cb1cedcadf5899",
+    "naver-draft.txt": "25a17170f20f60a235abdd014dab8b08d20e442070aeabeee3725b80c65f72f0",
+    "social-drafts.json": "8c88cfb925221d6338575b15968264458b36e76f11bbc6adbdca56f4eb6ba890",
+    "youtube-package.json": "a2c7ebc384e23faec1b0f64a467a8113e35b6a15d6fa1a3256c8ead56b543b69"
+  }
+}

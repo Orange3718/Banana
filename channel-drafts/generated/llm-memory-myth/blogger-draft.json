@@ -1,0 +1,16 @@
+{
+  "kind": "blogger#post",
+  "title": "8B 모델이면 8GB 메모리로 충분하다는 착각｜PC·AI 구매 전 체크",
+  "content": "<p><strong>이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.</strong></p>\n<p>모델 이름의 8B를 보고 8GB RAM이면 된다고 생각하기 쉽습니다. 하지만 숫자는 파라미터 개수이고, 저장 비트와 실행 여유분, 컨텍스트가 실제 메모리를 결정합니다.</p>\n<h2>PC·AI를 고르기 전에 놓치기 쉬운 숫자</h2>\n<p>8B 모델을 4비트로 저장하면 가중치 원시 계산은 약 4GB지만 런타임 오버헤드와 KV cache가 추가됩니다. 긴 문맥과 동시 사용자가 늘면 필요한 여유도 커집니다.</p>\n<ul><li><strong>8B</strong> — 파라미터 수</li><li><strong>4-bit</strong> — 양자화 예시</li><li><strong>20%+</strong> — 실행 여유 시작점</li></ul>\n<h2>결제 직전 확인할 것</h2>\n<p>최소 실행과 편안한 사용을 구분하세요. 모델을 겨우 올리는 사양보다 원하는 컨텍스트와 속도로 유지되는 사양을 골라야 합니다.</p>\n<ol><li>원하는 컨텍스트 길이는 얼마인가</li><li>GPU와 시스템 RAM을 어떻게 나눌 것인가</li><li>동시에 몇 명이 사용하는가</li></ol>\n<p><a href=\"https://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=blogger&amp;utm_medium=referral&amp;utm_campaign=commerce_llm&amp;utm_content=article_cta\" rel=\"sponsored nofollow\">조건별 계산과 전체 구매 가이드 보기</a></p>\n<p>원문: <a href=\"https://orange3718.github.io/Banana/stories/llm-memory-myth.html\" rel=\"canonical\">https://orange3718.github.io/Banana/stories/llm-memory-myth.html</a></p>",
+  "labels": [
+    "PC·AI",
+    "구매가이드",
+    "숨은비용",
+    "Atemoya"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/stories/llm-memory-myth.html",
+    "isDraft": true,
+    "disclosureIncluded": true
+  }
+}

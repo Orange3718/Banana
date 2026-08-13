@@ -1,0 +1,24 @@
+{
+  "slug": "power-bank-real-capacity",
+  "category": "travel",
+  "title": "20,000mAh인데 휴대폰을 네 번 못 채우는 이유",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/power-bank-real-capacity.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "4703b7e882a6a31915a97d48ae50102c42377a0831d3f4a8d9b026f9b515a13d",
+    "blogger-draft.json": "70c5e28dc1e84bda161707f468108b4206f16db4c99187742104b9fdbead281a",
+    "tistory-copy-paste.html": "a3d5509d66f46105c03a250bbb79d0c9e2c03fb44084a56097960041ce55389e",
+    "naver-draft.txt": "4f1e6aa1dd7a8c927d4c8b1b162b6768ddc9e7ba5bcd25a39b7d1c1eb5d6a365",
+    "social-drafts.json": "bf75da9f8d63b7d1f0d39fd2dcd59f91fa1c61a48f2e1cf22ea283982a76422f",
+    "youtube-package.json": "7842e751b436f51999ba29b34f78f26fda558b63c1ef3dc4af05ff3778bf7693"
+  }
+}

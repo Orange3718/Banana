@@ -1,0 +1,24 @@
+{
+  "slug": "humidifier-hidden-cost",
+  "category": "humidifier",
+  "title": "10만원 싸게 샀는데, 겨울마다 더 귀찮아진 이유",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/humidifier-hidden-cost.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "12fd2d6cc175bb47e1ed7dc1a1b0343840f5b2499a833b746cebf6e80982de1a",
+    "blogger-draft.json": "2eed49e72b33846a4383558527072f7da149ec31e23cfa3e62bb23b3898ffd4b",
+    "tistory-copy-paste.html": "a27aa7b03ac9a8738e6c94cdc3b72d0b120e2dbd3f3a059ef056c4dfd137c6ed",
+    "naver-draft.txt": "5fb6b2163d1889b2abe74112dc1a8eab4c701c591a8fbd904dbe24ae0f5722a1",
+    "social-drafts.json": "683a6a37dda098d691dc44270d90dfeae866cd8d5bc075bb2ee15c4a956a0b90",
+    "youtube-package.json": "c10a077d0df8e746edb6d23824541a42c4defbd16e1bc202310af6d0bf87b1ac"
+  }
+}

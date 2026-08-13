@@ -1,0 +1,22 @@
+{
+  "threads": {
+    "status": "draft",
+    "posts": [
+      "8B 모델이면 8GB 메모리로 충분하다는 착각\n\n모델 이름의 8B를 보고 8GB RAM이면 된다고 생각하기 쉽습니다. 하지만 숫자는 파라미터 개수이고, 저장 비트와 실행 여유분, 컨텍스트가 실제 메모리를 결정합니다.\n\n결론: 최소 실행과 편안한 사용을 구분하세요. 모델을 겨우 올리는 사양보다 원하는 컨텍스트와 속도로 유지되는 사양을 골라야 합니다.\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\nhttps://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=threads&utm_medium=social&utm_campaign=commerce_llm&utm_content=hook_post",
+      "PC·AI 살 때 확인할 3가지\n1) 원하는 컨텍스트 길이는 얼마인가\n2) GPU와 시스템 RAM을 어떻게 나눌 것인가\n3) 동시에 몇 명이 사용하는가\n\n저장해두고 결제 직전에 확인하세요.\nhttps://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=threads&utm_medium=social&utm_campaign=commerce_llm&utm_content=hook_post"
+    ]
+  },
+  "instagram": {
+    "status": "draft",
+    "caption": "8B 모델이면 8GB 메모리로 충분하다는 착각\n\n파라미터 수와 양자화, KV cache는 서로 다른 메모리를 사용합니다.\n\n✓ 8B — 파라미터 수\n✓ 4-bit — 양자화 예시\n✓ 20%+ — 실행 여유 시작점\n\n최소 실행과 편안한 사용을 구분하세요. 모델을 겨우 올리는 사양보다 원하는 컨텍스트와 속도로 유지되는 사양을 골라야 합니다.\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\n프로필 링크: https://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=instagram&utm_medium=social&utm_campaign=commerce_llm&utm_content=caption\n\n#PC·AI #구매팁 #생활비절약 #제품비교 #Atemoya",
+    "carousel": [
+      "8B 모델이면 8GB 메모리로 충분하다는 착각",
+      "가격표에 없는 비용",
+      "8B\n파라미터 수",
+      "4-bit\n양자화 예시",
+      "20%+\n실행 여유 시작점",
+      "구매 전 세 가지 확인",
+      "프로필 링크에서 계산"
+    ]
+  }
+}

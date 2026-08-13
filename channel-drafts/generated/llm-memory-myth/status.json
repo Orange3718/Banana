@@ -1,0 +1,24 @@
+{
+  "slug": "llm-memory-myth",
+  "category": "llm",
+  "title": "8B 모델이면 8GB 메모리로 충분하다는 착각",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/llm-memory-myth.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "26abca659b3d641086d3f538626d7c26c46135b6059430df90fe205dbde4a072",
+    "blogger-draft.json": "08d01f5dcc5db99ce531b4d5868e37eef15f2a03f7affd9abee85c22080fc615",
+    "tistory-copy-paste.html": "c603867f42f73b0c1870b9eadf621cae76117916cb2a3eb9e74811032ee27066",
+    "naver-draft.txt": "16bdac0c80cccd1acf0b8ba90c4e812e77abfbc169ffa52cd4ad02aa385ccfbc",
+    "social-drafts.json": "38df89daab2e98d3ca0092df61fd812e4be6ed6852f3a08d9ebf8b6fd1fa0415",
+    "youtube-package.json": "3936953b3ca94495bffd485fff63c59475f05df43dfb726e34aaf235078be3d8"
+  }
+}

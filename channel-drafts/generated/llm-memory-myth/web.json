@@ -1,0 +1,12 @@
+{
+  "slug": "llm-memory-myth",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/llm-memory-myth.html",
+  "title": "8B 모델이면 8GB 메모리로 충분하다는 착각",
+  "description": "파라미터 수와 양자화, KV cache는 서로 다른 메모리를 사용합니다.",
+  "disclosure": "이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.",
+  "cta": {
+    "label": "내 조건으로 숫자 확인하기",
+    "url": "https://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=atemoya&utm_medium=owned_web&utm_campaign=commerce_llm&utm_content=story_cta"
+  },
+  "contentFingerprint": "7759723c257da11dd7a06ec6527c6fddb2a3f8c1ba1ef6da06dea4e8f2c1d701"
+}

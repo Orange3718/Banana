@@ -1,0 +1,31 @@
+[제목]
+PC·AI, 8B 모델이면 8GB 메모리로 충분하다는 착각
+
+[제휴 고지]
+이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.
+
+[도입]
+파라미터 수와 양자화, KV cache는 서로 다른 메모리를 사용합니다.
+모델 이름의 8B를 보고 8GB RAM이면 된다고 생각하기 쉽습니다. 하지만 숫자는 파라미터 개수이고, 저장 비트와 실행 여유분, 컨텍스트가 실제 메모리를 결정합니다.
+
+[핵심]
+최소 실행과 편안한 사용을 구분하세요. 모델을 겨우 올리는 사양보다 원하는 컨텍스트와 속도로 유지되는 사양을 골라야 합니다.
+
+[숫자 메모]
+• 8B: 파라미터 수
+• 4-bit: 양자화 예시
+• 20%+: 실행 여유 시작점
+
+[구매 전 체크]
+1. 원하는 컨텍스트 길이는 얼마인가
+2. GPU와 시스템 RAM을 어떻게 나눌 것인가
+3. 동시에 몇 명이 사용하는가
+
+[CTA]
+내 조건으로 계산하고 상세 근거 보기
+https://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=commerce_llm&utm_content=article_cta
+
+[원본·최신 수정본]
+https://orange3718.github.io/Banana/stories/llm-memory-myth.html
+
+#PC·AI #구매가이드 #숨은비용 #Atemoya

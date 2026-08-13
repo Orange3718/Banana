@@ -1,0 +1,24 @@
+{
+  "slug": "pet-feeder-days",
+  "category": "feeder",
+  "title": "4L 자동급식기면 정말 한 달 외출이 가능할까?",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/pet-feeder-days.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "9c66aeeed90ed12bfec313a40894f6a830a1f4b7a275b1785688f1a83eb62eba",
+    "blogger-draft.json": "21592c480977b0735db581cb5993c1d88dd22fda7c7750756f2e7df400b61d3c",
+    "tistory-copy-paste.html": "8bb572772615e113d18144d2e980e5aca4e693489c096604da5ae41d7933ed00",
+    "naver-draft.txt": "650638b6fb123fb56edbe18e08647551e291c3145082a8ac2582d8efa9ca5382",
+    "social-drafts.json": "03d183c50bdee941a0b01201d1e16acd693873fc7ae7268043c96c5742961594",
+    "youtube-package.json": "c07bc4c864bcceca4cb95e679afb3901777fefef3d7a1a1faf73efdb6d0f1db2"
+  }
+}

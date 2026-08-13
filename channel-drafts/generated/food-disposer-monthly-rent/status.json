@@ -1,0 +1,24 @@
+{
+  "slug": "food-disposer-monthly-rent",
+  "category": "disposer",
+  "title": "60만원짜리 기계가 매달 월세를 요구한다면",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/food-disposer-monthly-rent.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "7118a7ee6467884b949b8f909c6ad3206a96b106e69f6866f8a0c77dc542f470",
+    "blogger-draft.json": "843b15df24136ed0c289d1ba40d1d02644bce702f5db6a1cbc7448998737fc27",
+    "tistory-copy-paste.html": "63b73f821057313c07b7f73027ed4b1b3dc6d17a14de45f43457c5acc8d42292",
+    "naver-draft.txt": "52e0531e578406cdd8a70e8e71cbcba053ce061de19cee2937729840cdbc1e83",
+    "social-drafts.json": "ac6928a4340fdafd83165353030963d32f2e825d7a93f37ace62555936c787d0",
+    "youtube-package.json": "a7612a9f62d4f0ca7f2df2269ef3505c5849d456c4144c35500e95ed6de11b0c"
+  }
+}

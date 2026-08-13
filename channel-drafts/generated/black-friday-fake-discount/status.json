@@ -1,0 +1,24 @@
+{
+  "slug": "black-friday-fake-discount",
+  "category": "blackfriday",
+  "title": "30% 할인인데 평소보다 비싸게 사는 방법",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/black-friday-fake-discount.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "58b51eed63860645fc676412d5aca4df07225df4ea4b69a78c8bffe6ca613d78",
+    "blogger-draft.json": "5b2b67e03c301af6f9e750c4c96072310ab80b1079b64d2522fe7e542fb2c1bf",
+    "tistory-copy-paste.html": "a1b13a1c52e1997e65ec84e2d6ea8069333f127dde886de322b5dc0ae7afa7e1",
+    "naver-draft.txt": "c15b1e611389ec8084e2dde97b5cab72a72e949e572b8a2eca1b4e57dff410c3",
+    "social-drafts.json": "5b72d574b23420749f88c6322020c09979dade1ecbede2506791058a89165ef8",
+    "youtube-package.json": "8647aefbdedeea6f7f85c14cef4397e5807efdc9ab82a88fda91c1a105c0351a"
+  }
+}

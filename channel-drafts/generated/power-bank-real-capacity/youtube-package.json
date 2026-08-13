@@ -1,0 +1,46 @@
+{
+  "status": "script-ready",
+  "productionMode": "no-video-generated",
+  "titleOptions": [
+    "20,000mAh인데 휴대폰을 네 번 못 채우는 이유",
+    "여행 사기 전 이 숫자부터 보세요",
+    "여행, 가격만 보고 사면 생기는 일"
+  ],
+  "thumbnailBrief": {
+    "style": "따뜻한 아마존 편집 삽화풍, 손그림 잉크선, 크림색 종이 질감, 사이버펑크 금지",
+    "composition": "여행 제품과 숨은 비용을 상징하는 영수증 또는 경고 표식을 좌우 대비로 배치",
+    "textOptions": [
+      "이 비용, 보셨나요?",
+      "싸게 샀는데 왜?",
+      "74Wh"
+    ],
+    "safeArea": "1280×720, 텍스트는 중앙 80% 영역, 모바일에서도 3초 안에 읽히게 6단어 이하"
+  },
+  "script": [
+    {
+      "section": "0:00 Hook",
+      "text": "보조배터리 용량을 휴대폰 mAh로 단순 나누면 실제보다 많은 충전 횟수가 나옵니다. 내부 셀 전압을 올리고 케이블과 회로를 통과하는 동안 손실이 생기기 때문입니다."
+    },
+    {
+      "section": "0:12 Problem",
+      "text": "mAh를 Wh로 바꾸고 70~85% 수준의 변환 효율 가정을 적용한 뒤 휴대폰 배터리 Wh로 나누면 현실적인 범위를 볼 수 있습니다."
+    },
+    {
+      "section": "0:45 Numbers",
+      "text": "74Wh, 20,000mAh·3.7V 예시. 75%, 변환효율 가정. 항공사, 최종 규정 확인"
+    },
+    {
+      "section": "1:15 Decision",
+      "text": "여행에서는 용량만큼 무게, 충전 속도, 포트 수와 항공 반입 규정이 중요합니다. 출발 전에는 항공사 공식 규정을 다시 확인하세요."
+    },
+    {
+      "section": "1:45 Checklist",
+      "text": "Wh가 본체에 표시돼 있는가. 내 기기의 충전 규격을 지원하는가. 여행 노선의 공식 규정을 확인했는가"
+    },
+    {
+      "section": "2:10 CTA",
+      "text": "설명란의 무료 계산기에서 내 조건으로 확인하세요. 이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다."
+    }
+  ],
+  "description": "표시 용량과 출력 전압, 변환 손실을 함께 봐야 실제 충전 횟수가 보입니다.\n\n무료 계산기·전체 근거: https://orange3718.github.io/Banana/stories/power-bank-real-capacity.html?utm_source=youtube&utm_medium=video&utm_campaign=commerce_travel&utm_content=description\n원문: https://orange3718.github.io/Banana/stories/power-bank-real-capacity.html\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\n\n#여행 #구매가이드 #Atemoya"
+}

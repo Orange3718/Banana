@@ -1,5 +1,18 @@
 # 외부 채널 게시 대기본
 
+## 멀티채널 팩토리
+
+`stories/catalog.json`의 10개 원본 스토리에서 아래 초안을 한 번에 생성한다.
+
+```bash
+SITE_BASE_URL=https://실제도메인.example node scripts/build-channel-drafts.mjs
+node scripts/test-channel-drafts.mjs
+```
+
+생성 위치는 `channel-drafts/generated/`이다. 스토리마다 자체 웹 메타데이터, Blogger API 초안, Tistory HTML, Naver 텍스트, Threads·Instagram 문안, YouTube 스크립트·썸네일 브리프와 상태 파일이 만들어진다. `manifest.json`은 전체 게시 준비 상태를 모아 보여준다.
+
+팩토리는 외부 서비스에 로그인하거나 게시하지 않는다. 모든 산출물은 초안이며 계정 연결과 Owner 검토 후 별도 게시 워크플로에서 사용한다. 채널별 문장과 구성을 달리하고 SHA-256 지문을 기록해 같은 문서의 반복 게시를 막는다.
+
 ## 안전한 운영 원칙
 
 - 자체 사이트가 원본이다.

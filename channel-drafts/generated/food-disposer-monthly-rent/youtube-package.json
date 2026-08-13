@@ -1,0 +1,46 @@
+{
+  "status": "script-ready",
+  "productionMode": "no-video-generated",
+  "titleOptions": [
+    "60만원짜리 기계가 매달 월세를 요구한다면",
+    "음식물처리기 사기 전 이 숫자부터 보세요",
+    "음식물처리기, 가격만 보고 사면 생기는 일"
+  ],
+  "thumbnailBrief": {
+    "style": "따뜻한 아마존 편집 삽화풍, 손그림 잉크선, 크림색 종이 질감, 사이버펑크 금지",
+    "composition": "음식물처리기 제품과 숨은 비용을 상징하는 영수증 또는 경고 표식을 좌우 대비로 배치",
+    "textOptions": [
+      "이 비용, 보셨나요?",
+      "싸게 샀는데 왜?",
+      "36개월"
+    ],
+    "safeArea": "1280×720, 텍스트는 중앙 80% 영역, 모바일에서도 3초 안에 읽히게 6단어 이하"
+  },
+  "script": [
+    {
+      "section": "0:00 Hook",
+      "text": "음식물처리기는 삶의 질을 바꿀 수 있지만 본체 가격으로 비용이 끝나지 않습니다. 탈취 필터나 미생물 보충, 전기와 처리 후 배출 방식이 매달의 사용성을 결정합니다."
+    },
+    {
+      "section": "0:12 Problem",
+      "text": "3년 보유를 가정하고 구입가에 월 소모품과 전기료를 더하면 방식별 차이가 보입니다. 처리 용량이 작아 여러 번 돌려야 하거나 냄새 때문에 필터를 자주 갈면 계산은 다시 달라집니다."
+    },
+    {
+      "section": "0:45 Numbers",
+      "text": "36개월, 3년 비교. 소모품, 반복비용. 처리량, 가구 인원과 연결"
+    },
+    {
+      "section": "1:15 Decision",
+      "text": "하루 음식물 발생량, 설치 공간, 소음, 최종 부산물 처리 규정을 먼저 확인하세요. 편의성은 처리 속도보다 내가 매일 해야 하는 일이 얼마나 줄어드는지로 판단합니다."
+    },
+    {
+      "section": "1:45 Checklist",
+      "text": "월 소모품이 얼마인가. 처리 후 부산물을 어떻게 버리는가. 소음·냄새·설치공간을 감당할 수 있는가"
+    },
+    {
+      "section": "2:10 CTA",
+      "text": "설명란의 무료 계산기에서 내 조건으로 확인하세요. 이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다."
+    }
+  ],
+  "description": "필터·미생물·전기·처리시간을 빼면 음식물처리기 비교가 아닙니다.\n\n무료 계산기·전체 근거: https://orange3718.github.io/Banana/stories/food-disposer-monthly-rent.html?utm_source=youtube&utm_medium=video&utm_campaign=commerce_disposer&utm_content=description\n원문: https://orange3718.github.io/Banana/stories/food-disposer-monthly-rent.html\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\n\n#음식물처리기 #구매가이드 #Atemoya"
+}

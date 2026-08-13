@@ -1,0 +1,24 @@
+{
+  "slug": "heating-bill-shock",
+  "category": "heating",
+  "title": "둘 다 따뜻한데, 한 달 전기료는 10배가 될 수 있다",
+  "canonicalUrl": "https://orange3718.github.io/Banana/stories/heating-bill-shock.html",
+  "status": "ready-for-review",
+  "publishing": {
+    "web": "not-published",
+    "blogger": "draft-only",
+    "tistory": "copy-paste-only",
+    "naver": "copy-paste-only",
+    "threads": "draft-only",
+    "instagram": "draft-only",
+    "youtube": "script-only"
+  },
+  "fingerprints": {
+    "web.json": "ada310bf9ffa68fa624f8ab2b42109c3d9ea4b19333fdb5c826026333d78c178",
+    "blogger-draft.json": "b4e64b505e56131531ccf513cd000108b40bdfe5659b695fcaabd1f1657b37aa",
+    "tistory-copy-paste.html": "39363cd15d9ba3c9640e5f4e3689db996179d72dd6c9b63b6925ee55dee1e3d3",
+    "naver-draft.txt": "2f1410a86c06b4e6fe352f1fce70c9c62313100f8c13fabea17f52eecb674f6c",
+    "social-drafts.json": "278b59e01c96030a2603b16b525f152041dda2ead4660d8178418c79876e13e9",
+    "youtube-package.json": "28d2a0f6c81152cda90f5e30f9c601e1bceb69892be4326d95955495af3de18f"
+  }
+}

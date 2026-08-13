@@ -1,0 +1,31 @@
+[제목]
+로봇청소기, 흡입력보다 2cm 문턱에서 멈추는 로봇청소기
+
+[제휴 고지]
+이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.
+
+[도입]
+스펙표의 가장 큰 숫자보다 집 구조가 실제 청소 시간을 결정합니다.
+최신 로봇청소기를 샀는데 방문턱을 못 넘고 매번 구조 요청을 보낸다면 자동화가 아닙니다. 흡입력은 강해도 케이블과 낮은 가구, 여러 층은 스스로 해결하지 못할 수 있습니다.
+
+[핵심]
+제품부터 고르지 말고 집 지도를 먼저 만드세요. 로봇이 갈 수 없는 공간이 많을수록 비싼 기능의 가치도 줄어듭니다.
+
+[숫자 메모]
+• 20mm: 문턱 예시
+• 1층: 완전자동화에 유리
+• 0개: 바닥 케이블 목표
+
+[구매 전 체크]
+1. 가장 높은 문턱은 몇 mm인가
+2. 가구 아래 높이가 충분한가
+3. 소모품과 먼지봉투 비용은 얼마인가
+
+[CTA]
+내 조건으로 계산하고 상세 근거 보기
+https://orange3718.github.io/Banana/stories/robot-vacuum-threshold.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=commerce_robot&utm_content=article_cta
+
+[원본·최신 수정본]
+https://orange3718.github.io/Banana/stories/robot-vacuum-threshold.html
+
+#로봇청소기 #구매가이드 #숨은비용 #Atemoya

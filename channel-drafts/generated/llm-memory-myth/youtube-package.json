@@ -1,0 +1,46 @@
+{
+  "status": "script-ready",
+  "productionMode": "no-video-generated",
+  "titleOptions": [
+    "8B 모델이면 8GB 메모리로 충분하다는 착각",
+    "PC·AI 사기 전 이 숫자부터 보세요",
+    "PC·AI, 가격만 보고 사면 생기는 일"
+  ],
+  "thumbnailBrief": {
+    "style": "따뜻한 아마존 편집 삽화풍, 손그림 잉크선, 크림색 종이 질감, 사이버펑크 금지",
+    "composition": "PC·AI 제품과 숨은 비용을 상징하는 영수증 또는 경고 표식을 좌우 대비로 배치",
+    "textOptions": [
+      "이 비용, 보셨나요?",
+      "싸게 샀는데 왜?",
+      "8B"
+    ],
+    "safeArea": "1280×720, 텍스트는 중앙 80% 영역, 모바일에서도 3초 안에 읽히게 6단어 이하"
+  },
+  "script": [
+    {
+      "section": "0:00 Hook",
+      "text": "모델 이름의 8B를 보고 8GB RAM이면 된다고 생각하기 쉽습니다. 하지만 숫자는 파라미터 개수이고, 저장 비트와 실행 여유분, 컨텍스트가 실제 메모리를 결정합니다."
+    },
+    {
+      "section": "0:12 Problem",
+      "text": "8B 모델을 4비트로 저장하면 가중치 원시 계산은 약 4GB지만 런타임 오버헤드와 KV cache가 추가됩니다. 긴 문맥과 동시 사용자가 늘면 필요한 여유도 커집니다."
+    },
+    {
+      "section": "0:45 Numbers",
+      "text": "8B, 파라미터 수. 4-bit, 양자화 예시. 20%+, 실행 여유 시작점"
+    },
+    {
+      "section": "1:15 Decision",
+      "text": "최소 실행과 편안한 사용을 구분하세요. 모델을 겨우 올리는 사양보다 원하는 컨텍스트와 속도로 유지되는 사양을 골라야 합니다."
+    },
+    {
+      "section": "1:45 Checklist",
+      "text": "원하는 컨텍스트 길이는 얼마인가. GPU와 시스템 RAM을 어떻게 나눌 것인가. 동시에 몇 명이 사용하는가"
+    },
+    {
+      "section": "2:10 CTA",
+      "text": "설명란의 무료 계산기에서 내 조건으로 확인하세요. 이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다."
+    }
+  ],
+  "description": "파라미터 수와 양자화, KV cache는 서로 다른 메모리를 사용합니다.\n\n무료 계산기·전체 근거: https://orange3718.github.io/Banana/stories/llm-memory-myth.html?utm_source=youtube&utm_medium=video&utm_campaign=commerce_llm&utm_content=description\n원문: https://orange3718.github.io/Banana/stories/llm-memory-myth.html\n\n이 콘텐츠에는 제휴 링크가 포함될 수 있으며, 링크를 통한 구매 시 일정액의 수수료를 제공받을 수 있습니다. 구매 가격에는 영향을 주지 않습니다.\n\n#PC·AI #구매가이드 #Atemoya"
+}
