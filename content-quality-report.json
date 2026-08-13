@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13T03:43:00.511Z",
+  "generatedAt": "2026-08-13T03:43:43.287Z",
   "benchmarkRules": [
     "정확한 제목과 호기심의 결합",
     "첫 화면에서 문제 또는 비교를 즉시 제시",
@@ -10,7 +10,7 @@
   ],
   "summary": {
     "assets": 10,
-    "averageScore": 96,
+    "averageScore": 98,
     "duplicateTitles": 0
   },
   "items": [
@@ -102,10 +102,10 @@
     {
       "slug": "beauty-device-consumable",
       "category": "홈뷰티",
-      "title": "기기는 한 번 샀는데 젤과 팁은 계속 결제된다",
-      "score": 75,
+      "title": "기기는 한 번 샀는데, 24개월 소모품은 계속 결제된다",
+      "score": 88,
       "checks": {
-        "accurateSpecificHook": false,
+        "accurateSpecificHook": true,
         "unresolvedTension": false,
         "concreteEvidence": true,
         "decisionHelp": true,
@@ -114,7 +114,7 @@
         "conciseTitle": true,
         "mobileThumbnail": true
       },
-      "next": "IMPROVE_BEFORE_PUBLISH"
+      "next": "READY_FOR_TEST"
     },
     {
       "slug": "pet-feeder-days",

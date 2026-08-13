@@ -1,7 +1,7 @@
 {
   "slug": "beauty-device-consumable",
   "category": "beauty",
-  "title": "기기는 한 번 샀는데 젤과 팁은 계속 결제된다",
+  "title": "기기는 한 번 샀는데, 24개월 소모품은 계속 결제된다",
   "canonicalUrl": "https://orange3718.github.io/Banana/stories/beauty-device-consumable.html",
   "status": "ready-for-review",
   "publishing": {
@@ -14,11 +14,11 @@
     "youtube": "script-only"
   },
   "fingerprints": {
-    "web.json": "d14a88da384790c297762eb60b79cd3a9b7d8d8763b76717150ca3fe7fdc00ff",
-    "blogger-draft.json": "ec82fd948ac96c5363c97015806ac569df30ed1f4ff1beea182b9bccc0bce6d8",
+    "web.json": "e30c0ddb968347dc1c7907ff0323f2ae4c8255f1881d8053a095fa5f0c7c0fa3",
+    "blogger-draft.json": "c26f9dc7f16419d4767a08e7ccdfefb1f54726ca2b15b70360847696511cebe1",
     "tistory-copy-paste.html": "3f5f68c10dfa203fd2477a4396e44f2874e6624a61a202206d86528759ef5d05",
-    "naver-draft.txt": "c5d038e34079fe82b35a4e6e743fe05929ee86d4556efd82f1f04c8bf04b2afd",
-    "social-drafts.json": "67edf8255c524627d521d44abd1bacf01495ff385eb3d5c02d9ac161ba331f24",
-    "youtube-package.json": "51fdfd62a7cc17fc4fb365960ecb35d04cd286bd7b7e4db40424cd304380ce7a"
+    "naver-draft.txt": "42b86d1239c2028a7bec8e0cdc4809033036edae0f9c390b33ac509b966e810a",
+    "social-drafts.json": "d15c8c6901ce64c663177fcf01a442346ad85622b1d3552d84a1287123660091",
+    "youtube-package.json": "ce062f99ccafc1ed7b0cf1682820db99270acae40f62b951c086bb07f46cf68a"
   }
 }

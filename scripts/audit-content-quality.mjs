@@ -35,4 +35,4 @@ const result = {
 };
 writeFileSync(resolve(root, 'content-quality-report.json'), JSON.stringify(result,null,2)+'\n');
 console.log(`PASS: ${rows.length} assets, avg=${result.summary.averageScore}, duplicateTitles=${duplicateTitles}`);
-if (duplicateTitles || rows.some(x => x.score < 75)) process.exitCode = 1;
+if (duplicateTitles || rows.some(x => x.score < 88)) process.exitCode = 1;
