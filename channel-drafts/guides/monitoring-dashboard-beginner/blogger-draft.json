@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "CPU·Docker·자동화 오류를 한 화면에서 보는 무료 대시보드",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>예쁜 화면보다 무엇이 멈췄고 사용자가 무엇을 해야 하는지 보여주는 운영판을 만듭니다.</p><h2>따라 하는 순서</h2><ol><li>반드시 볼 서비스와 KPI 정의</li><li>CPU·RAM·디스크·네트워크 수집</li><li>Docker와 n8n 상태 연결</li><li>최근 실패와 승인 대기 표시</li><li>정상 알림은 묶고 장애만 즉시 전송</li><li>공개 인터넷이 아닌 사설망에서 제공</li></ol><h2>완료 전 확인</h2><ul><li>대시보드에 API 키나 개인정보가 없는가</li><li>실제 데이터가 없을 때 0으로 꾸미지 않는가</li><li>경고가 너무 많아 무시되는 구조가 아닌가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/monitoring-dashboard-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.docker.com/reference/cli/docker/container/ls/\">Docker 상태 확인</a></li><li><a href=\"https://docs.n8n.io/workflows/executions/\">n8n 실행 데이터</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/monitoring-dashboard-beginner.html",
+    "isDraft": true
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "정전 뒤에도 Mac 자동화 서버가 다시 살아나게 만들기",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>로그인 항목·Docker 자동 시작·LaunchAgent·상태검사를 순서대로 구성합니다.</p><h2>따라 하는 순서</h2><ol><li>Mac 전원·절전 설정 확인</li><li>Docker Desktop 로그인 시 시작 활성화</li><li>서비스별 재시작 정책 확인</li><li>LaunchAgent로 로컬 대시보드와 점검 작업 등록</li><li>재부팅 후 포트와 컨테이너 확인</li><li>실패 로그 위치 기록</li></ol><h2>완료 전 확인</h2><ul><li>재부팅 후 사람이 클릭해야 하는 창이 남지 않았는가</li><li>Docker 시작 전 의존 서비스가 실패할 때 재시도하는가</li><li>절전 때문에 네트워크가 끊기지 않는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/mac-auto-start-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://support.apple.com/guide/mac-help/open-items-automatically-when-you-log-in-mh15189/mac\">Apple 로그인 항목</a></li><li><a href=\"https://docs.docker.com/desktop/settings-and-maintenance/settings/\">Docker 시작 설정</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/mac-auto-start-beginner.html",
+    "isDraft": true
+  }
+}

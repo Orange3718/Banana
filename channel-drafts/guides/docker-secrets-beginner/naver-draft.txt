@@ -1,0 +1,20 @@
+Docker compose.yml에 비밀번호를 쓰면 안 되는 이유
+
+환경변수·secret 파일·Git 제외 규칙을 초보자 관점에서 구분합니다.
+
+따라 하는 순서
+1. 공개 설정과 비밀값 목록 분리
+2. 예시용 .env.example 작성
+3. 실제 .env는 .gitignore에 추가
+4. 서비스가 환경변수에서 값을 읽도록 구성
+5. 로그와 오류 화면에서 비밀값 노출 확인
+6. 유출 의심 시 즉시 폐기·재발급
+
+완료 전 확인
+• git status에 .env가 나타나지 않는가
+• compose 파일에 토큰·비밀번호가 없는가
+• 메신저로 비밀값을 전달하지 않았는가
+
+전체 글: https://orange3718.github.io/Banana/guides/docker-secrets-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

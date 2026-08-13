@@ -27,6 +27,15 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Build and verify content
+        run: |
+          node scripts/build-stories.mjs
+          node scripts/build-beginner-guides.mjs
+          node scripts/build-guide-channel-drafts.mjs
+          node scripts/build-sitemap.mjs
+          node scripts/audit-content-quality.mjs
+          node scripts/test-channel-drafts.mjs
+          node scripts/test-site.mjs
       - name: Connect revenue and analytics accounts
         env:
           ATEMOYA_AFFILIATE_URL: ${{ vars.ATEMOYA_AFFILIATE_URL }}

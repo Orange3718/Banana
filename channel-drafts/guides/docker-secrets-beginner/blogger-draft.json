@@ -1,0 +1,15 @@
+{
+  "kind": "blogger#post",
+  "title": "Docker compose.yml에 비밀번호를 쓰면 안 되는 이유",
+  "content": "<p><b>초보자용 환경구축 가이드입니다.</b> 비밀번호·API 키·2FA 코드·SSH 개인키는 글이나 채팅에 입력하지 마세요.</p><p>환경변수·secret 파일·Git 제외 규칙을 초보자 관점에서 구분합니다.</p><h2>따라 하는 순서</h2><ol><li>공개 설정과 비밀값 목록 분리</li><li>예시용 .env.example 작성</li><li>실제 .env는 .gitignore에 추가</li><li>서비스가 환경변수에서 값을 읽도록 구성</li><li>로그와 오류 화면에서 비밀값 노출 확인</li><li>유출 의심 시 즉시 폐기·재발급</li></ol><h2>완료 전 확인</h2><ul><li>git status에 .env가 나타나지 않는가</li><li>compose 파일에 토큰·비밀번호가 없는가</li><li>메신저로 비밀값을 전달하지 않았는가</li></ul><p><a href=\"https://orange3718.github.io/Banana/guides/docker-secrets-beginner.html?utm_source=blogger&utm_medium=referral&utm_campaign=beginner_setup\">그림과 최신 수정본 보기 →</a></p><h2>공식 문서</h2><ul><li><a href=\"https://docs.docker.com/compose/how-tos/use-secrets/\">Docker Compose secrets</a></li><li><a href=\"https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository\">GitHub 비밀정보 제거</a></li></ul>",
+  "labels": [
+    "초보자",
+    "Mac",
+    "AI자동화",
+    "환경구축"
+  ],
+  "customMeta": {
+    "canonicalUrl": "https://orange3718.github.io/Banana/guides/docker-secrets-beginner.html",
+    "isDraft": true
+  }
+}

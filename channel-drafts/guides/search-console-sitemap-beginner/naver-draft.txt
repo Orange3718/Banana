@@ -1,0 +1,20 @@
+사이트를 만들었는데 Google이 모를 때: sitemap과 Search Console
+
+사이트 공개 후 소유권 확인, sitemap 제출, 색인 상태 확인을 초보자 순서로 설명합니다.
+
+따라 하는 순서
+1. 공개 URL과 HTTPS 접속 확인
+2. robots.txt와 sitemap.xml 열기
+3. Search Console 속성 추가
+4. DNS 또는 HTML 태그로 소유권 확인
+5. sitemap URL 제출
+6. 페이지 색인과 오류를 주기적으로 확인
+
+완료 전 확인
+• 비공개·미완성 페이지를 sitemap에 넣지 않았는가
+• canonical 주소가 실제 공개 주소와 같은가
+• 색인 요청을 반복 제출로 오해하지 않았는가
+
+전체 글: https://orange3718.github.io/Banana/guides/search-console-sitemap-beginner.html?utm_source=naver_blog&utm_medium=referral&utm_campaign=beginner_setup
+
+#맥초보 #도커 #n8n #AI자동화 #환경구축

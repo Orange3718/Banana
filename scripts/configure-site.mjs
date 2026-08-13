@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 
 const config={
   affiliateUrl:process.env.ATEMOYA_AFFILIATE_URL||"",
@@ -21,4 +21,5 @@ const verification=[
   config.googleSiteVerification&&`<meta name="google-site-verification" content="${config.googleSiteVerification.replace(/[\"<>]/g,"")}">`,
   config.naverSiteVerification&&`<meta name="naver-site-verification" content="${config.naverSiteVerification.replace(/[\"<>]/g,"")}">`
 ].filter(Boolean).join("");
-if(verification){for(const file of ["index.html","tools/humidifier-calculator.html"]){const html=readFileSync(file,"utf8");writeFileSync(file,html.replace("</head>",verification+"</head>"))}}
+function htmlFiles(dir="."){return readdirSync(dir).flatMap(name=>{const path=`${dir}/${name}`.replace(/^\.\//,"");if(path.startsWith(".git/")||path.startsWith("channel-drafts/"))return[];return statSync(path).isDirectory()?htmlFiles(path):path.endsWith(".html")?[path]:[]})}
+if(verification){for(const file of htmlFiles()){const html=readFileSync(file,"utf8");if(!html.includes("google-site-verification")&&!html.includes("naver-site-verification"))writeFileSync(file,html.replace("</head>",verification+"</head>"))}}
