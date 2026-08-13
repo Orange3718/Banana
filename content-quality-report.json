@@ -1,0 +1,188 @@
+{
+  "generatedAt": "2026-08-13T03:43:00.511Z",
+  "benchmarkRules": [
+    "정확한 제목과 호기심의 결합",
+    "첫 화면에서 문제 또는 비교를 즉시 제시",
+    "최소 3개의 확인 가능한 숫자와 3개의 구매 질문",
+    "글에서 무료 도구로 자연스럽게 이동",
+    "과장형 클릭베이트 금지",
+    "게시 후 노출·CTR·체류·제휴클릭을 함께 평가"
+  ],
+  "summary": {
+    "assets": 10,
+    "averageScore": 96,
+    "duplicateTitles": 0
+  },
+  "items": [
+    {
+      "slug": "humidifier-hidden-cost",
+      "category": "가습기",
+      "title": "10만원 싸게 샀는데, 겨울마다 더 귀찮아진 이유",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "heating-bill-shock",
+      "category": "온열가전",
+      "title": "둘 다 따뜻한데, 한 달 전기료는 10배가 될 수 있다",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "air-purifier-filter-trap",
+      "category": "공기청정기",
+      "title": "본체 할인보다 필터값이 더 무서운 제품",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "food-disposer-monthly-rent",
+      "category": "음식물처리기",
+      "title": "60만원짜리 기계가 매달 월세를 요구한다면",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "robot-vacuum-threshold",
+      "category": "로봇청소기",
+      "title": "흡입력보다 2cm 문턱에서 멈추는 로봇청소기",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "beauty-device-consumable",
+      "category": "홈뷰티",
+      "title": "기기는 한 번 샀는데 젤과 팁은 계속 결제된다",
+      "score": 75,
+      "checks": {
+        "accurateSpecificHook": false,
+        "unresolvedTension": false,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "IMPROVE_BEFORE_PUBLISH"
+    },
+    {
+      "slug": "pet-feeder-days",
+      "category": "반려동물",
+      "title": "4L 자동급식기면 정말 한 달 외출이 가능할까?",
+      "score": 88,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": false,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "llm-memory-myth",
+      "category": "PC·AI",
+      "title": "8B 모델이면 8GB 메모리로 충분하다는 착각",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "power-bank-real-capacity",
+      "category": "여행",
+      "title": "20,000mAh인데 휴대폰을 네 번 못 채우는 이유",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    },
+    {
+      "slug": "black-friday-fake-discount",
+      "category": "할인행사",
+      "title": "30% 할인인데 평소보다 비싸게 사는 방법",
+      "score": 100,
+      "checks": {
+        "accurateSpecificHook": true,
+        "unresolvedTension": true,
+        "concreteEvidence": true,
+        "decisionHelp": true,
+        "toolBridge": true,
+        "honestPackaging": true,
+        "conciseTitle": true,
+        "mobileThumbnail": true
+      },
+      "next": "READY_FOR_TEST"
+    }
+  ]
+}
