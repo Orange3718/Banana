@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://orange3718.github.io/Banana/sitemap.xml

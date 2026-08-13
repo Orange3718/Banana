@@ -27,6 +27,15 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Connect revenue and analytics accounts
+        env:
+          ATEMOYA_AFFILIATE_URL: ${{ vars.ATEMOYA_AFFILIATE_URL }}
+          ATEMOYA_GA_ID: ${{ vars.ATEMOYA_GA_ID }}
+          ATEMOYA_ADSENSE_CLIENT: ${{ vars.ATEMOYA_ADSENSE_CLIENT }}
+          ATEMOYA_CONTACT_EMAIL: ${{ vars.ATEMOYA_CONTACT_EMAIL }}
+          ATEMOYA_GOOGLE_VERIFY: ${{ vars.ATEMOYA_GOOGLE_VERIFY }}
+          ATEMOYA_NAVER_VERIFY: ${{ vars.ATEMOYA_NAVER_VERIFY }}
+        run: node scripts/configure-site.mjs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
