@@ -4,6 +4,8 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 python3 -m json.tool "$repo_root/n8n/workflows/business-scout.json" >/dev/null
 python3 -m json.tool "$repo_root/n8n/workflows/business-scout-error-handler.json" >/dev/null
+python3 -m json.tool "$repo_root/n8n/workflows/atemoya-hardware-execution-orchestrator.json" >/dev/null
+test -x "$repo_root/ops/scripts/export-obsidian-inbox.sh"
 
 docker compose --env-file "$repo_root/.env.example" -f "$repo_root/docker-compose.yml" config --quiet
 docker exec atemoya-postgres sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null

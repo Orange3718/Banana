@@ -78,3 +78,38 @@ keys are intentionally absent; the workflow remains inactive by default.
    routing and TLS/Funnel behavior are documented and a rollback is prepared.
 7. Connect Gmail reporting, Calendar routines and finally Obsidian after the
    core workflow produces verified operational records.
+
+## Obsidian Inbox bridge
+
+The first human-readable bridge is `ops/scripts/export-obsidian-inbox.sh`.
+It writes a single Markdown dashboard to `~/AtemoyaVault/00 Inbox` from
+the nine operational-memory tables. It includes only new/evaluating ideas,
+pending approvals and recent failed/retrying executions. PostgreSQL remains the
+source of truth, and no credential or secret fields are exported.
+The iMac LaunchAgent `com.atemoya.obsidian-inbox` refreshes this dashboard
+every 15 minutes and once at login. Its configuration is local because the
+absolute Vault and worktree paths are machine-specific.
+
+## AI provider routing
+
+- Google Gemini `gemini-2.5-flash` replaced the direct Ollama HTTP calls in the
+  daily trend, 12-week commerce scout and Telegram memory workflows.
+- The Gemini credential is encrypted in n8n and its API test returned HTTP 200.
+- An xAI credential is encrypted in n8n as a future Grok fallback. The xAI
+  models endpoint currently returns HTTP 403, so Grok is not in the live route.
+- No provider key is stored in Git, workflow JSON, documentation or Obsidian.
+- The pre-change workflow exports are retained outside Git under the private
+  Atemoya backup directory; current secret-free exports live in
+  `n8n/workflows/exports/`.
+
+## AI Hardware Lab execution orchestrator
+
+`AtemoyaHardwareExecution01` advances one approval-free AI Hardware Lab task
+at a time from `business_unit_tasks`. It records the run in `executions` and
+`agent_actions`, generates an internal specification draft, stores it in
+`content` with `review_ready` status, and reports the result to Telegram.
+
+The production route uses the iMac-local Ollama `qwen3.5:4b` model so a cloud
+AI outage does not stop approved internal drafting. It never publishes,
+purchases, logs in, or spends money. A run left in `running` for over fifteen
+minutes is failed and its task is returned to `ready` on the next trigger.

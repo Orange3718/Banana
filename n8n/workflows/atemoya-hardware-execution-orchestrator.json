@@ -1,0 +1,226 @@
+{
+  "id": "AtemoyaHardwareExecution01",
+  "name": "Atemoya AI Hardware Lab 실행 오케스트레이터",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "hardware-manual-trigger",
+      "name": "수동 시험 실행",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 160]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH stale_runs AS (UPDATE executions SET status='failed',finished_at=now(),error_summary=COALESCE(error_summary,'stale running execution recovered') WHERE workflow_key='ai-hardware-execution' AND status='running' AND started_at < now()-interval '15 minutes' RETURNING id,correlation_id), stale_actions AS (UPDATE agent_actions SET status='failed',details=details || jsonb_build_object('error','stale running execution recovered') WHERE execution_id IN (SELECT id FROM stale_runs) AND status='running' RETURNING id), stale_tasks AS (UPDATE business_unit_tasks SET status='ready',updated_at=now() WHERE status='running' AND ('business-unit-task-' || id)=ANY(SELECT correlation_id FROM stale_runs) RETURNING id) SELECT count(*)::integer AS recovered_count FROM stale_runs;",
+        "options": {}
+      },
+      "id": "recover-stale-hardware-runs",
+      "name": "중단 실행 자동 복구",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [390, 250],
+      "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+    },
+    {
+      "parameters": {
+        "jsCode": "const input=$input.first().json; const prompt=['당신은 Atemoya AI Hardware Lab의 제품 설계자다. 실제 벤치마크만 사실로 사용하고 없는 데이터는 검증 필요라고 표시한다. 외부 게시나 구매를 수행하지 않는다. 한국어 1800자 이내로 1) 데이터 모델 2) 계산 방법 3) 출처와 검증 규칙 4) 구현 백로그 5) 완료 기준을 완결해서 작성한다.','작업: '+input.task_name,'산출물: '+input.deliverable,'KPI: '+input.kpi,'실제 벤치마크 JSON: '+input.benchmark_context].join('\\n'); return [{json:{...input,local_body:JSON.stringify({model:'qwen3.5:4b',stream:false,think:false,prompt,options:{temperature:0.1,num_predict:1400}})}}];"
+      },
+      "id": "prepare-local-fallback",
+      "name": "로컬 AI 요청 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1390, 430]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.local_body }}",
+        "options": {"timeout": 180000}
+      },
+      "id": "run-local-fallback",
+      "name": "Ollama 로컬 초안",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1620, 430],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const base=$('작업 확보와 실행 시작').item.json; const body=String($json.response||'').trim(); const error=String($json.error?.message||$json.error||''); return [{json:{...base,draft:body,ok:!error&&body.length>=300,error_summary:error||(!body?'로컬 AI 빈 응답':'로컬 AI 초안이 너무 짧음'),provider:'ollama:qwen3.5:4b'}}];"
+      },
+      "id": "validate-local-fallback",
+      "name": "로컬 초안 확인",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 430]
+    },
+    {
+      "parameters": {
+        "conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2}, "conditions": [{"id": "local-draft-ok", "leftValue": "={{ $json.ok }}", "rightValue": true, "operator": {"type": "boolean", "operation": "true", "singleValue": true}}], "combinator": "and"},
+        "options": {}
+      },
+      "id": "route-local-result",
+      "name": "로컬 초안 정상인가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [2080, 430]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input=$input.first().json; const instruction='당신은 Atemoya AI Hardware Lab의 제품 설계자다. 입력에 포함된 실제 벤치마크만 사실로 사용하고 데이터가 없으면 검증 필요라고 표시한다. 외부 게시나 구매를 수행하지 않는다. 한국어로 1800자 이내의 실행 가능한 V1 정밀화 초안을 완결해서 작성한다. 형식: 1) 데이터 모델 2) 계산 방법 3) 출처와 검증 규칙 4) 구현 백로그 5) 완료 기준. 각 항목은 짧은 목록으로 작성한다.'; const prompt=['작업: '+input.task_name,'산출물: '+input.deliverable,'KPI: '+input.kpi,'실제 벤치마크 JSON: '+input.benchmark_context].join('\\n'); return [{json:{...input,gemini_body:JSON.stringify({systemInstruction:{parts:[{text:instruction}]},contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:4096,temperature:0.1}})}}];"
+      },
+      "id": "prepare-gemini-request",
+      "name": "Gemini 요청 준비",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 250]
+    },
+    {
+      "parameters": {
+        "rule": {"interval": [{"field": "cronExpression", "expression": "20 9 * * *"}]}
+      },
+      "id": "hardware-daily-trigger",
+      "name": "매일 오전 9시 20분",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 340]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH candidate AS (SELECT id FROM business_unit_tasks WHERE status='ready' AND automation_mode='AUTO' AND owner_required=false AND (task_name ILIKE '%AI Hardware%' OR deliverable ILIKE '%AI Hardware%') ORDER BY priority, due_date NULLS LAST, id FOR UPDATE SKIP LOCKED LIMIT 1), claimed AS (UPDATE business_unit_tasks t SET status='running', updated_at=now() FROM candidate c WHERE t.id=c.id RETURNING t.*), run AS (INSERT INTO executions(workflow_key,correlation_id,status,input_summary) SELECT 'ai-hardware-execution', 'business-unit-task-' || id, 'running', jsonb_build_object('task_id',id,'task_name',task_name,'deliverable',deliverable) FROM claimed RETURNING id), action AS (INSERT INTO agent_actions(execution_id,agent_name,action_type,status,requires_approval,details) SELECT r.id,'AI Hardware Lab Builder','draft_specification','running',false,jsonb_build_object('task_id',c.id,'task_name',c.task_name) FROM claimed c CROSS JOIN run r RETURNING id) SELECT c.id AS task_id,c.task_name,c.deliverable,c.kpi,c.due_date,r.id AS execution_id,a.id AS action_id,COALESCE((SELECT jsonb_agg(jsonb_build_object('benchmark_key',benchmark_key,'hardware',hardware,'runtime',runtime,'model',model,'result',result,'measured_at',measured_at) ORDER BY measured_at DESC) FROM (SELECT * FROM hardware_benchmarks ORDER BY measured_at DESC LIMIT 20) b),'[]'::jsonb)::text AS benchmark_context FROM claimed c CROSS JOIN run r CROSS JOIN action a;",
+        "options": {}
+      },
+      "id": "claim-hardware-task",
+      "name": "작업 확보와 실행 시작",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [500, 250],
+      "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.gemini_body }}",
+        "options": {"timeout": 180000}
+      },
+      "id": "generate-hardware-spec",
+      "name": "Gemini 정밀화 초안",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [860, 250],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "credentials": {"googlePalmApi": {"id": "7OoFh76bZ1JcIwX3", "name": "Google Gemini(PaLM) Api account"}}
+    },
+    {
+      "parameters": {
+        "jsCode": "const base=$('작업 확보와 실행 시작').item.json; const body=String($json.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'').trim(); const error=String($json.error?.message||$json.error||''); return [{json:{...base,draft:body,ok:!error&&body.length>=300,error_summary:error||(!body?'빈 AI 응답':'AI 초안이 너무 짧음'),provider:'gemini:3.7-flash'}}];"
+      },
+      "id": "validate-hardware-draft",
+      "name": "초안 완성도 확인",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 250]
+    },
+    {
+      "parameters": {
+        "conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2}, "conditions": [{"id": "hardware-draft-ok", "leftValue": "={{ $json.ok }}", "rightValue": true, "operator": {"type": "boolean", "operation": "true", "singleValue": true}}], "combinator": "and"},
+        "options": {}
+      },
+      "id": "route-hardware-result",
+      "name": "초안 정상인가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1260, 250]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH artifact AS (INSERT INTO content(external_key,title,channel,status,body_ref,metadata) VALUES($1,$2,'internal','review_ready','postgres:content.metadata.body',jsonb_build_object('body',$3::text,'task_id',$4::bigint,'execution_id',$5::bigint,'generated_by','AI Hardware Lab Builder','provider',$7::text)) ON CONFLICT(external_key) DO UPDATE SET title=EXCLUDED.title,status='review_ready',body_ref=EXCLUDED.body_ref,metadata=EXCLUDED.metadata,updated_at=now() RETURNING id,title), task_done AS (UPDATE business_unit_tasks SET status='done',updated_at=now() WHERE id=$4::bigint RETURNING id), run_done AS (UPDATE executions SET status='success',finished_at=now(),output_summary=jsonb_build_object('content_id',(SELECT id FROM artifact),'result','review_ready','provider',$7::text) WHERE id=$5::bigint RETURNING id), action_done AS (UPDATE agent_actions SET status='completed',details=details || jsonb_build_object('content_id',(SELECT id FROM artifact),'result','review_ready','provider',$7::text) WHERE id=$6::bigint RETURNING id) SELECT a.id AS content_id,a.title,$4::bigint AS task_id,$5::bigint AS execution_id,left($3::text,1200) AS draft_preview,$7::text AS provider FROM artifact a CROSS JOIN task_done CROSS JOIN run_done CROSS JOIN action_done;",
+        "options": {"queryReplacement": "={{ ['ai-hardware-task-'+$json.task_id, $json.task_name+' — V1 정밀화 초안', $json.draft, $json.task_id, $json.execution_id, $json.action_id, $json.provider] }}"}
+      },
+      "id": "save-hardware-success",
+      "name": "초안 저장과 작업 완료",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1510, 150],
+      "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+    },
+    {
+      "parameters": {
+        "chatId": "8954042258",
+        "text": "={{ ('🛠️ AI Hardware Lab 실행 완료\\n\\n작업 #'+$json.task_id+' · '+$json.title+'\\n실행 #'+$json.execution_id+'\\nAI: '+$json.provider+'\\n상태: 검토 준비\\n\\n'+$json.draft_preview+'\\n\\n외부 공개·결제는 수행하지 않았습니다.').slice(0,3900) }}",
+        "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false}
+      },
+      "id": "notify-hardware-success",
+      "name": "Telegram 검토 보고",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1760, 150],
+      "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH task_reset AS (UPDATE business_unit_tasks SET status='ready',updated_at=now() WHERE id=$1::bigint RETURNING id), run_failed AS (UPDATE executions SET status='failed',finished_at=now(),error_summary=$4::text WHERE id=$2::bigint RETURNING id), action_failed AS (UPDATE agent_actions SET status='failed',details=details || jsonb_build_object('error',$4::text) WHERE id=$3::bigint RETURNING id) SELECT $1::bigint AS task_id,$2::bigint AS execution_id,$4::text AS error_summary FROM task_reset CROSS JOIN run_failed CROSS JOIN action_failed;",
+        "options": {"queryReplacement": "={{ [$json.task_id,$json.execution_id,$json.action_id,$json.error_summary] }}"}
+      },
+      "id": "save-hardware-failure",
+      "name": "실패 기록과 작업 복구",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [1510, 350],
+      "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+    },
+    {
+      "parameters": {
+        "chatId": "8954042258",
+        "text": "={{ '🚨 AI Hardware Lab 실행 실패\\n작업 #'+$json.task_id+'은 ready로 복구했습니다.\\n실행 #'+$json.execution_id+'\\n오류: '+$json.error_summary }}",
+        "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false}
+      },
+      "id": "notify-hardware-failure",
+      "name": "Telegram 실패 알림",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1760, 350],
+      "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}
+    }
+  ],
+  "connections": {
+    "수동 시험 실행": {"main": [[{"node": "중단 실행 자동 복구", "type": "main", "index": 0}]]},
+    "매일 오전 9시 20분": {"main": [[{"node": "중단 실행 자동 복구", "type": "main", "index": 0}]]},
+    "중단 실행 자동 복구": {"main": [[{"node": "작업 확보와 실행 시작", "type": "main", "index": 0}]]},
+    "작업 확보와 실행 시작": {"main": [[{"node": "로컬 AI 요청 준비", "type": "main", "index": 0}]]},
+    "Gemini 요청 준비": {"main": [[{"node": "Gemini 정밀화 초안", "type": "main", "index": 0}]]},
+    "Gemini 정밀화 초안": {"main": [[{"node": "초안 완성도 확인", "type": "main", "index": 0}]]},
+    "초안 완성도 확인": {"main": [[{"node": "초안 정상인가", "type": "main", "index": 0}]]},
+    "초안 정상인가": {"main": [[{"node": "초안 저장과 작업 완료", "type": "main", "index": 0}], [{"node": "로컬 AI 요청 준비", "type": "main", "index": 0}]]},
+    "로컬 AI 요청 준비": {"main": [[{"node": "Ollama 로컬 초안", "type": "main", "index": 0}]]},
+    "Ollama 로컬 초안": {"main": [[{"node": "로컬 초안 확인", "type": "main", "index": 0}]]},
+    "로컬 초안 확인": {"main": [[{"node": "로컬 초안 정상인가", "type": "main", "index": 0}]]},
+    "로컬 초안 정상인가": {"main": [[{"node": "초안 저장과 작업 완료", "type": "main", "index": 0}], [{"node": "실패 기록과 작업 복구", "type": "main", "index": 0}]]},
+    "초안 저장과 작업 완료": {"main": [[{"node": "Telegram 검토 보고", "type": "main", "index": 0}]]},
+    "실패 기록과 작업 복구": {"main": [[{"node": "Telegram 실패 알림", "type": "main", "index": 0}]]}
+  },
+  "settings": {"timezone": "Asia/Seoul", "errorWorkflow": "AtemoyaErrorHandler01", "executionOrder": "v1", "saveManualExecutions": true},
+  "active": false,
+  "tags": []
+}
