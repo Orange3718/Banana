@@ -3,7 +3,7 @@
 import json, os, subprocess, threading, time, uuid
 from urllib.request import Request, urlopen
 
-DB_CMD=["docker","exec","atemoya-postgres","psql","-U","n8n","-d","n8n","-At","-F", "\t"]
+DB_CMD=["/usr/local/bin/docker","exec","atemoya-postgres","psql","-U","n8n","-d","n8n","-At","-F", "\t"]
 MODEL=os.getenv("ATEMOYA_LOCAL_MODEL","qwen3.5:4b")
 OLLAMA=os.getenv("OLLAMA_URL","http://127.0.0.1:11434/api/chat")
 lock=threading.Lock()
