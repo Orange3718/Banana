@@ -9,3 +9,9 @@ n8n UI after import. Imported workflows must remain inactive until reviewed.
 - `business-scout-error-handler.json`: workflow error logging and Telegram alert.
 - `exports/`: sanitized exports from the live server may be copied here after
   review; do not export credentials.
+- `exports/AtemoyaAffiliateHealth01.json`: daily public affiliate-page health
+  check. It verifies reachability, the Coupang disclosure and the sponsored
+  destination link, then records the result in PostgreSQL and reports to
+  Telegram. The chat identifier is referenced through the private n8n variable
+  `ATEMOYA_TELEGRAM_CHAT_ID`; it is not stored in this export. The workflow
+  never clicks the affiliate link or reads settlement data.
