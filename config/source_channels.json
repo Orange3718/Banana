@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "channels": [
+    {"id":"github","region":"global","mode":"api","enabled":true,"priority":1},
+    {"id":"hackernews","region":"global","mode":"api","enabled":true,"priority":2},
+    {"id":"google-news","region":"kr+global","mode":"rss","enabled":true,"priority":1},
+    {"id":"youtube","region":"global","mode":"official-api-or-public-search","enabled":true,"priority":2},
+    {"id":"reddit","region":"global","mode":"public-api","enabled":true,"priority":2},
+    {"id":"naver-search","region":"kr","mode":"public-search","enabled":true,"priority":1},
+    {"id":"naver-cafe","region":"kr","mode":"public-search-only","enabled":false,"priority":3},
+    {"id":"tiktok","region":"global","mode":"creative-center-or-public","enabled":true,"priority":2},
+    {"id":"instagram","region":"global","mode":"public-or-official","enabled":true,"priority":3},
+    {"id":"product-hunt","region":"global","mode":"public-api-or-rss","enabled":true,"priority":3}
+  ]
+}
