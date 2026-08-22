@@ -6,3 +6,5 @@ backups/
 *.dump.gz
 *.sql.gz
 .DS_Store
+.local-llm-status.json
+tools/local-llm-status.json
