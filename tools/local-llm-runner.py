@@ -6,6 +6,7 @@ from urllib.request import Request, urlopen
 DB_CMD=["/usr/local/bin/docker","exec","atemoya-postgres","psql","-U","n8n","-d","n8n","-At","-F", "\t"]
 MODEL=os.getenv("ATEMOYA_LOCAL_MODEL","qwen3.5:4b")
 OLLAMA=os.getenv("OLLAMA_URL","http://127.0.0.1:11434/api/chat")
+N8N_NOTIFY=os.getenv("N8N_NOTIFY_URL","http://127.0.0.1:5678/webhook/atemoya-local-llm-complete")
 lock=threading.Lock()
 STATUS_FILE=os.path.join(os.path.dirname(__file__),'local-llm-status.json')
 
@@ -29,6 +30,11 @@ def update(run, status, progress, step, summary=None, error=None, started=None, 
     sql("UPDATE local_llm_runs SET status=?,progress=?,current_step=?,result_summary=NULLIF(?,''),error_summary=NULLIF(?,''),started_at=COALESCE(started_at,NULLIF(?,'')::timestamptz),finished_at=NULLIF(?,'')::timestamptz,duration_ms=NULLIF(?, '')::int,output_tokens=NULLIF(?, '')::int,updated_at=NOW() WHERE run_key=?", (status,progress,step,summary,error,started,finished,duration,out_tokens,run))
     with lock: snapshot()
 
+def notify(task, provider, model, duration, summary, error=None):
+    payload=json.dumps({'task_name':task,'provider':provider,'model':model,'duration_ms':duration,'result_summary':summary,'error_summary':error or ''}).encode()
+    try: urlopen(Request(N8N_NOTIFY,data=payload,headers={'Content-Type':'application/json'}),timeout=10).read()
+    except Exception as exc: print('telegram notify skipped:', exc)
+
 def worker(lane, task, prompt, max_tokens):
     run=f"{lane}-{uuid.uuid4().hex[:10]}"; started=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
     sql("INSERT INTO local_llm_runs(run_key,lane,task_name,model,provider,inference_note,status,progress,current_step,started_at,metadata) VALUES(?,?,?,?,?,?,?,?,?,?::timestamptz,?::jsonb)", (run,lane,task,MODEL,'ollama-local','로컬 iMac Ollama 추론 · 외부 API 미사용','queued',0,'대기열',started,json.dumps({'runner':'tools/local-llm-runner.py'},ensure_ascii=False)))
@@ -39,7 +45,9 @@ def worker(lane, task, prompt, max_tokens):
         body=json.dumps({'model':MODEL,'stream':False,'think':False,'options':{'num_predict':max_tokens,'temperature':0.2},'messages':[{'role':'system','content':'Atemoya의 한국어 커머스 운영 보조다. 사실을 만들지 말고 5개 불릿 이내로 답한다.'},{'role':'user','content':prompt}]}).encode()
         res=json.loads(urlopen(Request(OLLAMA,data=body,headers={'Content-Type':'application/json'}),timeout=180).read())
         text=(res.get('message') or {}).get('content','').strip(); dur=int((time.time()-t0)*1000)
-        update(run,'complete',100,'완료',summary='[추론: Ollama 로컬 / '+MODEL+']\n'+text[:1200],finished=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),duration=dur,out_tokens=res.get('eval_count'))
+        final='[추론: Ollama 로컬 / '+MODEL+']\n'+text[:1200]
+        update(run,'complete',100,'완료',summary=final,finished=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),duration=dur,out_tokens=res.get('eval_count'))
+        notify(task,'ollama-local',MODEL,dur,final)
     except Exception as e:
         update(run,'error',100,'오류',error=str(e)[:800],finished=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),duration=int((time.time()-t0)*1000))
 
