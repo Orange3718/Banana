@@ -60,27 +60,68 @@
       },
       {
         "parameters": {
-          "jsCode": "const pageUrl='https://orange3718.github.io/Banana/offers/cutdang-apple-vinegar.html'; const body=String($json.body ?? $json.data ?? ''); const status=Number($json.statusCode ?? 200); const disclosure=body.includes('쿠팡 파트너스 활동의 일환'); const link=/https:\\/\\/link\\.coupang\\.com\\/a\\/[A-Za-z0-9]+/.test(body) && body.includes('rel=\"sponsored nofollow\"'); const reachable=status>=200&&status<400&&body.length>200; const healthy=reachable&&disclosure&&link; return [{json:{asset_key:'cutdang-apple-vinegar',page_url:pageUrl,http_status:status,page_reachable:reachable,disclosure_present:disclosure,affiliate_link_present:link,healthy,details:{body_length:body.length,checked_by:'n8n-public-health-check'},checked_at:new Date().toISOString()}}];"
+          "url": "https://orange3718.github.io/Banana/config.js",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Atemoya-Affiliate-Health/1.0"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 30000,
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true,
+                "responseFormat": "text"
+              }
+            }
+          }
+        },
+        "id": "affiliate-ga4-fetch",
+        "name": "GA4 설정 가져오기",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [-340, 240]
+      },
+      {
+        "parameters": {
+          "mode": "append",
+          "numberInputs": 2,
+          "options": {}
+        },
+        "id": "affiliate-merge",
+        "name": "점검 자료 합치기",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3,
+        "position": [-120, 80]
+      },
+      {
+        "parameters": {
+          "jsCode": "const pageUrl='https://orange3718.github.io/Banana/offers/cutdang-apple-vinegar.html'; const expectedGa4='G-LKX74KWHLM'; const inputs=$input.all().map(i=>i.json); const page=inputs.find(i=>String(i.data??i.body??'').includes('쿠팡 파트너스 활동의 일환'))||{}; const ga4=inputs.find(i=>String(i.data??i.body??'').includes('gaMeasurementId'))||{}; const body=String(page.body??page.data??''); const configBody=String(ga4.body??ga4.data??''); const status=Number(page.statusCode??0); const disclosure=body.includes('쿠팡 파트너스 활동의 일환'); const link=/https:\\/\\/link\\.coupang\\.com\\/a\\/[A-Za-z0-9]+/.test(body)&&body.includes('rel=\"sponsored nofollow\"'); const reachable=status>=200&&status<400&&body.length>200; const ga4ConfigValid=configBody.includes(expectedGa4); const healthy=reachable&&disclosure&&link&&ga4ConfigValid; return [{json:{asset_key:'cutdang-apple-vinegar',page_url:pageUrl,http_status:status,page_reachable:reachable,disclosure_present:disclosure,affiliate_link_present:link,ga4_config_valid:ga4ConfigValid,healthy,details:{body_length:body.length,ga4_expected:expectedGa4,checked_by:'n8n-public-health-check'},checked_at:new Date().toISOString()}}];"
         },
         "id": "affiliate-validate",
         "name": "고지와 링크 검증",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
-        "position": [-80, 80]
+        "position": [100, 80]
       },
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "INSERT INTO affiliate_health_checks(asset_key,page_url,http_status,page_reachable,disclosure_present,affiliate_link_present,healthy,details) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb) RETURNING checked_at,asset_key,page_url,http_status,page_reachable,disclosure_present,affiliate_link_present,healthy;",
+          "query": "INSERT INTO affiliate_health_checks(asset_key,page_url,http_status,page_reachable,disclosure_present,affiliate_link_present,ga4_config_valid,healthy,details) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb) RETURNING checked_at,asset_key,page_url,http_status,page_reachable,disclosure_present,affiliate_link_present,ga4_config_valid,healthy;",
           "options": {
-            "queryReplacement": "={{ [$json.asset_key,$json.page_url,$json.http_status,$json.page_reachable,$json.disclosure_present,$json.affiliate_link_present,$json.healthy,JSON.stringify($json.details)] }}"
+            "queryReplacement": "={{ [$json.asset_key,$json.page_url,$json.http_status,$json.page_reachable,$json.disclosure_present,$json.affiliate_link_present,$json.ga4_config_valid,$json.healthy,JSON.stringify($json.details)] }}"
           }
         },
         "id": "affiliate-store",
         "name": "PostgreSQL 상태 기록",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
-        "position": [180, 80],
+        "position": [360, 80],
         "credentials": {
           "postgres": {
             "id": "AtemoyaPostgresMemory01",
@@ -91,7 +132,7 @@
       {
         "parameters": {
           "chatId": "={{ $vars.ATEMOYA_TELEGRAM_CHAT_ID }}",
-          "text": "={{ ($json.healthy ? '✅' : '🚨') + ' Atemoya 제휴 페이지 일일 점검\\n' + new Date($json.checked_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) + '\\n\\n페이지: ' + ($json.page_reachable?'정상':'오류') + '\\n제휴 고지: ' + ($json.disclosure_present?'정상':'누락') + '\\n쿠팡 버튼: ' + ($json.affiliate_link_present?'정상':'누락') + '\\nHTTP: ' + $json.http_status + '\\n\\n' + ($json.healthy?'조치 필요 없음':'자동 기록 완료 · 페이지 수정 필요') }}",
+          "text": "={{ ($json.healthy ? '✅' : '🚨') + ' Atemoya 제휴 페이지 일일 점검\\n' + new Date($json.checked_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}) + '\\n\\n페이지: ' + ($json.page_reachable?'정상':'오류') + '\\n제휴 고지: ' + ($json.disclosure_present?'정상':'누락') + '\\n쿠팡 버튼: ' + ($json.affiliate_link_present?'정상':'누락') + '\\nGA4 측정: ' + ($json.ga4_config_valid?'정상':'오류') + '\\nHTTP: ' + $json.http_status + '\\n\\n' + ($json.healthy?'조치 필요 없음':'자동 기록 완료 · 페이지 수정 필요') }}",
           "additionalFields": {
             "disable_web_page_preview": true
           }
@@ -100,7 +141,7 @@
         "name": "Telegram 일일 상태 보고",
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
-        "position": [440, 80],
+        "position": [620, 80],
         "credentials": {
           "telegramApi": {
             "id": "6WaLMIqUth2LtuDZ",
@@ -110,9 +151,11 @@
       }
     ],
     "connections": {
-      "매일 오전 9시 30분": {"main": [[{"node": "제휴 페이지 가져오기", "type": "main", "index": 0}]]},
-      "수동 점검": {"main": [[{"node": "제휴 페이지 가져오기", "type": "main", "index": 0}]]},
-      "제휴 페이지 가져오기": {"main": [[{"node": "고지와 링크 검증", "type": "main", "index": 0}]]},
+      "매일 오전 9시 30분": {"main": [[{"node": "제휴 페이지 가져오기", "type": "main", "index": 0},{"node": "GA4 설정 가져오기", "type": "main", "index": 0}]]},
+      "수동 점검": {"main": [[{"node": "제휴 페이지 가져오기", "type": "main", "index": 0},{"node": "GA4 설정 가져오기", "type": "main", "index": 0}]]},
+      "제휴 페이지 가져오기": {"main": [[{"node": "점검 자료 합치기", "type": "main", "index": 0}]]},
+      "GA4 설정 가져오기": {"main": [[{"node": "점검 자료 합치기", "type": "main", "index": 1}]]},
+      "점검 자료 합치기": {"main": [[{"node": "고지와 링크 검증", "type": "main", "index": 0}]]},
       "고지와 링크 검증": {"main": [[{"node": "PostgreSQL 상태 기록", "type": "main", "index": 0}]]},
       "PostgreSQL 상태 기록": {"main": [[{"node": "Telegram 일일 상태 보고", "type": "main", "index": 0}]]}
     },
