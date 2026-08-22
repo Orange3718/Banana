@@ -10,6 +10,7 @@ lock=threading.Lock()
 STATUS_FILE=os.path.join(os.path.dirname(__file__),'local-llm-status.json')
 
 def snapshot():
+    subprocess.run(DB_CMD+["-c","UPDATE local_llm_runs SET status='error',progress=100,current_step='시간 초과 정리',error_summary='작업이 15분 이상 갱신되지 않아 자동 정리됨',updated_at=NOW() WHERE status='running' AND updated_at < NOW()-interval '15 minutes'; UPDATE local_llm_runs SET status='error',progress=100,current_step='대기 만료 정리',error_summary='대기열에서 1시간 이상 대기하여 자동 정리됨',updated_at=NOW() WHERE status='queued' AND updated_at < NOW()-interval '1 hour';"],check=True,stdout=subprocess.DEVNULL)
     p=subprocess.run(DB_CMD+["-c","SELECT json_agg(x) FROM (SELECT lane,task_name,model,provider,status,progress,current_step,result_summary,error_summary,started_at,finished_at,duration_ms FROM local_llm_runs ORDER BY updated_at DESC LIMIT 20) x;"],capture_output=True,text=True,check=True)
     raw=p.stdout.strip() or 'null'
     try: runs=json.loads(raw) or []
