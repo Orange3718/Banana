@@ -15,6 +15,11 @@ for channel,url in sources:
     rows.append({'channel':channel,'url':url,'items':data,'collected_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())})
   except Exception as e: rows.append({'channel':channel,'url':url,'items':[],'error':str(e)[:200]})
 with open(OUT,'w',encoding='utf-8') as f: json.dump({'collected_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'sources':rows},f,ensure_ascii=False,indent=2)
+for src in rows:
+  for item in src.get('items',[]):
+    title=str(item.get('title','')).replace("'","''")[:1000]; url=str(item.get('url','')).replace("'","''")[:2000]
+    if not url: continue
+    subprocess.run(['/usr/local/bin/docker','exec','atemoya-postgres','psql','-U','n8n','-d','n8n','-c',f"INSERT INTO source_observations(channel,source_url,item_title,item_url,raw) VALUES ('{src['channel']}','{src['url']}','{title}','{url}', '{{}}'::jsonb) ON CONFLICT(channel,item_url) DO UPDATE SET item_title=EXCLUDED.item_title,collected_at=NOW();"],stdout=subprocess.DEVNULL,check=True)
 context='\n'.join(f"[{x['channel']}] "+' | '.join(i.get('title','') for i in x['items'][:8]) for x in rows)
 analysis={'provider':'ollama-local','model':'qwen3.5:4b','status':'error','source_count':len(rows),'item_count':sum(len(x['items']) for x in rows)}
 try:
