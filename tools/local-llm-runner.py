@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Run two safe, local-only Atemoya LLM lanes and publish live status to Postgres."""
-import json, os, subprocess, threading, time, uuid
+import json, os, subprocess, threading, time, uuid, hashlib
 from urllib.request import Request, urlopen
 
 DB_CMD=["/usr/local/bin/docker","exec","atemoya-postgres","psql","-U","n8n","-d","n8n","-At","-F", "\t"]
 MODEL=os.getenv("ATEMOYA_LOCAL_MODEL","qwen3.5:4b")
 OLLAMA=os.getenv("OLLAMA_URL","http://127.0.0.1:11434/api/chat")
 N8N_NOTIFY=os.getenv("N8N_NOTIFY_URL","http://127.0.0.1:5678/webhook/atemoya-local-llm-complete")
+DEDUP_FILE='/Users/orange/Developer/Banana-atemoya-ops/tools/local-llm-notify-dedupe.json'
 lock=threading.Lock()
 STATUS_FILE=os.path.join(os.path.dirname(__file__),'local-llm-status.json')
 
@@ -31,8 +32,16 @@ def update(run, status, progress, step, summary=None, error=None, started=None, 
     with lock: snapshot()
 
 def notify(task, provider, model, duration, summary, error=None):
+    key=hashlib.sha256((task+'|'+summary).encode()).hexdigest()
+    try:
+        old=json.load(open(DEDUP_FILE,encoding='utf-8'))
+        if old.get(task)==key: return
+    except Exception: old={}
     payload=json.dumps({'task_name':task,'provider':provider,'model':model,'duration_ms':duration,'result_summary':summary,'error_summary':error or ''}).encode()
-    try: urlopen(Request(N8N_NOTIFY,data=payload,headers={'Content-Type':'application/json'}),timeout=10).read()
+    try:
+        urlopen(Request(N8N_NOTIFY,data=payload,headers={'Content-Type':'application/json'}),timeout=10).read()
+        old[task]=key
+        with open(DEDUP_FILE,'w',encoding='utf-8') as f: json.dump(old,f)
     except Exception as exc: print('telegram notify skipped:', exc)
 
 def worker(lane, task, prompt, max_tokens):
