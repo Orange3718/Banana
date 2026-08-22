@@ -6,7 +6,7 @@ from urllib.request import Request, urlopen
 DB_CMD=["/usr/local/bin/docker","exec","atemoya-postgres","psql","-U","n8n","-d","n8n","-At","-F", "\t"]
 MODEL=os.getenv("ATEMOYA_LOCAL_MODEL","qwen3.5:4b")
 OLLAMA=os.getenv("OLLAMA_URL","http://127.0.0.1:11434/api/chat")
-N8N_NOTIFY=os.getenv("N8N_NOTIFY_URL","http://127.0.0.1:5678/webhook/atemoya-local-llm-complete")
+N8N_NOTIFY=os.getenv("N8N_NOTIFY_URL","http://127.0.0.1:5678/webhook/atemoya-local-llm-result")
 DEDUP_FILE='/Users/orange/Developer/Banana-atemoya-ops/tools/local-llm-notify-dedupe.json'
 lock=threading.Lock()
 STATUS_FILE=os.path.join(os.path.dirname(__file__),'local-llm-status.json')
