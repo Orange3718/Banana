@@ -4,6 +4,7 @@
 
 - 실행 로그: `/tmp/atemoya-local-llm-supervisor.log`
 - 상태 화면: `http://127.0.0.1:8765/local-llm-status.html`
+- 상태 화면 서버도 `com.atemoya.local-llm-status`로 로그인 시 자동 시작·장애 시 재시작한다.
 - 중지: `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.atemoya.local-llm.plist`
 - 재시작: `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.atemoya.local-llm.plist`
 
