@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, time
+import json, time, subprocess
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree as ET
 OUT='/Users/orange/Developer/Banana-atemoya-ops/tools/source-scout-latest.json'
