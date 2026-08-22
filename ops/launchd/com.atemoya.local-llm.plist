@@ -3,7 +3,7 @@
 <plist version="1.0"><dict>
   <key>Label</key><string>com.atemoya.local-llm</string>
   <key>ProgramArguments</key><array><string>/bin/zsh</string><string>/Users/orange/Developer/Banana-atemoya-ops/tools/local-llm-supervisor.sh</string></array>
-  <key>StartInterval</key><integer>21600</integer>
+  <key>StartInterval</key><integer>3600</integer>
   <key>RunAtLoad</key><true/>
   <key>ProcessType</key><string>Background</string>
   <key>StandardOutPath</key><string>/tmp/atemoya-local-llm-launchd.out</string>
