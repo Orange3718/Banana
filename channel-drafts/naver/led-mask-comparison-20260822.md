@@ -26,6 +26,9 @@ LED 마스크를 찾아보면 2만원대부터 70만원대까지 가격 차이�
 ▶ Atemoya LED 마스크 구매 체크리스트
 https://orange3718.github.io/Banana/offers/led-mask-checklist.html
 
+▶ 현재 후보 상품 확인
+https://link.coupang.com/a/gpT67t1pJI
+
 구매 전에는 가격·배송·구성품·A/S·반품 조건을 판매처의 최신 표시로 최종 확인하세요.
 
 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.
