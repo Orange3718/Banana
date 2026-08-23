@@ -6,6 +6,8 @@
 
 최근 자동 점검: 2026-08-23 09:25 KST
 
+운영 대시보드: `http://127.0.0.1:8765/atemoya-dashboard.html` (iMac), Tailscale 연결 시 `http://100.102.120.59:8765/atemoya-dashboard.html`. 메모리·예약 작업·현재/최근 로컬 실행·최근 수집 근거를 5초마다 읽는다. `GET /api/status`가 라이브 원천이며, PostgreSQL과 macOS 상태를 함께 표시한다.
+
 - Git worktree: clean, branch `feat/atemoya-ops-baseline`
 - n8n health: `{"status":"ok"}`
 - Ollama: `qwen3.5:4b` 응답 가능
