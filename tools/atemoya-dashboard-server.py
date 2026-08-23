@@ -9,14 +9,19 @@ def run(c,t=4):
  try:return subprocess.run(c,text=True,capture_output=True,timeout=t).stdout.strip()
  except:return ''
 def mem():
- total=int(run(['sysctl','-n','hw.memsize']) or 0); vals={}
- for l in run(['vm_stat']).splitlines():
+ total=int(run(['sysctl','-n','hw.memsize']) or 0); vals={}; page=4096
+ stat=run(['vm_stat'])
+ for l in stat.splitlines():
+  if 'page size of' in l:
+   try: page=int(l.split('page size of',1)[1].split()[0])
+   except ValueError: pass
+ for l in stat.splitlines():
   if ':' in l:
    k,v=l.split(':',1)
    try: vals[k.strip()]=int(v.strip().rstrip('.'))
    except ValueError: pass
- free=sum(vals.get(k,0) for k in ('Pages free','Pages inactive','Pages speculative'))*4096; used=max(0,total-free)
- return {'used_percent':round(used*100/total,1) if total else 0,'used_gb':round(used/1073741824,2),'total_gb':round(total/1073741824,2)}
+ free=sum(vals.get(k,0) for k in ('Pages free','Pages inactive','Pages speculative'))*page; used=max(0,total-free)
+ return {'used_percent':round(used*100/total,1) if total else 0,'used_gb':round(used/1073741824,2),'total_gb':round(total/1073741824,2),'page_size':page}
 def db(sql):return (run(['/usr/local/bin/docker','exec','atemoya-postgres','psql','-U','n8n','-d','n8n','-At','-F','\t','-c',sql],8) or '').splitlines()
 def state(label):
  t=run(['launchctl','print',f'gui/{os.getuid()}/{label}']); runs=next((int(x.split('=',1)[1].strip()) for x in t.splitlines() if 'runs =' in x),None)
