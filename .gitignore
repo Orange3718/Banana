@@ -8,3 +8,7 @@ backups/
 .DS_Store
 .local-llm-status.json
 tools/local-llm-status.json
+tools/local-llm-notify-dedupe.json
+tools/nightly-reflection-latest.json
+tools/source-scout-analysis.json
+tools/source-scout-latest.json

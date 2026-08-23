@@ -1,0 +1,4 @@
+interface:
+  display_name: "Atemoya 운영"
+  short_description: "Atemoya 자동화 상태를 읽고 다음 작업을 끝까지 운영"
+  default_prompt: "Use $atemoya-operate to inspect the Atemoya baseline, verify live automation, and continue the highest-priority unfinished work."
