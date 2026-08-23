@@ -34,7 +34,7 @@
 
 ### 다음 우선순위
 
-1. Telegram `GOOD / BAD / 수정` 답장을 게시 승인 상태와 연결
+1. Telegram `GOOD / BAD / 수정` 답장을 최신 로컬 결과의 `metadata.owner_review`에 연결 완료 (`AtemoyaLocalLLMReviewGate01`)
 2. 근거 URL이 포함된 초안만 승인 요청하도록 QA 강화
 3. GOOD 승인 후 GitHub Pages 게시와 게시 URL 저장을 먼저 완성
 4. 네이버·Blogger OAuth 게시를 각각 연결하고 실제 게시 URL까지 검증
