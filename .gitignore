@@ -12,3 +12,5 @@ tools/local-llm-notify-dedupe.json
 tools/nightly-reflection-latest.json
 tools/source-scout-analysis.json
 tools/source-scout-latest.json
+
+AtemoyaModels/
