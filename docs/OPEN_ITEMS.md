@@ -4,6 +4,14 @@
 
 ## 2026-08-23 현재 상태
 
+최근 자동 점검: 2026-08-23 09:25 KST
+
+- Git worktree: clean, branch `feat/atemoya-ops-baseline`
+- n8n health: `{"status":"ok"}`
+- Ollama: `qwen3.5:4b` 응답 가능
+- 최근 로컬 LLM 실행: 09:25 종료, 최근 24시간 완료 49건·정리 오류 5건
+- 최근 소스 수집: 3채널·20항목·로컬 분석 완료
+
 ### 실제 상시 운영
 
 - `com.atemoya.local-llm`: 매시간 로컬 `qwen3.5:4b` 조사·콘텐츠 보조 2개 실행, PostgreSQL 기록, 중복 Telegram 억제
