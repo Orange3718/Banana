@@ -15,3 +15,7 @@ n8n UI after import. Imported workflows must remain inactive until reviewed.
   Telegram. The chat identifier is referenced through the private n8n variable
   `ATEMOYA_TELEGRAM_CHAT_ID`; it is not stored in this export. The workflow
   never clicks the affiliate link or reads settlement data.
+- `exports/AtemoyaOpsGuardian01.json`: daily 03:10 deterministic operations
+  review with a local Qwen summary, plus the deduplicated incident webhook used
+  by the macOS Watchdog. It stores daily reviews before sending Telegram and
+  never changes the rule-based `GOOD / REVIEW / BAD` verdict.

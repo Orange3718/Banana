@@ -1,0 +1,284 @@
+[
+  {
+    "id": "AtemoyaOpsGuardian01",
+    "name": "Atemoya 일일 운영 점검 Guardian",
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "10 3 * * *"
+              }
+            ]
+          }
+        },
+        "id": "ops-daily-schedule",
+        "name": "매일 오전 3시 10분",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [200, 180]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "atemoya-ops-guardian-run",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "ops-manual-webhook",
+        "name": "수동 일일 점검",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [200, 360],
+        "webhookId": "atemoya-ops-guardian-run"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH m AS (SELECT to_char((NOW() AT TIME ZONE 'Asia/Seoul')::date,'YYYY-MM-DD') AS review_date,(SELECT count(*) FROM execution_entity WHERE status='success' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_success_24h,(SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_errors_24h,(SELECT count(*) FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours')::int AS local_complete_24h,(SELECT count(*) FROM local_llm_runs WHERE status='error' AND updated_at>NOW()-interval '24 hours')::int AS local_errors_24h,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(updated_at)))/60 FROM local_llm_runs WHERE status='complete'),99999)::int AS local_age_minutes,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(collected_at)))/60 FROM source_observations),99999)::int AS source_age_minutes,(SELECT count(DISTINCT channel) FROM source_observations WHERE collected_at>NOW()-interval '24 hours')::int AS source_channels_24h,(SELECT count(*)-count(DISTINCT metadata->>'topic_key') FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours' AND COALESCE(metadata->>'topic_key','')<>'')::int AS duplicate_topics_24h,COALESCE((SELECT healthy FROM affiliate_health_checks ORDER BY checked_at DESC LIMIT 1),false) AS affiliate_healthy,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM affiliate_health_checks),99999)::int AS affiliate_age_minutes,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='bad')::int AS open_bad,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='review')::int AS open_review,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM system_health_checks),99999)::int AS watchdog_age_minutes,(SELECT count(*) FROM content WHERE published_at>NOW()-interval '7 days' AND published_url IS NOT NULL)::int AS published_7d,COALESCE((SELECT sum(amount) FROM revenue WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS revenue_7d,COALESCE((SELECT sum(amount) FROM cost WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS cost_7d) SELECT m.*,CASE WHEN open_bad>0 OR watchdog_age_minutes>30 OR n8n_errors_24h>=3 OR source_age_minutes>180 OR local_errors_24h>0 THEN 'BAD' WHEN open_review>0 OR n8n_errors_24h>0 OR source_channels_24h<2 OR NOT affiliate_healthy OR affiliate_age_minutes>1560 OR local_age_minutes>180 OR duplicate_topics_24h>0 THEN 'REVIEW' ELSE 'GOOD' END AS status,jsonb_build_object('n8n_success_24h',n8n_success_24h,'n8n_errors_24h',n8n_errors_24h,'local_complete_24h',local_complete_24h,'local_errors_24h',local_errors_24h,'local_age_minutes',local_age_minutes,'source_age_minutes',source_age_minutes,'source_channels_24h',source_channels_24h,'duplicate_topics_24h',duplicate_topics_24h,'affiliate_healthy',affiliate_healthy,'affiliate_age_minutes',affiliate_age_minutes,'open_bad',open_bad,'open_review',open_review,'watchdog_age_minutes',watchdog_age_minutes,'published_7d',published_7d,'revenue_7d',revenue_7d,'cost_7d',cost_7d) AS metrics FROM m;",
+          "options": {}
+        },
+        "id": "ops-metrics-query",
+        "name": "운영 지표 조회",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [500, 260],
+        "credentials": {
+          "postgres": {
+            "id": "AtemoyaPostgresMemory01",
+            "name": "Atemoya PostgreSQL Memory"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const m=$json.metrics; const status=$json.status; const prompt='판정은 이미 규칙으로 확정됐다. 판정을 바꾸지 말고 이 JSON만 근거로 한국어 5줄 이내 보충 설명을 작성하라. 없는 수익이나 원인을 만들지 마라. 사용자 승인이나 결정을 요청하지 말고 자동 점검 대상이라고 써라.\\n판정: '+status+'\\n지표: '+JSON.stringify(m); return [{json:{...$json,ollama_body:JSON.stringify({model:'qwen3.5:4b',stream:false,think:false,options:{num_predict:240,temperature:0.05},messages:[{role:'system',content:'당신은 Atemoya 운영 점검 보고서 편집자다. 입력된 수치만 설명하며 판정과 사실을 바꾸지 않는다. 사용자 결정을 요청하지 않는다.'},{role:'user',content:prompt}]})}}];"
+        },
+        "id": "ops-prompt",
+        "name": "규칙 판정과 로컬 요약 준비",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [740, 260]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:11434/api/chat",
+          "sendBody": true,
+          "contentType": "raw",
+          "rawContentType": "application/json",
+          "body": "={{ $json.ollama_body }}",
+          "options": {
+            "timeout": 180000
+          }
+        },
+        "id": "ops-ollama",
+        "name": "로컬 Qwen 운영 요약",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [980, 260],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 5000,
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const base=$('규칙 판정과 로컬 요약 준비').first().json; const generated=String($json.message?.content||'').split('\\n').filter(x=>!(/사용자.*(결정|승인|필요)/.test(x))).join('\\n').trim(); const facts='인프라: Watchdog '+base.watchdog_age_minutes+'분 전 · 열린 BAD '+base.open_bad+'건 · REVIEW '+base.open_review+'건\\n자동화: n8n 성공 '+base.n8n_success_24h+'건 · 오류 '+base.n8n_errors_24h+'건 / 로컬 완료 '+base.local_complete_24h+'건 · 오류 '+base.local_errors_24h+'건\\n수집·품질: '+base.source_age_minutes+'분 전 · '+base.source_channels_24h+'채널 · 주제 중복 '+base.duplicate_topics_24h+'건\\n게시·현금흐름: 7일 게시 '+base.published_7d+'건 · 수익 '+base.revenue_7d+'원 · 비용 '+base.cost_7d+'원'; const explanation=generated.length>=40?'\\n로컬 설명: '+generated:''; const summary=(facts+explanation+'\\n운영 Agent가 자동 점검합니다. 답장 불필요').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,3000); const icon=base.status==='GOOD'?'✅':base.status==='BAD'?'🚨':'⚠️'; return [{json:{review_date:base.review_date,status:base.status,metrics:base.metrics,provider:'ollama-local',model:'qwen3.5:4b',summary,telegram_text:(icon+' Atemoya 일일 운영 점검 | '+base.review_date+'\\n판정: '+base.status+'\\n\\n'+summary+'\\n\\n추론: Ollama 로컬 / qwen3.5:4b').slice(0,3900)}}];"
+        },
+        "id": "ops-summary-validate",
+        "name": "요약 검증과 보고 작성",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [1220, 260]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO ops_daily_reviews(review_date,status,metrics,summary,provider,model) VALUES($1::date,$2,$3::jsonb,$4,$5,$6) ON CONFLICT(review_date) DO UPDATE SET status=EXCLUDED.status,metrics=EXCLUDED.metrics,summary=EXCLUDED.summary,provider=EXCLUDED.provider,model=EXCLUDED.model,updated_at=NOW() RETURNING id,review_date,status,summary,provider,model,(notified_at IS NULL) AS should_notify;",
+          "options": {
+            "queryReplacement": "={{ [$json.review_date,$json.status,JSON.stringify($json.metrics),$json.summary,$json.provider,$json.model] }}"
+          }
+        },
+        "id": "ops-save-review",
+        "name": "일일 점검 저장",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [1460, 260],
+        "credentials": {
+          "postgres": {
+            "id": "AtemoyaPostgresMemory01",
+            "name": "Atemoya PostgreSQL Memory"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "ops-notify-condition",
+                "leftValue": "={{ $json.should_notify }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "ops-should-notify",
+        "name": "오늘 보고 전송 전인가",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [1690, 260]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.ATEMOYA_TELEGRAM_CHAT_ID }}",
+          "text": "={{ $('요약 검증과 보고 작성').first().json.telegram_text }}",
+          "additionalFields": {
+            "disable_web_page_preview": true,
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "ops-daily-telegram",
+        "name": "Telegram 일일 운영 보고",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [1920, 200],
+        "credentials": {
+          "telegramApi": {
+            "id": "6WaLMIqUth2LtuDZ",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE ops_daily_reviews SET notified_at=NOW(),updated_at=NOW() WHERE id=$1 RETURNING id,review_date,status,notified_at;",
+          "options": {
+            "queryReplacement": "={{ [$('일일 점검 저장').first().json.id] }}"
+          }
+        },
+        "id": "ops-mark-notified",
+        "name": "보고 전송 기록",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [2150, 200],
+        "credentials": {
+          "postgres": {
+            "id": "AtemoyaPostgresMemory01",
+            "name": "Atemoya PostgreSQL Memory"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "atemoya-ops-incident",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "ops-incident-webhook",
+        "name": "Watchdog 사건 수신",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [200, 600],
+        "webhookId": "atemoya-ops-incident"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body=$json.body||$json; const status=['GOOD','REVIEW','BAD'].includes(body.status)?body.status:'REVIEW'; const icon=status==='GOOD'?'✅':status==='BAD'?'🚨':'⚠️'; const summary=String(body.summary||'상태 변경 감지').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return [{json:{status,text:(icon+' Atemoya 운영 Watchdog\\n판정: '+status+'\\n\\n'+summary+'\\n\\n같은 사건은 상태가 바뀔 때만 알립니다.').slice(0,3900)}}];"
+        },
+        "id": "ops-incident-format",
+        "name": "사건 보고 형식화",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [460, 600]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $vars.ATEMOYA_TELEGRAM_CHAT_ID }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "disable_web_page_preview": true,
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "ops-incident-telegram",
+        "name": "Telegram 상태 변경 알림",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [720, 600],
+        "credentials": {
+          "telegramApi": {
+            "id": "6WaLMIqUth2LtuDZ",
+            "name": "Telegram account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "매일 오전 3시 10분": {
+        "main": [[{"node": "운영 지표 조회", "type": "main", "index": 0}]]
+      },
+      "수동 일일 점검": {
+        "main": [[{"node": "운영 지표 조회", "type": "main", "index": 0}]]
+      },
+      "운영 지표 조회": {
+        "main": [[{"node": "규칙 판정과 로컬 요약 준비", "type": "main", "index": 0}]]
+      },
+      "규칙 판정과 로컬 요약 준비": {
+        "main": [[{"node": "로컬 Qwen 운영 요약", "type": "main", "index": 0}]]
+      },
+      "로컬 Qwen 운영 요약": {
+        "main": [[{"node": "요약 검증과 보고 작성", "type": "main", "index": 0}]]
+      },
+      "요약 검증과 보고 작성": {
+        "main": [[{"node": "일일 점검 저장", "type": "main", "index": 0}]]
+      },
+      "일일 점검 저장": {
+        "main": [[{"node": "오늘 보고 전송 전인가", "type": "main", "index": 0}]]
+      },
+      "오늘 보고 전송 전인가": {
+        "main": [[{"node": "Telegram 일일 운영 보고", "type": "main", "index": 0}], []]
+      },
+      "Telegram 일일 운영 보고": {
+        "main": [[{"node": "보고 전송 기록", "type": "main", "index": 0}]]
+      },
+      "Watchdog 사건 수신": {
+        "main": [[{"node": "사건 보고 형식화", "type": "main", "index": 0}]]
+      },
+      "사건 보고 형식화": {
+        "main": [[{"node": "Telegram 상태 변경 알림", "type": "main", "index": 0}]]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Seoul",
+      "errorWorkflow": "AtemoyaErrorHandler01",
+      "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "tags": []
+  }
+]
