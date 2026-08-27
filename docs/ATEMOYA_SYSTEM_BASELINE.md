@@ -131,3 +131,17 @@ those facts into a short report. Daily reviews are stored in
 receives only a new incident, its resolution, and one daily report. The former
 03:00 `com.atemoya.nightly-reflection` job is retained in Git for recovery but
 must remain unloaded to prevent duplicate summaries.
+
+## Revenue Autopilot
+
+`AtemoyaRevenueAutopilot01` runs every 30 minutes. It promotes fresh,
+evidence-backed `local_llm_runs` into a local-Qwen long-form draft, performs
+deterministic QA, stores the result in PostgreSQL, and sends at most one active
+Telegram publication approval request. No external model API is required.
+
+`com.atemoya.autopilot-publisher` checks approved requests every 15 minutes,
+renders safe HTML, rebuilds the sitemap, runs the site test, and commits only
+the generated artifacts to `feat/atemoya-ops-baseline`. It never writes or
+merges `main`. After a human PR merge, it detects the public Pages URL and
+records the final publication. Queue state is held in
+`revenue_autopilot_jobs`; details are in `ops/REVENUE_AUTOPILOT.md`.

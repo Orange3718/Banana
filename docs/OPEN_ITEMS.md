@@ -2,6 +2,17 @@
 
 기준일: 2026-08-23
 
+## 2026-08-28 수익 Autopilot 상시 운영
+
+- 공개 근거 수집과 로컬 분석 뒤 n8n `AtemoyaRevenueAutopilot01`이 30분마다
+  수익 후보를 선별하고 하루 최대 한 건을 장문 초안·자동 QA·Telegram 승인
+  요청까지 진행한다.
+- 승인된 콘텐츠는 `com.atemoya.autopilot-publisher`가 15분마다 확인해 HTML,
+  sitemap, 사이트 검사를 수행하고 feature branch에만 커밋·push한다.
+- `main` 직접 변경은 금지되어 있어 GitHub 비교 링크에서 PR 병합은 현재 남은
+  사람 단계다. 병합 뒤 Pages URL 공개는 Publisher가 자동 감지·기록·보고한다.
+- 상세 운영·복구·중복 방지는 `ops/REVENUE_AUTOPILOT.md`에 기록했다.
+
 ## 2026-08-28 일일 운영 점검 Guardian
 
 - 외부 `com.atemoya.ops-watchdog`가 15분마다 n8n 밖에서 인프라·예약·수집

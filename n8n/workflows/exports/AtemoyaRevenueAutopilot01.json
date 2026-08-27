@@ -1,0 +1,79 @@
+[
+  {
+    "id": "AtemoyaRevenueAutopilot01",
+    "name": "Atemoya Revenue Autopilot",
+    "active": true,
+    "settings": {"timezone": "Asia/Seoul", "executionOrder": "v1", "errorWorkflow": "AtemoyaErrorHandler01"},
+    "nodes": [
+      {
+        "parameters": {"rule": {"interval": [{"field": "cronExpression", "expression": "*/30 * * * *"}]}},
+        "id": "revenue-schedule", "name": "30분마다 수익 후보 처리", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [180, 180]
+      },
+      {
+        "parameters": {"httpMethod": "POST", "path": "atemoya-revenue-autopilot-run", "responseMode": "onReceived", "options": {}},
+        "id": "revenue-manual", "name": "수동 수익 파이프라인", "type": "n8n-nodes-base.webhook", "typeVersion": 2.1, "position": [180, 340], "webhookId": "atemoya-revenue-autopilot-run"
+      },
+      {
+        "parameters": {"operation": "executeQuery", "query": "UPDATE revenue_autopilot_jobs j SET stage=CASE WHEN a.status='approved' THEN 'approved' WHEN a.status IN ('rejected','deferred') THEN 'rejected' ELSE j.stage END,updated_at=NOW(),finished_at=CASE WHEN a.status IN ('rejected','deferred') THEN NOW() ELSE j.finished_at END FROM approval_requests a WHERE a.id=j.approval_request_id AND j.stage='awaiting_approval' AND a.status<>'pending'; UPDATE revenue_autopilot_jobs SET stage=CASE WHEN attempt>=max_attempts THEN 'failed' ELSE 'retry' END,next_attempt_at=NOW()+interval '1 hour',last_error='running lease expired',updated_at=NOW() WHERE stage='running' AND updated_at<NOW()-interval '30 minutes'; INSERT INTO revenue_autopilot_jobs(job_key,source_run_id,priority,metadata) SELECT 'local-run:'||r.id,r.id,CASE WHEN r.task_name='신규 수익 콘텐츠 후보' THEN 40 ELSE 10 END + CASE WHEN lower(COALESCE(r.metadata->>'topic_title','')) ~ '(buy|price|cost|review|commerce|product|tool|구매|가격|비교|제품)' THEN 20 ELSE 0 END,jsonb_build_object('source_channel',r.metadata->>'source_channel','topic_title',r.metadata->>'topic_title','topic_url',r.metadata->>'topic_url','provider',r.provider,'model',r.model) FROM local_llm_runs r WHERE r.status='complete' AND COALESCE(r.metadata->>'runner_version','0')='2' AND COALESCE(r.metadata->>'topic_url','')<>'' AND length(COALESCE(r.result_summary,''))>=200 AND r.updated_at>NOW()-interval '7 days' ON CONFLICT(job_key) DO NOTHING; WITH picked AS (SELECT j.id FROM revenue_autopilot_jobs j WHERE j.stage IN ('queued','retry') AND j.next_attempt_at<=NOW() AND NOT EXISTS (SELECT 1 FROM revenue_autopilot_jobs x WHERE x.stage IN ('running','awaiting_approval','approved','rendering')) AND NOT EXISTS (SELECT 1 FROM revenue_autopilot_jobs x WHERE x.created_at>date_trunc('day',NOW() AT TIME ZONE 'Asia/Seoul') AT TIME ZONE 'Asia/Seoul' AND x.stage NOT IN ('queued','retry','rejected','failed')) ORDER BY j.priority DESC,j.id DESC LIMIT 1 FOR UPDATE SKIP LOCKED), claimed AS (UPDATE revenue_autopilot_jobs j SET stage='running',attempt=attempt+1,updated_at=NOW() FROM picked WHERE j.id=picked.id RETURNING j.*) SELECT c.id AS job_id,c.job_key,c.attempt,r.task_name,r.provider,r.model,r.result_summary,r.metadata->>'topic_title' AS topic_title,r.metadata->>'topic_url' AS topic_url,r.metadata->>'source_channel' AS source_channel FROM claimed c JOIN local_llm_runs r ON r.id=c.source_run_id;", "options": {}},
+        "id": "revenue-claim", "name": "후보 동기화와 1건 점유", "type": "n8n-nodes-base.postgres", "typeVersion": 2.6, "position": [450, 260],
+        "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+      },
+      {
+        "parameters": {"jsCode": "const x=$json; const prompt=`너는 Atemoya의 근거 기반 커머스 편집자다. 아래 단일 공개 근거와 로컬 분석만 사용해 한국어 JSON 하나만 출력하라. 확인되지 않은 수치·효능·판매량·수익을 만들지 마라. 광고성 과장(무조건, 대박, 기적, 완치, 100% 보장)을 쓰지 마라. body_html은 1000자 이상이며 h2,p,ul,li,a만 사용하고, 독자 문제, 확인된 사실, 구매/사업 판단 질문, 실패를 줄이는 체크리스트, 한계와 다음 행동을 포함한다. 원문 링크를 최소 1회 넣어라. JSON 키: title,slug,description,keywords(문자열 배열),body_html.\n주제: ${x.topic_title}\n원문: ${x.topic_url}\n수집 채널: ${x.source_channel}\n로컬 분석:\n${x.result_summary}`; return [{json:{...x,ollama_body:JSON.stringify({model:'qwen3.5:4b',stream:false,think:false,messages:[{role:'user',content:prompt}],options:{temperature:0.1,num_predict:1800}})}}];"},
+        "id": "revenue-prompt", "name": "근거 제한 장문 프롬프트", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [700, 260]
+      },
+      {
+        "parameters": {"method": "POST", "url": "http://host.docker.internal:11434/api/chat", "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{ $json.ollama_body }}", "options": {"timeout": 240000}},
+        "id": "revenue-ollama", "name": "로컬 Qwen 장문 초안", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [950, 260], "retryOnFail": true, "maxTries": 2, "waitBetweenTries": 5000, "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {"jsCode": "const src=$('근거 제한 장문 프롬프트').first().json; let raw=$json?.message?.content||''; raw=raw.replace(/^```(?:json)?\\s*/i,'').replace(/\\s*```$/,'').trim(); let d={}; let err=''; try{d=JSON.parse(raw)}catch(e){err='JSON parse: '+e.message} const slug=String(d.slug||src.topic_title||'atemoya-brief').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,72)||'atemoya-brief'; let body=String(d.body_html||'').replace(/<\\/?(script|style|iframe)[^>]*>/gi,'').replace(/\\son[a-z]+=(['\\\"]).*?\\1/gi,'').replace(/javascript:/gi,''); if(!body.includes(src.topic_url)) body+=`<p><a href=\"${src.topic_url}\">원문 근거 확인</a></p>`; const plain=body.replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim(); const failures=[]; if(err) failures.push(err); if(plain.length<1000) failures.push('본문 1000자 미만'); if(!body.includes(src.topic_url)) failures.push('근거 URL 누락'); if(/<(script|iframe)|javascript:|\\son[a-z]+=/i.test(body)) failures.push('위험 HTML'); if(/무조건|대박|기적|완치|100%\\s*보장/i.test(plain)) failures.push('과장 표현'); return [{json:{...src,title:String(d.title||src.topic_title||'Atemoya 근거 브리프').slice(0,120),slug,description:String(d.description||'공개 근거를 바탕으로 확인 질문을 정리했습니다.').slice(0,180),keywords:Array.isArray(d.keywords)?d.keywords.slice(0,12):[],body_html:body,qa_pass:failures.length===0,qa:{plain_length:plain.length,source_url_present:body.includes(src.topic_url),failures},error:failures.join('; ')}}];"},
+        "id": "revenue-qa", "name": "자동 QA와 안전 정리", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1190, 260]
+      },
+      {
+        "parameters": {"conditions": {"options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2}, "conditions": [{"id": "qa-ok", "leftValue": "={{ $json.qa_pass }}", "rightValue": true, "operator": {"type": "boolean", "operation": "true", "singleValue": true}}], "combinator": "and"}, "options": {}},
+        "id": "revenue-if", "name": "QA 통과인가", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [1420, 260]
+      },
+      {
+        "parameters": {"operation": "executeQuery", "query": "WITH c AS (INSERT INTO content(external_key,title,channel,status,source_url,body_ref,metadata) VALUES($1,$2,'github-pages','review_ready',$3,'postgres:content.metadata.body_html',$4::jsonb) ON CONFLICT(external_key) DO UPDATE SET title=EXCLUDED.title,status='review_ready',source_url=EXCLUDED.source_url,body_ref=EXCLUDED.body_ref,metadata=EXCLUDED.metadata,updated_at=NOW() RETURNING id), a AS (INSERT INTO approval_requests(request_type,title,rationale,estimated_cost,risk_level,status) VALUES('revenue_content_publish',$5,$6,0,'low','pending') RETURNING id) UPDATE revenue_autopilot_jobs j SET content_id=c.id,approval_request_id=a.id,stage='awaiting_approval',qa=$7::jsonb,metadata=j.metadata||$8::jsonb,last_error=NULL,updated_at=NOW() FROM c,a WHERE j.id=$9 RETURNING j.id AS job_id,c.id AS content_id,a.id AS approval_id,$2::text AS title,$3::text AS source_url,$7::jsonb AS qa;", "options": {"queryReplacement": "={{ ['autopilot:'+String($json.job_id),$json.title,$json.topic_url,JSON.stringify({body_html:$json.body_html,description:$json.description,slug:$json.slug,keywords:$json.keywords,source_url:$json.topic_url,provider:'ollama-local',model:'qwen3.5:4b',job_id:$json.job_id}),('게시 검토 #'+$json.job_id+': '+$json.title),('근거: '+$json.topic_url+' | 자동 QA 통과 | 예상비용 0원'),JSON.stringify($json.qa),JSON.stringify({provider:'ollama-local',model:'qwen3.5:4b'}),$json.job_id] }}"}},
+        "id": "revenue-save", "name": "초안과 승인 요청 저장", "type": "n8n-nodes-base.postgres", "typeVersion": 2.6, "position": [1660, 180],
+        "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+      },
+      {
+        "parameters": {"chatId": "={{ $vars.ATEMOYA_TELEGRAM_CHAT_ID }}", "text": "={{ (()=>{const q=$json.qa||{}; const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return ('🧾 <b>Atemoya 게시 승인 요청</b>\\n결정번호 #'+$json.approval_id+'\\n\\n'+esc($json.title)+'\\n\\n근거: '+esc($json.source_url)+'\\nQA: '+(q.plain_length||'-')+'자 · 근거 링크 확인\\n추론: Ollama 로컬 / qwen3.5:4b\\n비용: 0원\\n\\n/승인 '+$json.approval_id+' 게시\\n/보류 '+$json.approval_id+'\\n/거절 '+$json.approval_id+' 사유').slice(0,3900)})() }}", "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false, "parse_mode": "HTML"}},
+        "id": "revenue-telegram", "name": "게시 승인 Telegram", "type": "n8n-nodes-base.telegram", "typeVersion": 1.2, "position": [1910, 180],
+        "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}
+      },
+      {
+        "parameters": {"operation": "executeQuery", "query": "UPDATE revenue_autopilot_jobs SET stage=CASE WHEN attempt>=max_attempts THEN 'failed' ELSE 'retry' END,next_attempt_at=NOW()+interval '1 hour',last_error=$1,qa=$2::jsonb,updated_at=NOW() WHERE id=$3 RETURNING id,stage,last_error;", "options": {"queryReplacement": "={{ [$json.error||'automatic QA failed',JSON.stringify($json.qa||{}),$json.job_id] }}"}},
+        "id": "revenue-retry", "name": "QA 실패 재시도 기록", "type": "n8n-nodes-base.postgres", "typeVersion": 2.6, "position": [1660, 360],
+        "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}
+      },
+      {
+        "parameters": {"httpMethod": "POST", "path": "atemoya-autopilot-publisher", "responseMode": "onReceived", "options": {}},
+        "id": "publisher-webhook", "name": "Publisher 결과 수신", "type": "n8n-nodes-base.webhook", "typeVersion": 2.1, "position": [180, 600], "webhookId": "atemoya-autopilot-publisher"
+      },
+      {
+        "parameters": {"jsCode": "const b=$json.body||$json; const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); const icon=b.status==='PUBLISHED'?'🌐':b.status==='FAILED'?'🚨':'✅'; return [{json:{text:(icon+' <b>Atemoya Publisher '+esc(b.status)+'</b>\\n'+esc(b.summary)+(b.url?'\\n'+esc(b.url):'')).slice(0,3900)}}];"},
+        "id": "publisher-format", "name": "Publisher 보고 형식화", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [450, 600]
+      },
+      {
+        "parameters": {"chatId": "={{ $vars.ATEMOYA_TELEGRAM_CHAT_ID }}", "text": "={{ $json.text }}", "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false, "parse_mode": "HTML"}},
+        "id": "publisher-telegram", "name": "Publisher Telegram", "type": "n8n-nodes-base.telegram", "typeVersion": 1.2, "position": [720, 600],
+        "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}
+      }
+    ],
+    "connections": {
+      "30분마다 수익 후보 처리": {"main": [[{"node": "후보 동기화와 1건 점유", "type": "main", "index": 0}]]},
+      "수동 수익 파이프라인": {"main": [[{"node": "후보 동기화와 1건 점유", "type": "main", "index": 0}]]},
+      "후보 동기화와 1건 점유": {"main": [[{"node": "근거 제한 장문 프롬프트", "type": "main", "index": 0}]]},
+      "근거 제한 장문 프롬프트": {"main": [[{"node": "로컬 Qwen 장문 초안", "type": "main", "index": 0}]]},
+      "로컬 Qwen 장문 초안": {"main": [[{"node": "자동 QA와 안전 정리", "type": "main", "index": 0}]]},
+      "자동 QA와 안전 정리": {"main": [[{"node": "QA 통과인가", "type": "main", "index": 0}]]},
+      "QA 통과인가": {"main": [[{"node": "초안과 승인 요청 저장", "type": "main", "index": 0}], [{"node": "QA 실패 재시도 기록", "type": "main", "index": 0}]]},
+      "초안과 승인 요청 저장": {"main": [[{"node": "게시 승인 Telegram", "type": "main", "index": 0}]]},
+      "Publisher 결과 수신": {"main": [[{"node": "Publisher 보고 형식화", "type": "main", "index": 0}]]},
+      "Publisher 보고 형식화": {"main": [[{"node": "Publisher Telegram", "type": "main", "index": 0}]]}
+    }
+  }
+]
