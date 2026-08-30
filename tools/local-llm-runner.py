@@ -32,6 +32,11 @@ KEYWORDS = {
     "appliance": 7, "가전": 8, "여행": 7, "할인": 9, "추천": 8,
 }
 REVENUE_MIN_SCORE = int(os.getenv("ATEMOYA_REVENUE_MIN_SCORE", "20"))
+REVENUE_TITLE_RE = re.compile(
+    r"\b(?:shopping|shoppers?|commerce|retail|payments?|affiliate|products?|reviews?|prices?|deals?|discounts?|coupons?|comparisons?|subscriptions?|saas|beauty|travel|appliances?)\b"
+    r"|쇼핑|커머스|구매|가격|할인|추천|가전|여행|비교|제품",
+    re.IGNORECASE,
+)
 
 
 def db_output(statement):
@@ -104,7 +109,11 @@ def load_candidates(now=None):
 
 
 def revenue_candidates(candidates, minimum=REVENUE_MIN_SCORE):
-    return [row for row in candidates if int(row.get("score", 0)) >= minimum]
+    return [
+        row for row in candidates
+        if int(row.get("score", 0)) >= minimum
+        and REVENUE_TITLE_RE.search(str(row.get("title", "")))
+    ]
 
 
 def recent_topic_keys(days=TOPIC_COOLDOWN_DAYS):

@@ -24,6 +24,11 @@ class RevenueWorkflowExportTests(unittest.TestCase):
         query = next(node["parameters"]["query"] for node in autopilot["nodes"] if node["name"] == "후보 동기화와 1건 점유")
         self.assertIn("r.task_name='신규 수익 콘텐츠 후보'", query)
         self.assertIn("approval_requests", query)
+        self.assertIn("lower(COALESCE(r.metadata->>'topic_title','')) ~", query)
+        self.assertNotIn("topic_title','')||' '||COALESCE(r.result_summary", query)
+        qa_code = next(node["parameters"]["jsCode"] for node in autopilot["nodes"] if node["name"] == "자동 QA와 안전 정리")
+        self.assertIn("replace(/무조건적으로?/g,'자동으로')", qa_code)
+        self.assertIn("unsupportedNumbers", qa_code)
 
 
 if __name__ == "__main__":

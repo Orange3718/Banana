@@ -18,6 +18,10 @@ class TopicSelectionTests(unittest.TestCase):
         ]
         self.assertEqual(runner.revenue_candidates(rows), [rows[1]])
 
+    def test_productivity_does_not_match_product(self):
+        rows = [{"title": "Good Culture Is the Biggest Productivity Hack, Not AI", "score": 60}]
+        self.assertEqual(runner.revenue_candidates(rows), [])
+
     def test_recent_topics_are_not_reused(self):
         rows = [
             {"topic_key": "old", "title": "AI shopping report", "url": "https://example.com/old", "channel": "google-news", "score": 50},

@@ -2,6 +2,19 @@
 
 기준일: 2026-08-23
 
+## 2026-08-30 수익 운영 복구 배포 완료
+
+- DB 백업 `/Users/orange/Atemoya/backups/20260830T073715Z` 생성 뒤 migration
+  010·011, Revenue Autopilot, Ops Guardian, Revenue Reconciler를 실제 적용했다.
+- Guardian은 게시 0건을 `REVIEW`로 판정하고 Telegram 전송 완료 시각을
+  `system_incidents.last_notified_at`에 기록했다.
+- 과거 넓은 필터 후보 93건은 삭제하지 않고 `rejected`로 격리했다.
+- 국내외 5개 소스 30건을 수집하고 로컬 Qwen이 Amazon/YouTube Shopping
+  제휴 후보를 처리했다. 작업 `6660`은 QA 실패 0건, 1,133자, 근거 URL 확인으로
+  승인요청 `#6`까지 도달했다.
+- 남은 사람 단계는 Telegram에서 승인요청 `#6`을 검토하는 것이다. 승인 전에는
+  Publisher가 외부 페이지를 생성하거나 공개하지 않는다.
+
 ## 2026-08-30 수익 운영 정체 복구 설계
 
 - Guardian은 이제 서버 상태뿐 아니라 7일 게시, 후보 정체, 승인 대기,

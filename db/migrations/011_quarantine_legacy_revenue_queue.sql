@@ -10,12 +10,6 @@ SET stage = 'rejected',
 FROM local_llm_runs r
 WHERE r.id = j.source_run_id
   AND j.stage IN ('queued', 'retry')
-  AND NOT (
-    r.task_name = '신규 수익 콘텐츠 후보'
-    AND lower(
-      COALESCE(r.metadata->>'topic_title', '') || ' ' ||
-      COALESCE(r.result_summary, '')
-    ) ~ '(shopping|shopper|commerce|retail|payment|affiliate|creator|consumer|product|review|price|cost|tool|deal|discount|coupon|comparison|subscription|saas|beauty|travel|appliance|쇼핑|커머스|소비자|구매|가격|할인|추천|가전|여행)'
-  );
+  AND j.created_at < TIMESTAMPTZ '2026-08-30 07:37:00+00';
 
 COMMIT;
