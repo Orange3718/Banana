@@ -6,3 +6,13 @@ backups/
 *.dump.gz
 *.sql.gz
 .DS_Store
+.local-llm-status.json
+tools/local-llm-status.json
+tools/local-llm-notify-dedupe.json
+tools/nightly-reflection-latest.json
+tools/source-scout-analysis.json
+tools/source-scout-latest.json
+tools/ops-watchdog-state.json
+tools/revenue-ops-reconciler-state.json
+
+AtemoyaModels/

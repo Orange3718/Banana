@@ -1,0 +1,33 @@
+[
+  {
+    "id": "AtemoyaLocalLLMCompletionNotify02",
+    "name": "Atemoya 로컬 결과 검증 알림",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {"httpMethod": "POST", "path": "atemoya-local-llm-result", "responseMode": "onReceived"},
+        "id": "w",
+        "name": "결과 수신",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [200, 300],
+        "webhookId": "atemoya-local-llm-result"
+      },
+      {
+        "parameters": {
+          "chatId": "8954042258",
+          "text": "={{ (() => { const raw='📦 Atemoya 로컬 결과\\n판정: REVIEW\\n작업: '+($json.body?.task_name||'알 수 없음')+'\\n추론: '+($json.body?.provider||'ollama-local')+' / '+($json.body?.model||'모델 미상')+'\\n소요시간: '+($json.body?.duration_ms||'-')+'ms\\n\\n근거·출처 링크는 수집 결과에서 확인하세요.\\n\\n'+($json.body?.result_summary||'결과 없음')+'\\n\\n평가 답장: GOOD / BAD / 수정: ...'; return raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,3900); })() }}",
+          "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false, "parse_mode": "HTML"}
+        },
+        "id": "t",
+        "name": "Telegram 결과 보고",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [500, 300],
+        "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}
+      }
+    ],
+    "connections": {"결과 수신": {"main": [[{"node": "Telegram 결과 보고", "type": "main", "index": 0}]]}},
+    "settings": {"timezone": "Asia/Seoul"}
+  }
+]

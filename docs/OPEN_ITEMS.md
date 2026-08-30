@@ -1,6 +1,130 @@
 # Atemoya 미결 작업 정리
 
-기준일: 2026-08-22
+기준일: 2026-08-23
+
+## 2026-08-30 수익 운영 복구 배포 완료
+
+- DB 백업 `/Users/orange/Atemoya/backups/20260830T073715Z` 생성 뒤 migration
+  010·011, Revenue Autopilot, Ops Guardian, Revenue Reconciler를 실제 적용했다.
+- Guardian은 게시 0건을 `REVIEW`로 판정하고 Telegram 전송 완료 시각을
+  `system_incidents.last_notified_at`에 기록했다.
+- 과거 넓은 필터 후보 93건은 삭제하지 않고 `rejected`로 격리했다.
+- 국내외 5개 소스 30건을 수집하고 로컬 Qwen이 Amazon/YouTube Shopping
+  제휴 후보를 처리했다. 작업 `6660`은 QA 실패 0건, 1,133자, 근거 URL 확인으로
+  승인요청 `#6`까지 도달했다.
+- 남은 사람 단계는 Telegram에서 승인요청 `#6`을 검토하는 것이다. 승인 전에는
+  Publisher가 외부 페이지를 생성하거나 공개하지 않는다.
+
+## 2026-08-30 수익 운영 정체 복구 설계
+
+- Guardian은 이제 서버 상태뿐 아니라 7일 게시, 후보 정체, 승인 대기,
+  feature branch 병합 대기를 판정한다. 후보가 있는데 게시가 없으면 더 이상
+  `GOOD`이 아니다.
+- `com.atemoya.revenue-reconciler`가 15분마다 승인·Autopilot 상태를 맞추고
+  승인 완료 Publisher 실행과 비활성 후보 재처리를 자동으로 시작한다.
+- 실제 수집은 한국·해외 쇼핑, 제품 비교, 제휴, creator commerce, social
+  shopping 검색으로 확대하며 로컬 작업은 수익 의도 점수 20점 이상만 처리한다.
+- 유입·클릭·전환·수익 저장 구조와 대시보드 표시는 준비했다. GA4 Data API와
+  네이버/Blogger 게시 OAuth는 계정 인증이 있어야 실제 수집·게시를 시작한다.
+- 실제 iMac 적용 순서: 백업 → migration 010 → n8n 두 workflow 재import/publish
+  → Reconciler LaunchAgent 등록 → 전체 검증 → feature branch push → PR 병합.
+- 채널별 공식 지원 범위와 활성화 검증 조건은
+  `docs/EXTERNAL_REVENUE_CHANNELS.md`에 기록했다. 브라우저에 로그인된 것만으로
+  Blogger/GA4 연결 완료로 판정하지 않으며, 현재 네이버 공식 API 목록에는
+  네이버 블로그 무인 글쓰기 API가 없다.
+
+## 2026-08-28 수익 Autopilot 상시 운영
+
+- 공개 근거 수집과 로컬 분석 뒤 n8n `AtemoyaRevenueAutopilot01`이 30분마다
+  수익 후보를 선별하고 하루 최대 한 건을 장문 초안·자동 QA·Telegram 승인
+  요청까지 진행한다.
+- 승인된 콘텐츠는 `com.atemoya.autopilot-publisher`가 15분마다 확인해 HTML,
+  sitemap, 사이트 검사를 수행하고 feature branch에만 커밋·push한다.
+- `main` 직접 변경은 금지되어 있어 GitHub 비교 링크에서 PR 병합은 현재 남은
+  사람 단계다. 병합 뒤 Pages URL 공개는 Publisher가 자동 감지·기록·보고한다.
+- 상세 운영·복구·중복 방지는 `ops/REVENUE_AUTOPILOT.md`에 기록했다.
+
+## 2026-08-28 일일 운영 점검 Guardian
+
+- 외부 `com.atemoya.ops-watchdog`가 15분마다 n8n 밖에서 인프라·예약·수집
+  신선도·정체 작업·디스크·현재 메모리 압력을 규칙 기반으로 검사한다.
+- 자동복구는 기존 컨테이너 시작, n8n 제한 재시작, 소스 수집 재실행,
+  만료 로컬 작업 정리로 제한하며 같은 조치는 1시간 안에 반복하지 않는다.
+- n8n `AtemoyaOpsGuardian01`은 매일 03:10 KST 규칙 판정을 저장한 뒤 로컬
+  `qwen3.5:4b`로만 설명하고 Telegram에 하루 한 번 보고한다.
+- 같은 사건은 최초 발생과 복구 전환 때만 알리며, 게시·결제·삭제·인증
+  변경은 수행하지 않는다.
+
+## 2026-08-27 로컬 주제 반복 방지
+
+- 매시간 실행되던 로컬 LLM 작업에서 LED 마스크와 여행용 보조배터리
+  프롬프트를 제거했다.
+- `source-scout-latest.json`의 실제 수집 제목과 URL에서 신규 주제를
+  선정하고, 최근 7일간 사용한 `topic_key`는 다시 선택하지 않는다.
+- 연구와 콘텐츠 작업은 서로 다른 근거를 사용하며, 16GB 통합 메모리에서
+  Ollama가 경쟁하지 않도록 순차 실행한다.
+- Telegram 중복 판단은 매번 달라지는 답변 문장이 아니라
+  `작업 유형 + topic_key + 날짜`를 사용한다.
+- 서로 다른 URL로 재배포된 같은 뉴스는 제목 토큰 유사도로 묶어 한 주제로
+  처리하며, 최근 7일 주제와 유사한 제목도 다시 선택하지 않는다.
+- 두 번째 작업은 가능한 경우 첫 번째와 다른 수집 채널을 선택해 한 피드나
+  한 산업 주제가 매시간 두 자리를 모두 차지하지 못하게 한다.
+- 새 근거가 없거나 수집 파일이 4시간보다 오래되면 추론과 Telegram 알림을
+  생략한다. 결과에는 수집 채널과 근거 URL을 반드시 포함한다.
+
+## 2026-08-24 외부 n8n 접속 복구
+
+- Tailscale HTTPS 주소 `https://orange-imac.tail14202a.ts.net/`에서 n8n
+  편집기 HTML과 `/healthz` HTTP 200을 확인했다.
+- 원인은 webhook proxy가 `/webhook/`과 `/webhook-test/`만 전달하고 루트
+  경로를 404로 반환하던 설정이었다.
+- 기존 webhook 우선 경로는 유지하고 루트 경로만 n8n `5678`로 프록시했다.
+- n8n과 PostgreSQL 데이터 및 워크플로는 변경하지 않았다.
+
+## 2026-08-23 현재 상태
+
+최근 자동 점검: 2026-08-23 09:25 KST
+
+운영 대시보드: `http://127.0.0.1:8765/atemoya-dashboard.html` (iMac), Tailscale 연결 시 `http://100.102.120.59:8765/atemoya-dashboard.html`. 메모리·예약 작업·현재/최근 로컬 실행·최근 수집 근거를 5초마다 읽는다. `GET /api/status`가 라이브 원천이며, PostgreSQL과 macOS 상태를 함께 표시한다.
+
+- Git worktree: clean, branch `feat/atemoya-ops-baseline`
+- n8n health: `{"status":"ok"}`
+- Ollama: `qwen3.5:4b` 응답 가능
+- 최근 로컬 LLM 실행: 09:25 종료, 최근 24시간 완료 49건·정리 오류 5건
+- 최근 소스 수집: 3채널·20항목·로컬 분석 완료
+
+### 실제 상시 운영
+
+- `com.atemoya.local-llm`: 매시간 로컬 `qwen3.5:4b` 조사·콘텐츠 보조 2개 실행, PostgreSQL 기록, 중복 Telegram 억제
+- `com.atemoya.source-scout`: 매시간 Hacker News·Reddit·Google News 공개 자료 수집, `source_observations` 저장, 로컬 분석
+- `com.atemoya.nightly-reflection`: 매일 03:00 KST 최근 24시간 반추와 Telegram 보고
+- `com.atemoya.local-llm-status`: 로컬 상태판 상시 제공
+- n8n·PostgreSQL·Ollama: 2026-08-23 사전 점검 정상
+
+예약 작업은 실행 사이에 `launchctl state = not running`으로 보이는 것이 정상이다. 등록 여부, `runs`, 최근 로그와 DB 실행시각을 함께 확인한다.
+
+### 계정·채널 상태
+
+- Telegram: n8n credential 연결 및 로컬 완료 Webhook 동작
+- Coupang Partners: 로그인 세션 확인, LED 마스크 추적 링크 `https://link.coupang.com/a/grbrDLnnlA` 생성
+- Gemini: n8n 암호화 credential 보존, 무료 범위 보조
+- 네이버 블로그: 초안은 있으나 정식 자동 게시·성과 회수는 미완료
+- Google Blogger/YouTube/GA4: 게시·측정 OAuth 전체 흐름 미완료
+
+### 다음 우선순위
+
+1. Telegram `GOOD / BAD / 수정` 답장을 최신 로컬 결과의 `metadata.owner_review`에 연결 완료 (`AtemoyaLocalLLMReviewGate01`)
+2. 근거 URL이 포함된 초안만 승인 요청하도록 QA 강화
+3. GOOD 승인 후 GitHub Pages 게시와 게시 URL 저장을 먼저 완성
+4. 네이버·Blogger OAuth 게시를 각각 연결하고 실제 게시 URL까지 검증
+5. GA4·제휴 클릭·구매 신호를 콘텐츠별로 회수
+6. 로컬 이미지 모델은 MLX 런타임만 설치됨. FLUX/SDXL 가중치·썸네일 생성·품질 검증은 미완료
+
+### 반복 질문 방지
+
+- 저장소의 `AGENTS.md`가 `.codex/skills/atemoya-operate/SKILL.md` 사용을 강제한다.
+- 새 작업은 스킬의 preflight와 이 문서를 먼저 읽고 실제 다음 미결 작업을 진행한다.
+- 백그라운드에 등록하지 않은 작업을 `진행 중`이라고 말하지 않는다.
 
 ## 최우선 운영 기준
 

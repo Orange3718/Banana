@@ -113,3 +113,43 @@ The production route uses the iMac-local Ollama `qwen3.5:4b` model so a cloud
 AI outage does not stop approved internal drafting. It never publishes,
 purchases, logs in, or spends money. A run left in `running` for over fifteen
 minutes is failed and its task is returned to `ready` on the next trigger.
+
+## Operations Guardian
+
+`com.atemoya.ops-watchdog` runs outside n8n every 15 minutes. It checks the
+three containers, n8n, PostgreSQL, Ollama, source freshness, local-job
+freshness, recent n8n errors, disk space and current macOS memory pressure.
+It may only start an existing stopped container, restart an unresponsive n8n
+container once per hour, kick a stale source collector, or mark expired local
+jobs as failed. It cannot publish, spend, delete data, change credentials or
+apply migrations.
+
+The active n8n workflow `AtemoyaOpsGuardian01` runs at 03:10 KST. PostgreSQL
+rules determine `GOOD`, `REVIEW` or `BAD`; local Ollama `qwen3.5:4b` only turns
+those facts into a short report. Daily reviews are stored in
+`ops_daily_reviews`. Incidents are stored in `system_incidents`, and Telegram
+receives only a new incident, its resolution, and one daily report. The former
+03:00 `com.atemoya.nightly-reflection` job is retained in Git for recovery but
+must remain unloaded to prevent duplicate summaries.
+
+## Revenue Autopilot
+
+`AtemoyaRevenueAutopilot01` runs every 30 minutes. It promotes fresh,
+evidence-backed `local_llm_runs` into a local-Qwen long-form draft, performs
+deterministic QA, stores the result in PostgreSQL, and sends at most one active
+Telegram publication approval request. No external model API is required.
+
+`com.atemoya.autopilot-publisher` checks approved requests every 15 minutes,
+renders safe HTML, rebuilds the sitemap, runs the site test, and commits only
+the generated artifacts to `feat/atemoya-ops-baseline`. It never writes or
+merges `main`. After a human PR merge, it detects the public Pages URL and
+records the final publication. Queue state is held in
+`revenue_autopilot_jobs`; details are in `ops/REVENUE_AUTOPILOT.md`.
+
+The independent `com.atemoya.revenue-reconciler` runs every 15 minutes. It
+repairs approval/job-state drift, wakes an approved Publisher immediately, and
+re-triggers n8n when monetizable queued work has no active approval. Guardian
+business health includes publication throughput, not only infrastructure.
+Traffic, outbound clicks, affiliate clicks, conversions and revenue are stored
+in `revenue_channel_metrics` with evidence provenance; missing GA4 OAuth is
+reported as unavailable rather than silently interpreted as zero.
