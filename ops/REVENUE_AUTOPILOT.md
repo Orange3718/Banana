@@ -22,6 +22,8 @@ Telegram 승인과 GitHub PR 병합을 통과해야 한다.
    HTTP 200이 되면 `published`로 기록하고 최종 URL을 한 번 알린다.
 8. `com.atemoya.revenue-reconciler`가 15분마다 승인 상태와 작업 상태를 맞추고,
    승인 완료 작업은 Publisher를 즉시 깨우며 후보만 남은 경우 n8n을 다시 호출한다.
+9. migration 011은 과거의 넓은 필터로 쌓인 후보를 삭제하지 않고 `rejected`로
+   격리해 현재 수익 의도 정책을 우회하지 못하게 한다.
 
 ## 안전 기준
 
