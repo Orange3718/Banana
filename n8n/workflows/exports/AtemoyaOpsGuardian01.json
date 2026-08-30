@@ -20,7 +20,10 @@
         "name": "매일 오전 3시 10분",
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
-        "position": [200, 180]
+        "position": [
+          200,
+          180
+        ]
       },
       {
         "parameters": {
@@ -33,20 +36,26 @@
         "name": "수동 일일 점검",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
-        "position": [200, 360],
+        "position": [
+          200,
+          360
+        ],
         "webhookId": "atemoya-ops-guardian-run"
       },
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH m AS (SELECT to_char((NOW() AT TIME ZONE 'Asia/Seoul')::date,'YYYY-MM-DD') AS review_date,(SELECT count(*) FROM execution_entity WHERE status='success' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_success_24h,(SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_errors_24h,(SELECT count(*) FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours')::int AS local_complete_24h,(SELECT count(*) FROM local_llm_runs WHERE status='error' AND updated_at>NOW()-interval '24 hours')::int AS local_errors_24h,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(updated_at)))/60 FROM local_llm_runs WHERE status='complete'),99999)::int AS local_age_minutes,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(collected_at)))/60 FROM source_observations),99999)::int AS source_age_minutes,(SELECT count(DISTINCT channel) FROM source_observations WHERE collected_at>NOW()-interval '24 hours')::int AS source_channels_24h,(SELECT count(*)-count(DISTINCT metadata->>'topic_key') FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours' AND COALESCE(metadata->>'topic_key','')<>'')::int AS duplicate_topics_24h,COALESCE((SELECT healthy FROM affiliate_health_checks ORDER BY checked_at DESC LIMIT 1),false) AS affiliate_healthy,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM affiliate_health_checks),99999)::int AS affiliate_age_minutes,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='bad')::int AS open_bad,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='review')::int AS open_review,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM system_health_checks),99999)::int AS watchdog_age_minutes,(SELECT count(*) FROM content WHERE published_at>NOW()-interval '7 days' AND published_url IS NOT NULL)::int AS published_7d,COALESCE((SELECT sum(amount) FROM revenue WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS revenue_7d,COALESCE((SELECT sum(amount) FROM cost WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS cost_7d) SELECT m.*,CASE WHEN open_bad>0 OR watchdog_age_minutes>30 OR n8n_errors_24h>=3 OR source_age_minutes>180 OR local_errors_24h>0 THEN 'BAD' WHEN open_review>0 OR n8n_errors_24h>0 OR source_channels_24h<2 OR NOT affiliate_healthy OR affiliate_age_minutes>1560 OR local_age_minutes>180 OR duplicate_topics_24h>0 THEN 'REVIEW' ELSE 'GOOD' END AS status,jsonb_build_object('n8n_success_24h',n8n_success_24h,'n8n_errors_24h',n8n_errors_24h,'local_complete_24h',local_complete_24h,'local_errors_24h',local_errors_24h,'local_age_minutes',local_age_minutes,'source_age_minutes',source_age_minutes,'source_channels_24h',source_channels_24h,'duplicate_topics_24h',duplicate_topics_24h,'affiliate_healthy',affiliate_healthy,'affiliate_age_minutes',affiliate_age_minutes,'open_bad',open_bad,'open_review',open_review,'watchdog_age_minutes',watchdog_age_minutes,'published_7d',published_7d,'revenue_7d',revenue_7d,'cost_7d',cost_7d) AS metrics FROM m;",
+          "query": "WITH m AS (SELECT to_char((NOW() AT TIME ZONE 'Asia/Seoul')::date,'YYYY-MM-DD') AS review_date,(SELECT count(*) FROM execution_entity WHERE status='success' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_success_24h,(SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '24 hours')::int AS n8n_errors_24h,(SELECT count(*) FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours')::int AS local_complete_24h,(SELECT count(*) FROM local_llm_runs WHERE status='error' AND updated_at>NOW()-interval '24 hours')::int AS local_errors_24h,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(updated_at)))/60 FROM local_llm_runs WHERE status='complete'),99999)::int AS local_age_minutes,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(collected_at)))/60 FROM source_observations),99999)::int AS source_age_minutes,(SELECT count(DISTINCT channel) FROM source_observations WHERE collected_at>NOW()-interval '24 hours')::int AS source_channels_24h,(SELECT count(*)-count(DISTINCT metadata->>'topic_key') FROM local_llm_runs WHERE status='complete' AND updated_at>NOW()-interval '24 hours' AND COALESCE(metadata->>'topic_key','')<>'')::int AS duplicate_topics_24h,COALESCE((SELECT healthy FROM affiliate_health_checks ORDER BY checked_at DESC LIMIT 1),false) AS affiliate_healthy,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM affiliate_health_checks),99999)::int AS affiliate_age_minutes,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='bad')::int AS open_bad,(SELECT count(*) FROM system_incidents WHERE state='open' AND severity='review')::int AS open_review,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-max(checked_at)))/60 FROM system_health_checks),99999)::int AS watchdog_age_minutes,(SELECT count(*) FROM content WHERE published_at>NOW()-interval '7 days' AND published_url IS NOT NULL)::int AS published_7d,COALESCE((SELECT sum(amount) FROM revenue WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS revenue_7d,COALESCE((SELECT sum(amount) FROM cost WHERE occurred_on>=(NOW() AT TIME ZONE 'Asia/Seoul')::date-6),0) AS cost_7d,(SELECT count(*) FROM revenue_autopilot_jobs WHERE stage IN ('queued','retry','awaiting_approval','approved','rendering','branch_ready'))::int AS autopilot_actionable,COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-min(created_at)))/60 FROM revenue_autopilot_jobs WHERE stage IN ('queued','retry','awaiting_approval','approved','rendering','branch_ready')),0)::int AS autopilot_oldest_minutes,(SELECT count(*) FROM approval_requests WHERE request_type='revenue_content_publish' AND status='pending')::int AS pending_publish_approvals,(SELECT count(*) FROM revenue_autopilot_jobs WHERE stage='branch_ready')::int AS branch_ready) SELECT m.*,CASE WHEN open_bad>0 OR watchdog_age_minutes>30 OR n8n_errors_24h>=3 OR source_age_minutes>180 OR local_errors_24h>0 OR (autopilot_actionable>0 AND autopilot_oldest_minutes>=4320) THEN 'BAD' WHEN open_review>0 OR n8n_errors_24h>0 OR source_channels_24h<2 OR NOT affiliate_healthy OR affiliate_age_minutes>1560 OR local_age_minutes>180 OR duplicate_topics_24h>0 OR published_7d=0 OR pending_publish_approvals>0 OR branch_ready>0 THEN 'REVIEW' ELSE 'GOOD' END AS status,jsonb_build_object('n8n_success_24h',n8n_success_24h,'n8n_errors_24h',n8n_errors_24h,'local_complete_24h',local_complete_24h,'local_errors_24h',local_errors_24h,'local_age_minutes',local_age_minutes,'source_age_minutes',source_age_minutes,'source_channels_24h',source_channels_24h,'duplicate_topics_24h',duplicate_topics_24h,'affiliate_healthy',affiliate_healthy,'affiliate_age_minutes',affiliate_age_minutes,'open_bad',open_bad,'open_review',open_review,'watchdog_age_minutes',watchdog_age_minutes,'published_7d',published_7d,'revenue_7d',revenue_7d,'cost_7d',cost_7d,'autopilot_actionable',autopilot_actionable,'autopilot_oldest_minutes',autopilot_oldest_minutes,'pending_publish_approvals',pending_publish_approvals,'branch_ready',branch_ready) AS metrics FROM m;",
           "options": {}
         },
         "id": "ops-metrics-query",
         "name": "운영 지표 조회",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
-        "position": [500, 260],
+        "position": [
+          500,
+          260
+        ],
         "credentials": {
           "postgres": {
             "id": "AtemoyaPostgresMemory01",
@@ -62,7 +71,10 @@
         "name": "규칙 판정과 로컬 요약 준비",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
-        "position": [740, 260]
+        "position": [
+          740,
+          260
+        ]
       },
       {
         "parameters": {
@@ -80,7 +92,10 @@
         "name": "로컬 Qwen 운영 요약",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
-        "position": [980, 260],
+        "position": [
+          980,
+          260
+        ],
         "retryOnFail": true,
         "maxTries": 2,
         "waitBetweenTries": 5000,
@@ -88,13 +103,16 @@
       },
       {
         "parameters": {
-          "jsCode": "const base=$('규칙 판정과 로컬 요약 준비').first().json; const generated=String($json.message?.content||'').split('\\n').filter(x=>!(/사용자.*(결정|승인|필요)/.test(x))).join('\\n').trim(); const facts='인프라: Watchdog '+base.watchdog_age_minutes+'분 전 · 열린 BAD '+base.open_bad+'건 · REVIEW '+base.open_review+'건\\n자동화: n8n 성공 '+base.n8n_success_24h+'건 · 오류 '+base.n8n_errors_24h+'건 / 로컬 완료 '+base.local_complete_24h+'건 · 오류 '+base.local_errors_24h+'건\\n수집·품질: '+base.source_age_minutes+'분 전 · '+base.source_channels_24h+'채널 · 주제 중복 '+base.duplicate_topics_24h+'건\\n게시·현금흐름: 7일 게시 '+base.published_7d+'건 · 수익 '+base.revenue_7d+'원 · 비용 '+base.cost_7d+'원'; const explanation=generated.length>=40?'\\n로컬 설명: '+generated:''; const summary=(facts+explanation+'\\n운영 Agent가 자동 점검합니다. 답장 불필요').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,3000); const icon=base.status==='GOOD'?'✅':base.status==='BAD'?'🚨':'⚠️'; return [{json:{review_date:base.review_date,status:base.status,metrics:base.metrics,provider:'ollama-local',model:'qwen3.5:4b',summary,telegram_text:(icon+' Atemoya 일일 운영 점검 | '+base.review_date+'\\n판정: '+base.status+'\\n\\n'+summary+'\\n\\n추론: Ollama 로컬 / qwen3.5:4b').slice(0,3900)}}];"
+          "jsCode": "const base=$('규칙 판정과 로컬 요약 준비').first().json; const generated=String($json.message?.content||'').split('\\n').filter(x=>!(/사용자.*(결정|승인|필요)/.test(x))).join('\\n').trim(); const facts='인프라: Watchdog '+base.watchdog_age_minutes+'분 전 · 열린 BAD '+base.open_bad+'건 · REVIEW '+base.open_review+'건\\n자동화: n8n 성공 '+base.n8n_success_24h+'건 · 오류 '+base.n8n_errors_24h+'건 / 로컬 완료 '+base.local_complete_24h+'건 · 오류 '+base.local_errors_24h+'건\\n수집·품질: '+base.source_age_minutes+'분 전 · '+base.source_channels_24h+'채널 · 주제 중복 '+base.duplicate_topics_24h+'건\\n게시·현금흐름: 7일 게시 '+base.published_7d+'건 · 수익 '+base.revenue_7d+'원 · 비용 '+base.cost_7d+'원\\n수익 파이프라인: 진행대상 '+base.autopilot_actionable+'건 · 최장 '+base.autopilot_oldest_minutes+'분 · 승인대기 '+base.pending_publish_approvals+'건 · 병합대기 '+base.branch_ready+'건'; const explanation=generated.length>=40?'\\n로컬 설명: '+generated:''; const summary=(facts+explanation+'\\n운영 Agent가 자동 점검합니다. 답장 불필요').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,3000); const icon=base.status==='GOOD'?'✅':base.status==='BAD'?'🚨':'⚠️'; return [{json:{review_date:base.review_date,status:base.status,metrics:base.metrics,provider:'ollama-local',model:'qwen3.5:4b',summary,telegram_text:(icon+' Atemoya 일일 운영 점검 | '+base.review_date+'\\n판정: '+base.status+'\\n\\n'+summary+'\\n\\n추론: Ollama 로컬 / qwen3.5:4b').slice(0,3900)}}];"
         },
         "id": "ops-summary-validate",
         "name": "요약 검증과 보고 작성",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
-        "position": [1220, 260]
+        "position": [
+          1220,
+          260
+        ]
       },
       {
         "parameters": {
@@ -108,7 +126,10 @@
         "name": "일일 점검 저장",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
-        "position": [1460, 260],
+        "position": [
+          1460,
+          260
+        ],
         "credentials": {
           "postgres": {
             "id": "AtemoyaPostgresMemory01",
@@ -145,7 +166,10 @@
         "name": "오늘 보고 전송 전인가",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
-        "position": [1690, 260]
+        "position": [
+          1690,
+          260
+        ]
       },
       {
         "parameters": {
@@ -161,7 +185,10 @@
         "name": "Telegram 일일 운영 보고",
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
-        "position": [1920, 200],
+        "position": [
+          1920,
+          200
+        ],
         "credentials": {
           "telegramApi": {
             "id": "6WaLMIqUth2LtuDZ",
@@ -181,7 +208,10 @@
         "name": "보고 전송 기록",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
-        "position": [2150, 200],
+        "position": [
+          2150,
+          200
+        ],
         "credentials": {
           "postgres": {
             "id": "AtemoyaPostgresMemory01",
@@ -200,7 +230,10 @@
         "name": "Watchdog 사건 수신",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
-        "position": [200, 600],
+        "position": [
+          200,
+          600
+        ],
         "webhookId": "atemoya-ops-incident"
       },
       {
@@ -211,7 +244,10 @@
         "name": "사건 보고 형식화",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
-        "position": [460, 600]
+        "position": [
+          460,
+          600
+        ]
       },
       {
         "parameters": {
@@ -227,7 +263,10 @@
         "name": "Telegram 상태 변경 알림",
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
-        "position": [720, 600],
+        "position": [
+          720,
+          600
+        ],
         "credentials": {
           "telegramApi": {
             "id": "6WaLMIqUth2LtuDZ",
@@ -238,37 +277,126 @@
     ],
     "connections": {
       "매일 오전 3시 10분": {
-        "main": [[{"node": "운영 지표 조회", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "운영 지표 조회",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "수동 일일 점검": {
-        "main": [[{"node": "운영 지표 조회", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "운영 지표 조회",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "운영 지표 조회": {
-        "main": [[{"node": "규칙 판정과 로컬 요약 준비", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "규칙 판정과 로컬 요약 준비",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "규칙 판정과 로컬 요약 준비": {
-        "main": [[{"node": "로컬 Qwen 운영 요약", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "로컬 Qwen 운영 요약",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "로컬 Qwen 운영 요약": {
-        "main": [[{"node": "요약 검증과 보고 작성", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "요약 검증과 보고 작성",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "요약 검증과 보고 작성": {
-        "main": [[{"node": "일일 점검 저장", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "일일 점검 저장",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "일일 점검 저장": {
-        "main": [[{"node": "오늘 보고 전송 전인가", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "오늘 보고 전송 전인가",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "오늘 보고 전송 전인가": {
-        "main": [[{"node": "Telegram 일일 운영 보고", "type": "main", "index": 0}], []]
+        "main": [
+          [
+            {
+              "node": "Telegram 일일 운영 보고",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
       },
       "Telegram 일일 운영 보고": {
-        "main": [[{"node": "보고 전송 기록", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "보고 전송 기록",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "Watchdog 사건 수신": {
-        "main": [[{"node": "사건 보고 형식화", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "사건 보고 형식화",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       },
       "사건 보고 형식화": {
-        "main": [[{"node": "Telegram 상태 변경 알림", "type": "main", "index": 0}]]
+        "main": [
+          [
+            {
+              "node": "Telegram 상태 변경 알림",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "settings": {

@@ -13,5 +13,6 @@ tools/nightly-reflection-latest.json
 tools/source-scout-analysis.json
 tools/source-scout-latest.json
 tools/ops-watchdog-state.json
+tools/revenue-ops-reconciler-state.json
 
 AtemoyaModels/

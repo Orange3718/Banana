@@ -27,7 +27,11 @@ KEYWORDS = {
     "payment": 8, "affiliate": 10, "creator": 7, "consumer": 8,
     "product": 7, "review": 7, "price": 7, "cost": 6, "tool": 5,
     "쇼핑": 12, "커머스": 12, "소비자": 8, "구매": 10, "가격": 7,
+    "deal": 9, "discount": 9, "coupon": 9, "comparison": 9,
+    "subscription": 7, "saas": 8, "beauty": 7, "travel": 7,
+    "appliance": 7, "가전": 8, "여행": 7, "할인": 9, "추천": 8,
 }
+REVENUE_MIN_SCORE = int(os.getenv("ATEMOYA_REVENUE_MIN_SCORE", "20"))
 
 
 def db_output(statement):
@@ -97,6 +101,10 @@ def load_candidates(now=None):
             score = CHANNEL_WEIGHT.get(channel, 0) + sum(weight for word, weight in KEYWORDS.items() if word in lowered)
             candidates.append({"topic_key": key, "title": title[:500], "url": url[:2000], "channel": channel, "score": score})
     return sorted(candidates, key=lambda row: (-row["score"], row["title"]))
+
+
+def revenue_candidates(candidates, minimum=REVENUE_MIN_SCORE):
+    return [row for row in candidates if int(row.get("score", 0)) >= minimum]
 
 
 def recent_topic_keys(days=TOPIC_COOLDOWN_DAYS):
@@ -204,7 +212,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Select topics without DB writes, Ollama calls, or Telegram notifications")
     args = parser.parse_args()
-    candidates = load_candidates()
+    candidates = revenue_candidates(load_candidates())
     used = set() if args.dry_run else recent_topic_keys()
     used_titles = [] if args.dry_run else recent_topic_titles()
     jobs = plan_jobs(candidates, used, used_titles)

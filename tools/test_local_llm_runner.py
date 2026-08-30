@@ -11,6 +11,13 @@ SPEC.loader.exec_module(runner)
 
 
 class TopicSelectionTests(unittest.TestCase):
+    def test_generic_hackernews_topic_is_not_revenue_work(self):
+        rows = [
+            {"title": "Python compiler internals", "score": 10},
+            {"title": "Creator commerce product comparison", "score": 38},
+        ]
+        self.assertEqual(runner.revenue_candidates(rows), [rows[1]])
+
     def test_recent_topics_are_not_reused(self):
         rows = [
             {"topic_key": "old", "title": "AI shopping report", "url": "https://example.com/old", "channel": "google-news", "score": 50},

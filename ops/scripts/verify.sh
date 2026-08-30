@@ -10,6 +10,8 @@ python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaRevenueAutopilot01
 test -x "$repo_root/ops/scripts/export-obsidian-inbox.sh"
 test -r "$repo_root/tools/ops-watchdog.py"
 test -r "$repo_root/tools/autopilot-publisher.py"
+test -r "$repo_root/tools/revenue-ops-reconciler.py"
+plutil -lint "$repo_root/ops/launchd/com.atemoya.revenue-reconciler.plist" >/dev/null
 
 docker compose --env-file "$repo_root/.env.example" -f "$repo_root/docker-compose.yml" config --quiet
 docker exec atemoya-postgres sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null
@@ -26,4 +28,8 @@ test "$guardian_actual" = "$guardian_expected" || { echo "Guardian tables are in
 autopilot_expected='revenue_autopilot_jobs'
 autopilot_actual="$(docker exec atemoya-postgres sh -lc 'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "select table_name from information_schema.tables where table_schema='"'"'public'"'"' and table_name='"'"'revenue_autopilot_jobs'"'"'"')"
 test "$autopilot_actual" = "$autopilot_expected" || { echo "Revenue Autopilot table is missing" >&2; exit 1; }
+
+revenue_ops_expected='revenue_autopilot_reconciliations revenue_channel_metrics'
+revenue_ops_actual="$(docker exec atemoya-postgres sh -lc 'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "select table_name from information_schema.tables where table_schema='"'"'public'"'"' and table_name in ('"'"'revenue_autopilot_reconciliations'"'"','"'"'revenue_channel_metrics'"'"') order by table_name"' | tr '\n' ' ' | sed 's/ $//')"
+test "$revenue_ops_actual" = "$revenue_ops_expected" || { echo "Revenue operations tables are incomplete: $revenue_ops_actual" >&2; exit 1; }
 echo "Atemoya runtime verification: PASS"

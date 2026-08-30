@@ -145,3 +145,11 @@ the generated artifacts to `feat/atemoya-ops-baseline`. It never writes or
 merges `main`. After a human PR merge, it detects the public Pages URL and
 records the final publication. Queue state is held in
 `revenue_autopilot_jobs`; details are in `ops/REVENUE_AUTOPILOT.md`.
+
+The independent `com.atemoya.revenue-reconciler` runs every 15 minutes. It
+repairs approval/job-state drift, wakes an approved Publisher immediately, and
+re-triggers n8n when monetizable queued work has no active approval. Guardian
+business health includes publication throughput, not only infrastructure.
+Traffic, outbound clicks, affiliate clicks, conversions and revenue are stored
+in `revenue_channel_metrics` with evidence provenance; missing GA4 OAuth is
+reported as unavailable rather than silently interpreted as zero.

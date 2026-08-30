@@ -2,6 +2,24 @@
 
 기준일: 2026-08-23
 
+## 2026-08-30 수익 운영 정체 복구 설계
+
+- Guardian은 이제 서버 상태뿐 아니라 7일 게시, 후보 정체, 승인 대기,
+  feature branch 병합 대기를 판정한다. 후보가 있는데 게시가 없으면 더 이상
+  `GOOD`이 아니다.
+- `com.atemoya.revenue-reconciler`가 15분마다 승인·Autopilot 상태를 맞추고
+  승인 완료 Publisher 실행과 비활성 후보 재처리를 자동으로 시작한다.
+- 실제 수집은 한국·해외 쇼핑, 제품 비교, 제휴, creator commerce, social
+  shopping 검색으로 확대하며 로컬 작업은 수익 의도 점수 20점 이상만 처리한다.
+- 유입·클릭·전환·수익 저장 구조와 대시보드 표시는 준비했다. GA4 Data API와
+  네이버/Blogger 게시 OAuth는 계정 인증이 있어야 실제 수집·게시를 시작한다.
+- 실제 iMac 적용 순서: 백업 → migration 010 → n8n 두 workflow 재import/publish
+  → Reconciler LaunchAgent 등록 → 전체 검증 → feature branch push → PR 병합.
+- 채널별 공식 지원 범위와 활성화 검증 조건은
+  `docs/EXTERNAL_REVENUE_CHANNELS.md`에 기록했다. 브라우저에 로그인된 것만으로
+  Blogger/GA4 연결 완료로 판정하지 않으며, 현재 네이버 공식 API 목록에는
+  네이버 블로그 무인 글쓰기 API가 없다.
+
 ## 2026-08-28 수익 Autopilot 상시 운영
 
 - 공개 근거 수집과 로컬 분석 뒤 n8n `AtemoyaRevenueAutopilot01`이 30분마다

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent; PLISTS=Path.home()/'Library/LaunchAgents'
-JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','15분마다',900),('com.atemoya.autopilot-publisher','승인 콘텐츠 Publisher','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
+JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','15분마다',900),('com.atemoya.revenue-reconciler','수익 파이프라인 복구','15분마다',900),('com.atemoya.autopilot-publisher','승인 콘텐츠 Publisher','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
 def run(c,t=4):
  try:return subprocess.run(c,text=True,capture_output=True,timeout=t).stdout.strip()
  except:return ''
@@ -22,7 +22,7 @@ def state(label):
  return bool(t),('running' if 'state = running' in t else 'idle'),runs
 def jobs():
  out=[]
- logs={'com.atemoya.local-llm':'/tmp/atemoya-local-llm-supervisor.log','com.atemoya.source-scout':'/tmp/atemoya-source-scout.out','com.atemoya.ops-watchdog':'/tmp/atemoya-ops-watchdog.out','com.atemoya.autopilot-publisher':'/tmp/atemoya-autopilot-publisher.out','com.atemoya.obsidian-inbox':'/tmp/atemoya-obsidian-inbox.out'}
+ logs={'com.atemoya.local-llm':'/tmp/atemoya-local-llm-supervisor.log','com.atemoya.source-scout':'/tmp/atemoya-source-scout.out','com.atemoya.ops-watchdog':'/tmp/atemoya-ops-watchdog.out','com.atemoya.revenue-reconciler':'/tmp/atemoya-revenue-reconciler.out','com.atemoya.autopilot-publisher':'/tmp/atemoya-autopilot-publisher.out','com.atemoya.obsidian-inbox':'/tmp/atemoya-obsidian-inbox.out'}
  for label,name,schedule,seconds in JOBS:
   raw=run(['tail','-1',logs.get(label,'/dev/null')]); last_log=raw[-500:]
   if label=='com.atemoya.ops-watchdog':
@@ -41,8 +41,9 @@ def snapshot():
  runs=db_json('select task_name,lane,status,progress,provider,model,current_step,result_summary,error_summary,started_at,finished_at,duration_ms from local_llm_runs order by coalesce(updated_at,created_at) desc limit 30')
  sources=db_json('select channel,item_title as title,item_url as url,collected_at from source_observations order by collected_at desc limit 12')
  autopilot=db_json("select stage,count(*)::int as count from revenue_autopilot_jobs group by stage order by stage")
+ revenue_ops=db_json("select metric_date,channel,page_views,outbound_clicks,affiliate_clicks,conversions,revenue_amount,source from revenue_channel_metrics order by metric_date desc,collected_at desc limit 14")
  h=run(['curl','-fsS','--max-time','2','http://127.0.0.1:5678/healthz'])
- return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}'},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot}
+ return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}'},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'revenue_ops':revenue_ops}
 class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?',1)[0]=='/api/status':

@@ -47,6 +47,18 @@ class WatchdogTests(unittest.TestCase):
         self.assertEqual(check.status, "good")
         self.assertEqual(check.details["free_percent"], 63)
 
+    def test_revenue_pipeline_is_review_when_nothing_published(self):
+        check = watchdog.revenue_pipeline_check({"queued": 4, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 0, "oldest_minutes": 60})
+        self.assertEqual(check.status, "review")
+
+    def test_revenue_pipeline_is_bad_when_stalled_three_days(self):
+        check = watchdog.revenue_pipeline_check({"queued": 4, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 0, "oldest_minutes": 4320})
+        self.assertEqual(check.status, "bad")
+
+    def test_revenue_pipeline_is_good_after_publication(self):
+        check = watchdog.revenue_pipeline_check({"queued": 2, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 1, "oldest_minutes": 120})
+        self.assertEqual(check.status, "good")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -112,6 +112,23 @@ def memory_pressure_check():
     return Check("host", "memory_pressure", status, f"메모리 여유 {free_percent}%", details={"free_percent": free_percent})
 
 
+def revenue_pipeline_check(facts):
+    queued = int(facts.get("queued", 0)) + int(facts.get("retry", 0))
+    pending = int(facts.get("awaiting_approval", 0))
+    approved = int(facts.get("approved", 0))
+    branch_ready = int(facts.get("branch_ready", 0))
+    published = int(facts.get("published_7d", 0))
+    oldest = int(facts.get("oldest_minutes", 0))
+    if (approved and oldest >= 45) or oldest >= 72 * 60:
+        status = "bad"
+    elif published == 0 or pending or branch_ready or oldest >= 24 * 60:
+        status = "review"
+    else:
+        status = "good"
+    message = f"7일 게시 {published}건 · 후보 {queued} · 승인대기 {pending} · 승인완료 {approved} · 병합대기 {branch_ready} · 최장 {oldest}분"
+    return Check("revenue", "pipeline_throughput", status, message, details=facts)
+
+
 def collect_checks():
     checks = [container_check(name) for name in CONTAINERS]
     ok, latency, detail = http_ok("http://127.0.0.1:5678/healthz")
@@ -128,6 +145,8 @@ def collect_checks():
         checks.append(Check("local-llm", "freshness", status, "최근 완료 없음" if age < 0 else f"최근 완료 {age // 60}분 전", details={"age_seconds": age}))
         errors = int(db_scalar("SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '2 hours';") or 0)
         checks.append(Check("n8n", "recent_errors", "bad" if errors >= 3 else "review" if errors else "good", f"최근 2시간 n8n 오류 {errors}건", details={"count": errors}))
+        raw = db_scalar("SELECT json_build_object('queued',count(*) FILTER(WHERE stage='queued'),'retry',count(*) FILTER(WHERE stage='retry'),'awaiting_approval',count(*) FILTER(WHERE stage='awaiting_approval'),'approved',count(*) FILTER(WHERE stage='approved'),'branch_ready',count(*) FILTER(WHERE stage='branch_ready'),'published_7d',(SELECT count(*) FROM content WHERE published_at>NOW()-interval '7 days' AND published_url IS NOT NULL),'oldest_minutes',COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-min(created_at)))/60 FROM revenue_autopilot_jobs WHERE stage IN ('queued','retry','awaiting_approval','approved','rendering','branch_ready')),0)::int) FROM revenue_autopilot_jobs;")
+        checks.append(revenue_pipeline_check(json.loads(raw or "{}")))
     except Exception as exc:
         checks.append(Check("postgres", "query", "bad", "PostgreSQL 상태 조회 실패", details={"error": str(exc)[:300]}))
     checks.append(source_check())
@@ -166,6 +185,10 @@ def remediate(checks, state):
         elif check.component == "local-llm" and check.code == "stale_jobs" and check.details and check.details.get("count", 0):
             db_scalar("UPDATE local_llm_runs SET status='error',progress=100,current_step='Watchdog 정리',error_summary='정체 작업 자동 정리',updated_at=NOW() WHERE (status='running' AND updated_at<NOW()-interval '20 minutes') OR (status='queued' AND updated_at<NOW()-interval '70 minutes');")
             action = "stale local_llm_runs marked error"
+        elif check.component == "revenue" and check.code == "pipeline_throughput":
+            result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.revenue-reconciler"], timeout=30)
+            if result.returncode == 0:
+                action = "launchctl kickstart com.atemoya.revenue-reconciler"
         if action:
             state.setdefault("last_remediation", {})[check.fingerprint] = now
             actions.append((check.fingerprint, action))
