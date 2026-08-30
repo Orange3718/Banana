@@ -4,6 +4,16 @@
 
 ## 2026-08-30 수익 운영 복구 배포 완료
 
+- Owner의 Telegram `/승인 6 게시`를 반영해 작업 `6660`을 게시했다. PR
+  [#1](https://github.com/Orange3718/Banana/pull/1)은 merge commit
+  `61260569889461a911d691d9bb34b85d3d7b1351`로 `main`에 병합됐다.
+- 공개 결과는
+  `https://orange3718.github.io/Banana/autopilot/amazon-youtube-shopping-affiliate-programme-expansion-cnbc-2024.html`이며,
+  HTTP 200과 제목·근거 링크를 확인했다. PostgreSQL의 job `6660`과 content
+  `5`도 `published` 및 동일 URL로 기록됐다.
+- 동일 Telegram 봇을 사용하던 두 수신 워크플로의 웹훅 충돌을 제거했다.
+  `AtemoyaTelegramMemory01`만 수신기로 활성화하고 승인·보류·거절과
+  GOOD/BAD/수정을 함께 처리한다. 중복 승인 명령은 현재 상태를 회신한다.
 - DB 백업 `/Users/orange/Atemoya/backups/20260830T073715Z` 생성 뒤 migration
   010·011, Revenue Autopilot, Ops Guardian, Revenue Reconciler를 실제 적용했다.
 - Guardian은 게시 0건을 `REVIEW`로 판정하고 Telegram 전송 완료 시각을
@@ -11,9 +21,7 @@
 - 과거 넓은 필터 후보 93건은 삭제하지 않고 `rejected`로 격리했다.
 - 국내외 5개 소스 30건을 수집하고 로컬 Qwen이 Amazon/YouTube Shopping
   제휴 후보를 처리했다. 작업 `6660`은 QA 실패 0건, 1,133자, 근거 URL 확인으로
-  승인요청 `#6`까지 도달했다.
-- 남은 사람 단계는 Telegram에서 승인요청 `#6`을 검토하는 것이다. 승인 전에는
-  Publisher가 외부 페이지를 생성하거나 공개하지 않는다.
+  승인요청 `#6`과 공개 게시까지 완료했다.
 
 ## 2026-08-30 수익 운영 정체 복구 설계
 
