@@ -79,6 +79,19 @@ keys are intentionally absent; the workflow remains inactive by default.
 7. Connect Gmail reporting, Calendar routines and finally Obsidian after the
    core workflow produces verified operational records.
 
+## Remote headless operation
+
+The iMac must be treated as a server. Screen lock must not stop Docker, n8n,
+PostgreSQL, Ollama, LaunchAgents, local status checks, workflow imports, draft
+generation, site file generation or approved publishing scripts.
+
+Mac unlock is required only for browser-only account login, OAuth consent, 2FA,
+password/recovery-code prompts, payment/legal consent, visual inspection that
+cannot be verified by HTTP/API, or final manual submission on a platform that
+has no approved API path.
+
+Operational details live in `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`.
+
 ## Obsidian Inbox bridge
 
 The first human-readable bridge is `ops/scripts/export-obsidian-inbox.sh`.

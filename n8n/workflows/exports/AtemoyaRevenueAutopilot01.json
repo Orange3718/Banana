@@ -277,6 +277,40 @@
             "name": "Telegram account"
           }
         }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "claimed-job-condition",
+                "leftValue": "={{ Number.isInteger(Number($json.job_id)) && Number($json.job_id) > 0 }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "revenue-claimed-job-if-01",
+        "name": "처리 후보 있는가?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          700,
+          300
+        ]
       }
     ],
     "connections": {
@@ -306,7 +340,7 @@
         "main": [
           [
             {
-              "node": "근거 제한 장문 프롬프트",
+              "node": "처리 후보 있는가?",
               "type": "main",
               "index": 0
             }
@@ -395,6 +429,18 @@
               "index": 0
             }
           ]
+        ]
+      },
+      "처리 후보 있는가?": {
+        "main": [
+          [
+            {
+              "node": "근거 제한 장문 프롬프트",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
         ]
       }
     }

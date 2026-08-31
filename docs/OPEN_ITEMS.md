@@ -168,3 +168,11 @@
 ## 운영 원칙
 
 사용자에게 매번 진행 승인을 묻지 않는다. 비밀번호·2FA·결제·법적 동의처럼 직접 입력이 필요한 항목만 알린다. 나머지는 자동화가 수행하고 결과만 보고한다.
+
+## 2026-08-31 원격 Headless 운영 설계
+
+- 목표: 원격 작업 때마다 iMac 화면 잠금 해제를 요구하지 않는 운영 구조로 전환한다.
+- 기준 문서: `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`
+- 원칙: Docker, n8n, PostgreSQL, Ollama, LaunchAgent, Git 작업은 잠금 화면과 무관하게 CLI/API로 수행한다.
+- 화면 잠금 해제가 필요한 작업은 계정 로그인, OAuth, 2FA, 결제, 법적 동의, 브라우저 전용 게시처럼 보안·외부 권한 단계로 제한한다.
+- 구현 범위: `scripts/preflight.sh` 복구, n8n workflow CLI 적용 경로, Daily Trend Gemini 실패 시 Ollama fallback, Telegram 자연어 라우터, dashboard API의 실패 노드·예약 상태 표시.

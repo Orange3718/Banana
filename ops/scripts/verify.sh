@@ -7,7 +7,11 @@ python3 -m json.tool "$repo_root/n8n/workflows/business-scout-error-handler.json
 python3 -m json.tool "$repo_root/n8n/workflows/atemoya-hardware-execution-orchestrator.json" >/dev/null
 python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaOpsGuardian01.json" >/dev/null
 python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaRevenueAutopilot01.json" >/dev/null
+python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaDailyTrend01.json" >/dev/null
+python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaTelegramMemory01.json" >/dev/null
 test -x "$repo_root/ops/scripts/export-obsidian-inbox.sh"
+test -x "$repo_root/ops/scripts/apply-n8n-workflows.sh"
+test -x "$repo_root/scripts/preflight.sh"
 test -r "$repo_root/tools/ops-watchdog.py"
 test -r "$repo_root/tools/autopilot-publisher.py"
 test -r "$repo_root/tools/revenue-ops-reconciler.py"

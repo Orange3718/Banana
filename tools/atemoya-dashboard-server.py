@@ -17,6 +17,31 @@ def db_json(sql):
  raw=run(['/usr/local/bin/docker','exec','atemoya-postgres','psql','-U','n8n','-d','n8n','-At','-c',"SELECT COALESCE(json_agg(x),'[]'::json) FROM ("+sql+") x"],8)
  try:return json.loads(raw or '[]')
  except:return []
+def deref_n8n(value, root):
+ for _ in range(20):
+  if isinstance(value,str) and value.isdigit():
+   idx=int(value)
+   if 0<=idx<len(root):
+    value=root[idx]; continue
+  break
+ return value
+def n8n_failures():
+ rows=db_json("select e.id as execution_id,w.name as workflow,e.status,e.\"startedAt\" as started_at,e.\"stoppedAt\" as stopped_at,ed.data as data from execution_entity e join workflow_entity w on w.id=e.\"workflowId\" left join execution_data ed on ed.\"executionId\"=e.id where e.status='error' order by e.id desc limit 10")
+ out=[]
+ for row in rows:
+  last_node=''; message=''
+  try:
+   root=json.loads(row.get('data') or '[]')
+   top=deref_n8n(root[0],root) if isinstance(root,list) and root else {}
+   result=deref_n8n(top.get('resultData'),root) if isinstance(top,dict) else {}
+   last_node=str(deref_n8n(result.get('lastNodeExecuted'),root) or '') if isinstance(result,dict) else ''
+   error=deref_n8n(result.get('error'),root) if isinstance(result,dict) else {}
+   if isinstance(error,dict):
+    message=str(deref_n8n(error.get('description'),root) or deref_n8n(error.get('message'),root) or deref_n8n(error.get('name'),root) or '')
+  except Exception as e:
+   message=str(e)
+  out.append({'execution_id':row.get('execution_id'),'workflow':row.get('workflow'),'status':row.get('status'),'started_at':row.get('started_at'),'stopped_at':row.get('stopped_at'),'last_node':last_node,'message':message[:500]})
+ return out
 def state(label):
  t=run(['launchctl','print',f'gui/{os.getuid()}/{label}']); runs=next((int(x.split('=',1)[1].strip()) for x in t.splitlines() if 'runs =' in x),None)
  return bool(t),('running' if 'state = running' in t else 'idle'),runs
@@ -24,12 +49,16 @@ def jobs():
  out=[]
  logs={'com.atemoya.local-llm':'/tmp/atemoya-local-llm-supervisor.log','com.atemoya.source-scout':'/tmp/atemoya-source-scout.out','com.atemoya.ops-watchdog':'/tmp/atemoya-ops-watchdog.out','com.atemoya.revenue-reconciler':'/tmp/atemoya-revenue-reconciler.out','com.atemoya.autopilot-publisher':'/tmp/atemoya-autopilot-publisher.out','com.atemoya.obsidian-inbox':'/tmp/atemoya-obsidian-inbox.out'}
  for label,name,schedule,seconds in JOBS:
-  raw=run(['tail','-1',logs.get(label,'/dev/null')]); last_log=raw[-500:]
+  log_path=logs.get(label,'/dev/null'); raw=run(['tail','-1',log_path]); last_log=raw[-500:]
+  age_raw=run(['stat','-f','%m',log_path]); age_seconds=None
+  if age_raw:
+   try: age_seconds=max(0,int(datetime.now().timestamp())-int(age_raw))
+   except: age_seconds=None
   if label=='com.atemoya.ops-watchdog':
    try:
     parsed=json.loads(raw); last_log=f"판정 {parsed.get('status','-')} · 복구 {len(parsed.get('actions',[]))} · 상태전환 {len(parsed.get('transitions',[]))}"
    except:pass
-  reg,st,runs=state(label); out.append({'label':label,'name':name,'schedule':schedule,'registered':reg,'state':st,'runs':runs,'next_hint':'최근 실행 후 1시간 이내' if seconds==3600 else '최근 실행 후 15분 이내','last_log':last_log})
+  reg,st,runs=state(label); out.append({'label':label,'name':name,'schedule':schedule,'registered':reg,'state':st,'runs':runs,'stale':bool(age_seconds is not None and age_seconds>seconds*2),'last_log_age_seconds':age_seconds,'next_hint':'최근 실행 후 1시간 이내' if seconds==3600 else '최근 실행 후 15분 이내','last_log':last_log})
  return out
 def ollama():
  try:
@@ -42,8 +71,9 @@ def snapshot():
  sources=db_json('select channel,item_title as title,item_url as url,collected_at from source_observations order by collected_at desc limit 12')
  autopilot=db_json("select stage,count(*)::int as count from revenue_autopilot_jobs group by stage order by stage")
  revenue_ops=db_json("select metric_date,channel,page_views,outbound_clicks,affiliate_clicks,conversions,revenue_amount,source from revenue_channel_metrics order by metric_date desc,collected_at desc limit 14")
+ failures=n8n_failures()
  h=run(['curl','-fsS','--max-time','2','http://127.0.0.1:5678/healthz'])
- return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}'},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'revenue_ops':revenue_ops}
+ return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'revenue_ops':revenue_ops}
 class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?',1)[0]=='/api/status':
