@@ -13,8 +13,9 @@
 - 현재 안전 상태: Upbit 키 미설정, Binance Futures disabled, 주문 API 미연결,
   `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
 - 다음 할 일:
-  1. Upbit 읽기 전용 API 키를 발급하고 이 iMac의 실행 IP를 허용 목록에 등록한다.
-  2. `.env`에 키를 입력한 뒤 `/api/v1/overview`에서 계좌 스냅샷을 검증한다.
+  1. Upbit API 키의 허용 IP에 이 iMac 공인 IP `122.43.246.101`을 등록한다.
+  2. `/api/v1/overview`에서 계좌 스냅샷을 검증한다. 현재 Upbit 응답은
+     `no_authorization_ip`이며, 키 자체는 로컬 `.env`에만 보관한다.
   3. Telegram 알림 토큰과 허용 chat id를 입력하고 알림 중복 억제를 확인한다.
   4. Binance Futures는 읽기 전용 키와 IP 제한을 준비한 뒤
      `BINANCE_FUTURES_ENABLED=true`로 전환한다.
