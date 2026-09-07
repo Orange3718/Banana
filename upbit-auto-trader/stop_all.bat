@@ -1,0 +1,2 @@
+@echo off
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*upbit-auto-trader*' -or $_.CommandLine -like '*telegram_bot.py*' -or $_.CommandLine -like '*streamlit*' -or $_.CommandLine -like '*main.py*' }; foreach ($p in $procs) { if ($p.ProcessId -ne $PID) { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue } }"
