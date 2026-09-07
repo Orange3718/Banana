@@ -39,7 +39,15 @@ cp .env.example .env
 ./tools/start_neural.sh
 ```
 
-브라우저: `http://127.0.0.1:8765`
+브라우저: `http://127.0.0.1:8766`
+
+기존 Atemoya 운영 대시보드가 8765 포트를 사용하므로, iMac 서버에서는 `.env`의 `NEURAL_PORT=8766`을 유지합니다.
+
+서버에서 로그인 시 자동 실행하려면 다음을 실행합니다.
+
+```bash
+./tools/install_launchd_macos.sh
+```
 
 종료:
 
@@ -86,7 +94,7 @@ npm run build
 ```
 
 ```bash
-curl http://127.0.0.1:8765/api/v1/health
+curl http://127.0.0.1:8766/api/v1/health
 ```
 
 ## 7. 현재 구현 범위
@@ -103,7 +111,11 @@ curl http://127.0.0.1:8765/api/v1/health
 
 ## 8. 다음 작업 체크리스트
 
-- [ ] 맥에서 clone 및 대시보드 실행 확인
+- [x] iMac 서버에서 브랜치 pull/병합 및 대시보드 실행 확인
+- [x] 기존 Atemoya 8765 대시보드와 충돌하지 않도록 8766 포트 구성
+- [x] API, Upbit 수집기, Binance Futures 수집기를 LaunchAgent로 등록
+- [x] 안전 기본값 확인: 키 미설정, Binance disabled, 주문 API 미연결
+
 - [ ] Upbit API 허용 IP를 실제 실행 환경 IP로 등록
 - [ ] Upbit 읽기 전용 잔고/주문조회 연결 검증
 - [ ] Binance Futures 읽기 전용 키와 IP 제한 설정
@@ -129,4 +141,3 @@ curl http://127.0.0.1:8765/api/v1/health
 - 원격 작업자는 읽기 전용부터 검증합니다.
 - 실제 주문은 별도 executor와 위험 한도 검증 후에만 다룹니다.
 - 로그에 키, Authorization 헤더, 전체 계좌 식별자를 남기지 않습니다.
-

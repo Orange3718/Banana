@@ -2,6 +2,24 @@
 
 기준일: 2026-08-23
 
+## 2026-09-07 Upbit Auto Trader 서버 적용
+
+- `origin/feat/upbit-auto-trader`를 iMac 운영 브랜치에 병합하고
+  `upbit-auto-trader/`를 로컬 실행 가능 상태로 구성했다.
+- 기존 Atemoya 운영 대시보드가 8765 포트를 사용하므로 Upbit Auto Trader는
+  `NEURAL_PORT=8766`으로 분리했다.
+- API, Upbit 읽기 전용 수집기, Binance Futures 읽기 전용 수집기를
+  `com.orange3718.upbit-auto-trader.*` LaunchAgent로 등록했다.
+- 현재 안전 상태: Upbit 키 미설정, Binance Futures disabled, 주문 API 미연결,
+  `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
+- 다음 할 일:
+  1. Upbit 읽기 전용 API 키를 발급하고 이 iMac의 실행 IP를 허용 목록에 등록한다.
+  2. `.env`에 키를 입력한 뒤 `/api/v1/overview`에서 계좌 스냅샷을 검증한다.
+  3. Telegram 알림 토큰과 허용 chat id를 입력하고 알림 중복 억제를 확인한다.
+  4. Binance Futures는 읽기 전용 키와 IP 제한을 준비한 뒤
+     `BINANCE_FUTURES_ENABLED=true`로 전환한다.
+  5. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
+
 ## 2026-08-30 수익 운영 복구 배포 완료
 
 - Owner의 Telegram `/승인 6 게시`를 반영해 작업 `6660`을 게시했다. PR

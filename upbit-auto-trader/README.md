@@ -11,7 +11,13 @@ PowerShell 명령을 직접 입력하지 않고 아래 파일을 더블클릭해
 - `start_telegram_control.bat`: 텔레그램 모바일 제어 봇 실행
 - `start_all.bat`: 대시보드, 워커, 텔레그램 제어를 함께 실행
 
-대시보드 주소:
+맥 서버 대시보드 주소:
+
+```text
+http://127.0.0.1:8766
+```
+
+Windows/기존 Streamlit 대시보드 주소:
 
 ```text
 http://127.0.0.1:8501
@@ -76,6 +82,12 @@ ENABLE_REAL_TRADE=true
 ```
 
 API Key, Secret Key, Telegram Token은 브라우저 화면이나 로그에 노출하지 않도록 관리합니다.
+
+## iMac 서버 상태
+
+현재 Atemoya iMac에서는 기존 운영 대시보드가 8765 포트를 사용하므로, 이 앱은 `NEURAL_PORT=8766`으로 실행합니다. API, Upbit 읽기 전용 수집기, Binance Futures 읽기 전용 수집기는 LaunchAgent로 등록해 로그인 시 자동 시작되도록 구성합니다.
+
+현재 기본 상태는 계좌 키 미설정, Binance 비활성화, 실제 주문 비활성화입니다.
 # 원격 작업 시작점
 
 - [원격 작업 런북](REMOTE_RUNBOOK_KO.md)
