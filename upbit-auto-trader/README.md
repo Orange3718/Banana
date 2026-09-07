@@ -76,3 +76,10 @@ ENABLE_REAL_TRADE=true
 ```
 
 API Key, Secret Key, Telegram Token은 브라우저 화면이나 로그에 노출하지 않도록 관리합니다.
+# 원격 작업 시작점
+
+- [원격 작업 런북](REMOTE_RUNBOOK_KO.md)
+- [설계 사상](DESIGN_PRINCIPLES_KO.md)
+- [세션 인계 문서](SESSION_HANDOFF.md)
+- [맥 이관 가이드](MAC_MIGRATION.md)
+- [사용자 가이드](USER_GUIDE_KO.md)
