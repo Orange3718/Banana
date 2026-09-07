@@ -56,9 +56,10 @@ def regime(candles, index):
     fast, slow = sma(closes, 20), sma(closes, 60)
     if slow is None:
         return 'warmup'
-    recent = candles[max(1, index - 13):index + 1]
-    atr = sum(max(c.high - c.low, abs(c.high - candles[index - 1].close),
-                  abs(c.low - candles[index - 1].close)) for c in recent) / len(recent)
+    indices = range(max(1, index - 13), index + 1)
+    atr = sum(max(candles[i].high - candles[i].low,
+                  abs(candles[i].high - candles[i - 1].close),
+                  abs(candles[i].low - candles[i - 1].close)) for i in indices) / len(indices)
     if atr / candles[index].close > 0.045:
         return 'risk'
     if fast > slow * 1.005:
@@ -109,17 +110,19 @@ def backtest(candles, strategy, fee_rate=.0005, slippage_rate=.0005,
     if strategy not in {x['id'] for x in CATALOG}:
         raise ValueError('unknown strategy')
     cash, quantity, entry = float(initial), 0.0, 0.0
+    entry_cost = 0.0
     trades, curve = [], []
     pending = None
     for index, candle in enumerate(candles):
         if pending == 'BUY' and quantity == 0:
             price = candle.open * (1 + slippage_rate)
+            entry_cost = cash
             quantity = cash * (1 - fee_rate) / price
             cash, entry = 0.0, price
         elif pending == 'SELL' and quantity > 0:
             price = candle.open * (1 - slippage_rate)
             proceeds = quantity * price * (1 - fee_rate)
-            trades.append((proceeds / (quantity * entry) - 1) * 100)
+            trades.append((proceeds / entry_cost - 1) * 100)
             cash, quantity, entry = proceeds, 0.0, 0.0
         pending = None
         if quantity > 0 and (candle.close <= entry * (1 - stop_loss) or candle.close >= entry * (1 + take_profit)):
@@ -132,10 +135,11 @@ def backtest(candles, strategy, fee_rate=.0005, slippage_rate=.0005,
                 pending = 'SELL'
         curve.append(cash + quantity * candle.close)
     if quantity > 0:
-        proceeds = quantity * candles[-1].close * (1 - fee_rate - slippage_rate)
-        trades.append((proceeds / (quantity * entry) - 1) * 100)
+        proceeds = quantity * candles[-1].close * (1 - slippage_rate) * (1 - fee_rate)
+        trades.append((proceeds / entry_cost - 1) * 100)
         cash = proceeds
-    peak, drawdown = curve[0] if curve else initial, 0.0
+        curve[-1] = cash
+    peak, drawdown = initial, 0.0
     for value in curve:
         peak = max(peak, value)
         drawdown = min(drawdown, value / peak - 1)

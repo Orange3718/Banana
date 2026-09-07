@@ -4,6 +4,7 @@ import {Network, Coins, Landmark, Activity, SlidersHorizontal, BookOpen, List, B
 import ForceGraph2D from 'react-force-graph-2d';
 import * as THREE from 'three';
 import './style.css';
+import PaperPanel from './PaperPanel';
 const ForceGraph3D = lazy(()=>import('react-force-graph-3d'));
 type Position={symbol:string;market:string;quantity:string;price:string|null;value:string|null;unrealized:string|null;side?:string;entry_price?:string;leverage?:string;margin_type?:string};
 type Snapshot={as_of:string;currency:string;cash:string;equity:string|null;priced_subtotal:string;unrealized:string|null;positions:Position[];unpriced:string[]};
@@ -47,4 +48,4 @@ function App(){
  <footer><span>NEURAL TRADE · BUILD 02</span><span>LIVE 조회 / 신규 주문 기능 없음</span></footer></main></div></div>;
 }
 function EquityChart({values,currency='KRW'}:{values:{as_of:string;equity:string|null}[];currency?:string}){const v=values.filter(x=>x.equity!==null);const ns=v.map(x=>Number(x.equity));const lo=Math.min(...ns),hi=Math.max(...ns);const range=Math.max(hi-lo,1);const pts=ns.map((n,i)=>`${20+i/(ns.length-1)*740},${190-(n-lo)/range*160}`).join(' ');return <><div className="chart-caption"><span>{money(hi,currency)}</span><span>{money(lo,currency)}</span></div><svg viewBox="0 0 780 220" className="equity-chart" role="img" aria-label="수집 시점별 순자산 추이"><path d="M20 30H760 M20 110H760 M20 190H760" stroke="#2a353c"/><polyline fill="none" stroke="#45e3df" strokeWidth="2" points={pts}/></svg><div className="chart-caption"><span>{stamp(v[0].as_of)}</span><span>{stamp(v[v.length-1].as_of)}</span></div></>}
-createRoot(document.getElementById('root')!).render(<App/>);
+createRoot(document.getElementById('root')!).render(<><PaperPanel/><App/></>);

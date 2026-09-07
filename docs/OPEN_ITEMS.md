@@ -12,6 +12,11 @@
   `com.orange3718.upbit-auto-trader.*` LaunchAgent로 등록했다.
 - 현재 안전 상태: Upbit 읽기 전용 연결 성공, Binance Futures 읽기 전용 연결 성공,
   주문 API 미연결, `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
+- 자동 검증 단계: `com.orange3718.upbit-auto-trader.paper`를 추가해 Upbit
+  `KRW-BTC/KRW-ETH/KRW-SOL`과 Binance `SAMSUNGUSDT/SKHYNIXUSDT`를
+  1시간봉·가상자금으로 모의운용한다. 수수료 0.1%와 슬리피지 0.1%를 가정하고,
+  Binance 펀딩비는 아직 반영하지 않는다. 현재 5개 시장 모두 수집 `connected`,
+  결과는 `http://127.0.0.1:8766/api/v1/paper`와 대시보드에 표시한다.
 - 2026-09-07 17:58 KST 기준 `/api/v1/overview`에서 Upbit 수집기
   `connected`, 계좌 스냅샷 `stale=false`를 확인했다. 일부 보유 종목은
   현재 티커 가격 미제공으로 `unpriced`에 남아 있어 총 평가금은 priced
@@ -26,7 +31,8 @@
   2. Upbit 보유 종목 중 티커 미제공 종목의 가격 처리 정책을 정한다.
   3. Binance Futures 포지션/잔고 표시가 실제 앱 화면에서 기대한 계정과
      일치하는지 대조한다.
-  4. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
+  4. 모의운용에 Binance 펀딩비와 실제 수수료를 반영하고 기간별 성과를 축적한다.
+  5. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
 
 ## 2026-08-30 수익 운영 복구 배포 완료
 

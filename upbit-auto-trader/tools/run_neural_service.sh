@@ -28,6 +28,9 @@ case "$SERVICE" in
   binance-futures-collector)
     exec "$PYTHON" -m neural.binance_futures
     ;;
+  paper)
+    exec "$PYTHON" -m neural.paper
+    ;;
   *)
     echo "Unknown service: $SERVICE" >&2
     exit 64

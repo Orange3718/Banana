@@ -54,6 +54,11 @@ def create_app(store=None):
     def health():
         return {'service': 'neural-dashboard', 'execution': 'read_only', 'database': 'connected'}
 
+    @app.get('/api/v1/paper')
+    def paper():
+        from neural.paper import report
+        return report()
+
     @app.get('/api/v1/overview')
     def overview():
         upbit_snapshot = db.latest('upbit')

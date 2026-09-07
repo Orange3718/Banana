@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from config import Config
-from strategy import Position
+if TYPE_CHECKING:
+    from strategy import Position
 
 
 @dataclass
@@ -54,7 +55,7 @@ class RiskManager:
             self.daily_start_equity = max(total_equity, 1.0)
 
         daily_loss_rate = max(0.0, (self.daily_start_equity - total_equity) / self.daily_start_equity)
-        if daily_loss_rate >= self.config.max_daily_loss:
+        if action == "BUY" and daily_loss_rate >= self.config.max_daily_loss:
             return RiskDecision(False, f"Daily max loss exceeded: {daily_loss_rate:.2%}")
 
         if action == "BUY":
