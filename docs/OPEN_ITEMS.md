@@ -10,8 +10,9 @@
   `NEURAL_PORT=8766`으로 분리했다.
 - API, Upbit 읽기 전용 수집기, Binance Futures 읽기 전용 수집기를
   `com.orange3718.upbit-auto-trader.*` LaunchAgent로 등록했다.
-- 현재 안전 상태: Upbit 읽기 전용 연결 성공, Binance Futures 읽기 전용 연결 성공,
-  주문 API 미연결, `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
+- 초기 구성은 읽기 전용이었지만, 현재는 별도 레거시 Upbit 워커가 실제 주문을
+  담당한다. 신규 대시보드 API 자체는 여전히 읽기 전용이며, 워커의
+  `DRY_RUN=false`, `ENABLE_REAL_TRADE=true` 상태와 혼동하지 않는다.
 - 2026-09-07 20:41 KST 기준 레거시 Upbit 자동매매 워커를 별도 LaunchAgent로
   등록하고 실거래 상태로 시작했다. 운용 모드는 4단계 자동 운영, 균형 전략,
   1회 20,000원·종목당 40,000원·최대 4종목·하루 손실 1.5% 제한이다.
@@ -40,6 +41,12 @@
      일치하는지 대조한다.
   4. 모의운용에 Binance 펀딩비와 실제 수수료를 반영하고 기간별 성과를 축적한다.
   5. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
+- 개인 Telegram 제어 봇(`telegram_bot.py`)은 코드만 있고 현재 LaunchAgent로
+  등록되지 않았다. 회사 n8n Telegram 수신기와 충돌하지 않도록 개인 전용 봇
+  토큰을 준비한 뒤 별도 서비스로 등록한다.
+- `com.atemoya.command-center`와 `com.atemoya.trend-radar`는 오래된 ChatGPT
+  프로젝트 경로를 호출해 각각 exit 127/2를 반복한다. 현재 운영 경로와 무관한
+  구형 LaunchAgent는 중지하고 plist는 복구용으로 보존한다.
 
 ## 2026-09-07 Atemoya Telegram 자연어 DB 질의 운영
 

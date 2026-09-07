@@ -1,6 +1,9 @@
 # Upbit Auto Trader
 
-Upbit Open API 기반 로컬 자동매매/모니터링 도구입니다. 기본값은 `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`라 실제 주문을 보내지 않습니다.
+Upbit Open API 기반 개인 자동매매/모니터링 도구입니다. 읽기 전용 대시보드와
+실제 주문을 담당하는 레거시 워커는 별도 경로입니다. 현재 iMac에서는 운영 설정에
+따라 Upbit 워커가 실제 주문을 수행할 수 있으므로 `.env`와 LaunchAgent 상태를
+반드시 함께 확인합니다.
 
 ## 실행 방식
 
@@ -31,9 +34,16 @@ http://127.0.0.1:8501
 - 마지막 가격, 전략 신호, heartbeat
 - `Start / Resume`, `Pause`, `Kill Switch`, `Reset Kill`
 
-자동매매 워커는 시작 직후 항상 일시정지 상태입니다. 실제 루프를 돌리려면 대시보드에서 `Start / Resume`을 눌러야 합니다.
+현재 iMac의 `com.orange3718.upbit-auto-trader.upbit-worker`는 LaunchAgent로
+자동 시작됩니다. 대시보드 API는 주문을 보내지 않으며, 실제 주문 경로는 워커의
+설정·로그·거래소 체결 결과에서 확인합니다.
 
 ## 텔레그램 모바일 제어
+
+`telegram_bot.py`는 개인 봇 제어 코드다. 회사 Atemoya n8n Telegram 봇과 같은
+토큰을 사용해 웹훅과 `getUpdates` 폴링을 동시에 실행하면 수신 충돌이 발생할 수
+있으므로 개인 전용 봇 토큰을 사용한다. 현재 iMac에는 이 제어 봇 LaunchAgent가
+등록되어 있지 않다.
 
 1. 모바일 텔레그램에서 `@BotFather`를 검색합니다.
 2. `/newbot`으로 봇을 만들고 토큰을 받습니다.
@@ -87,7 +97,9 @@ API Key, Secret Key, Telegram Token은 브라우저 화면이나 로그에 노�
 
 현재 Atemoya iMac에서는 기존 운영 대시보드가 8765 포트를 사용하므로, 이 앱은 `NEURAL_PORT=8766`으로 실행합니다. API, Upbit 읽기 전용 수집기, Binance Futures 읽기 전용 수집기는 LaunchAgent로 등록해 로그인 시 자동 시작되도록 구성합니다.
 
-현재 기본 상태는 계좌 키 미설정, Binance 비활성화, 실제 주문 비활성화입니다.
+현재 Binance는 읽기·모의운용 경로만 운영하며 실주문 실행기는 연결하지 않았다.
+실제 Binance 주문 전에는 계약 단위, 레버리지, 보호주문, 펀딩비, 재시작 대사와
+24시간 모의운용을 별도로 통과해야 한다.
 # 원격 작업 시작점
 
 - [원격 작업 런북](REMOTE_RUNBOOK_KO.md)
