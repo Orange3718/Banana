@@ -57,5 +57,7 @@ write_agent com.orange3718.upbit-auto-trader.binance-futures-collector binance-f
 
 write_agent com.orange3718.upbit-auto-trader.paper paper \
   launchd-paper.out.log launchd-paper.err.log
+write_agent com.orange3718.upbit-auto-trader.upbit-worker upbit-worker \
+  launchd-upbit-worker.out.log launchd-upbit-worker.err.log
 
 echo "LaunchAgents installed. Check: launchctl print ${USER_DOMAIN}/com.orange3718.upbit-auto-trader.api"

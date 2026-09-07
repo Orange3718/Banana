@@ -12,11 +12,18 @@
   `com.orange3718.upbit-auto-trader.*` LaunchAgent로 등록했다.
 - 현재 안전 상태: Upbit 읽기 전용 연결 성공, Binance Futures 읽기 전용 연결 성공,
   주문 API 미연결, `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
+- 2026-09-07 20:41 KST 기준 레거시 Upbit 자동매매 워커를 별도 LaunchAgent로
+  등록하고 실거래 상태로 시작했다. 운용 모드는 4단계 자동 운영, 균형 전략,
+  1회 20,000원·종목당 40,000원·최대 4종목·하루 손실 1.5% 제한이다.
+  첫 점검에서 기존 `KRW-SOL` 보유분 0.26315789개를 시장가 매도했고 Upbit가
+  `done`으로 응답했다. 신규 매수는 신호가 없어 발생하지 않았다.
 - 자동 검증 단계: `com.orange3718.upbit-auto-trader.paper`를 추가해 Upbit
   `KRW-BTC/KRW-ETH/KRW-SOL`과 Binance `SAMSUNGUSDT/SKHYNIXUSDT`를
   1시간봉·가상자금으로 모의운용한다. 수수료 0.1%와 슬리피지 0.1%를 가정하고,
   Binance 펀딩비는 아직 반영하지 않는다. 현재 5개 시장 모두 수집 `connected`,
   결과는 `http://127.0.0.1:8766/api/v1/paper`와 대시보드에 표시한다.
+- Binance 실주문은 아직 실행기를 연결하지 않고 24시간 모의운용을 계속한다.
+  실주문 전환에는 상품별 주문 크기·레버리지·손실 제한을 별도로 확정해야 한다.
 - 2026-09-07 17:58 KST 기준 `/api/v1/overview`에서 Upbit 수집기
   `connected`, 계좌 스냅샷 `stale=false`를 확인했다. 일부 보유 종목은
   현재 티커 가격 미제공으로 `unpriced`에 남아 있어 총 평가금은 priced

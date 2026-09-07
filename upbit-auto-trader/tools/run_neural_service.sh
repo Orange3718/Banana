@@ -31,6 +31,9 @@ case "$SERVICE" in
   paper)
     exec "$PYTHON" -m neural.paper
     ;;
+  upbit-worker)
+    exec "$PYTHON" main.py
+    ;;
   *)
     echo "Unknown service: $SERVICE" >&2
     exit 64
