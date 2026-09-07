@@ -38,11 +38,17 @@ COALESCE((SELECT string_agg('#'||id||' ['||status||'] '||title,E'\\n' ORDER BY r
 (SELECT id FROM approval_requests WHERE status='pending' ORDER BY requested_at DESC LIMIT 1) AS latest_pending_id,
 COALESCE((SELECT string_agg(stage||' '||count,E', ' ORDER BY stage) FROM (SELECT stage,count(*)::text AS count FROM revenue_autopilot_jobs GROUP BY stage) j),'수익 작업 없음') AS revenue_jobs,
 COALESCE((SELECT string_agg(task_name||' ['||status||'] '||left(COALESCE(result_summary,''),180),E'\\n' ORDER BY updated_at DESC) FROM (SELECT task_name,status,result_summary,updated_at FROM local_llm_runs ORDER BY updated_at DESC LIMIT 4) r),'로컬 추론 기록 없음') AS local_runs,
-COALESCE((SELECT string_agg(title||' — '||published_url,E'\\n' ORDER BY published_at DESC) FROM (SELECT title,published_url,published_at FROM content WHERE published_url IS NOT NULL ORDER BY published_at DESC LIMIT 3) c),'최근 공개 콘텐츠 없음') AS publications;"""
+COALESCE((SELECT string_agg(title||' — '||published_url,E'\\n' ORDER BY published_at DESC) FROM (SELECT title,published_url,published_at FROM content WHERE published_url IS NOT NULL ORDER BY published_at DESC LIMIT 3) c),'최근 공개 콘텐츠 없음') AS publications,
+COALESCE((SELECT row_to_json(x)::text FROM v_atemoya_operational_status x),'운영 상태 조회 없음') AS db_status_context,
+COALESCE((SELECT json_agg(x)::text FROM (SELECT * FROM v_atemoya_recent_failures LIMIT 5) x),'[]') AS db_failure_context,
+COALESCE((SELECT json_agg(x)::text FROM (SELECT * FROM v_atemoya_recent_incidents LIMIT 5) x),'[]') AS db_incident_context,
+COALESCE((SELECT json_agg(x)::text FROM (SELECT * FROM v_atemoya_source_freshness LIMIT 5) x),'[]') AS db_source_context,
+COALESCE((SELECT json_agg(x)::text FROM (SELECT * FROM v_atemoya_revenue_status) x),'[]') AS db_revenue_context;"""
 
     system_prompt = """당신은 Atemoya 운영 대화 비서다. 한국어 존댓말로 자연스럽고 짧게 답한다.
-사용자는 명령어를 외울 필요가 없다. 제공된 PostgreSQL 운영 문맥만 사실로 사용하고 없는 사실은 만들지 않는다.
+사용자는 명령어를 외울 필요가 없다. 제공된 PostgreSQL 운영 문맥과 안전 DB 요약만 사실로 사용하고 없는 사실은 만들지 않는다.
 승인·게시·보류·거절 의도는 이해하되 실제 변경은 후속 결정 규칙이 검증한다.
+상태, 오류, 승인, 게시, 수익, 수집 근거 질문에는 DB 요약을 바탕으로 바로 답한다.
 비밀번호, API 키, 2FA, 개인키를 요구하거나 출력하지 않는다.
 반드시 JSON 하나만 출력한다: {\"intent\":\"chat|status|approve|defer|reject|remember\",\"decision_id\":null,\"note\":\"\",\"reply\":\"사용자에게 보낼 한국어 답변\"}.
 승인 번호가 문장에 분명히 있으면 decision_id에 숫자를 넣고, 불분명하면 null이다."""
@@ -54,7 +60,7 @@ COALESCE((SELECT string_agg(title||' — '||published_url,E'\\n' ORDER BY publis
     }
     llm_node = {
         "parameters": {"method": "POST", "url": "http://host.docker.internal:11434/api/chat", "sendBody": True, "contentType": "raw", "rawContentType": "application/json",
-            "body": "={{ JSON.stringify({model:'qwen3.5:4b',stream:false,think:false,format:'json',options:{num_predict:700,temperature:0.2},messages:[{role:'system',content:" + json.dumps(system_prompt, ensure_ascii=False) + "},{role:'user',content:'[사용자 입력]\\n'+$json.user_text+'\\n\\n[최근 대화]\\n'+$json.memory_context+'\\n\\n[승인 안건]\\n'+$json.approval_context+'\\n\\n[수익 작업]\\n'+$json.revenue_jobs+'\\n\\n[최근 로컬 추론]\\n'+$json.local_runs+'\\n\\n[최근 공개]\\n'+$json.publications}]}) }}",
+            "body": "={{ JSON.stringify({model:'qwen3.5:4b',stream:false,think:false,format:'json',options:{num_predict:700,temperature:0.2},messages:[{role:'system',content:" + json.dumps(system_prompt, ensure_ascii=False) + "},{role:'user',content:'[사용자 입력]\\n'+$json.user_text+'\\n\\n[최근 대화]\\n'+$json.memory_context+'\\n\\n[승인 안건]\\n'+$json.approval_context+'\\n\\n[수익 작업]\\n'+$json.revenue_jobs+'\\n\\n[최근 로컬 추론]\\n'+$json.local_runs+'\\n\\n[최근 공개]\\n'+$json.publications+'\\n\\n[DB 전체 상태]\\n'+$json.db_status_context+'\\n\\n[DB 최근 오류]\\n'+$json.db_failure_context+'\\n\\n[DB 인시던트]\\n'+$json.db_incident_context+'\\n\\n[DB 수집 근거]\\n'+$json.db_source_context+'\\n\\n[DB 수익 상태]\\n'+$json.db_revenue_context}]}) }}",
             "options": {"timeout": 180000}},
         "id": "telegram-natural-ollama-01", "name": "로컬 Qwen 자연어 대화", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [1460, 760],
         "retryOnFail": True, "maxTries": 2, "waitBetweenTries": 3000, "onError": "continueRegularOutput",
@@ -89,10 +95,17 @@ SELECT p.chat_id,CASE WHEN u.status='approved' THEN '좋습니다. #'||u.id||' �
     decision_node = {"parameters": {"operation": "executeQuery", "query": decision_query, "options": {"queryReplacement": "={{ [$json.chat_id,$json.decision_id,$json.status,$json.note] }}"}}, "id": "telegram-natural-decision-save-01", "name": "자연어 결정 저장", "type": "n8n-nodes-base.postgres", "typeVersion": 2.6, "position": [2180, 660], "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}}
     decision_reply = {"parameters": {"chatId": "={{ $json.chat_id }}", "text": "={{ $json.response_text }}", "additionalFields": {"disable_web_page_preview": True, "appendAttribution": False}}, "id": "telegram-natural-decision-reply-01", "name": "자연어 결정 답장", "type": "n8n-nodes-base.telegram", "typeVersion": 1.2, "position": [2420, 660], "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}}
 
-    memory_query = """INSERT INTO telegram_memory(update_id,chat_id,message_id,user_id,username,message_text,raw_update)
+    memory_query = """WITH saved AS (
+INSERT INTO telegram_memory(update_id,chat_id,message_id,user_id,username,message_text,raw_update)
 VALUES($1,$2,$3,$4,$5,$6,jsonb_set($7::jsonb,'{assistant_reply}',to_jsonb($8::text),true))
 ON CONFLICT(update_id) DO UPDATE SET message_text=EXCLUDED.message_text,raw_update=EXCLUDED.raw_update
-RETURNING chat_id,$8::text AS response_text;"""
+RETURNING chat_id
+), logged AS (
+INSERT INTO telegram_natural_language_queries(chat_id,message_text,intent,safe_query_key,provider,model,response_text,raw_model)
+VALUES($2,$6,'telegram_natural',NULL,'ollama-local','qwen3.5:4b',$8,jsonb_build_object('source','AtemoyaTelegramMemory01'))
+RETURNING id
+)
+SELECT chat_id,$8::text AS response_text FROM saved;"""
     memory_node = {"parameters": {"operation": "executeQuery", "query": memory_query, "options": {"queryReplacement": "={{ [$json.update_id,$json.chat_id,$json.message_id,$json.user_id,$json.username,$json.user_text,JSON.stringify($json.raw_update),$json.response_text] }}"}}, "id": "telegram-natural-memory-01", "name": "자연어 대화 기억 저장", "type": "n8n-nodes-base.postgres", "typeVersion": 2.6, "position": [2180, 860], "credentials": {"postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}}}
     chat_reply = {"parameters": {"chatId": "={{ $json.chat_id }}", "text": "={{ $json.response_text }}", "additionalFields": {"disable_web_page_preview": True, "appendAttribution": False}}, "id": "telegram-natural-chat-reply-01", "name": "자연어 대화 답장", "type": "n8n-nodes-base.telegram", "typeVersion": 1.2, "position": [2420, 860], "credentials": {"telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}}}
 

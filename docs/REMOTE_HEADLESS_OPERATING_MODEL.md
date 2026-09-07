@@ -78,6 +78,12 @@ authority for a state-changing action. State changes require deterministic
 validation such as an approval id, exactly one pending approval, or a known
 safe action.
 
+The natural-language DB path is backed by read-only operational views and the
+whitelist table `telegram_safe_query_catalog`. Ollama `qwen3.5:4b` classifies
+and summarizes; it does not generate arbitrary SQL. Audit rows are stored in
+`telegram_natural_language_queries`. Details live in
+`ops/TELEGRAM_NATURAL_LANGUAGE_DB.md`.
+
 ### Local dashboard
 
 The dashboard should expose:
@@ -133,4 +139,3 @@ If a cloud AI node returns service unavailable:
 5. Extend the dashboard API with latest n8n failure node and next scheduled
    run details.
 6. Record the unlock policy in the baseline and open items.
-

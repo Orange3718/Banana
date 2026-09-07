@@ -41,6 +41,18 @@
   4. 모의운용에 Binance 펀딩비와 실제 수수료를 반영하고 기간별 성과를 축적한다.
   5. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
 
+## 2026-09-07 Atemoya Telegram 자연어 DB 질의 운영
+
+- Atemoya와 Upbit Trader는 분리 운영한다. 이 항목은 Atemoya 사업 운영용이다.
+- Telegram 자연어 질의가 읽을 수 있는 DB 표면을
+  `telegram_safe_query_catalog`와 `v_atemoya_*` 읽기 전용 뷰로 제한했다.
+- 로컬 Ollama `qwen3.5:4b`는 질문 분류와 답변 요약만 담당하고, SQL 생성은
+  허용하지 않는다.
+- 질의 감사 기록은 `telegram_natural_language_queries`에 저장한다.
+- 운영 문서는 `ops/TELEGRAM_NATURAL_LANGUAGE_DB.md`에 기록했다.
+- 테스트 범위: 마이그레이션 적용, 뷰 조회, 로컬 모델 질의, 감사 로그 저장,
+  n8n 워크플로 JSON 검증, 운영 검증 스크립트.
+
 ## 2026-08-30 수익 운영 복구 배포 완료
 
 - Owner의 Telegram `/승인 6 게시`를 반영해 작업 `6660`을 게시했다. PR
