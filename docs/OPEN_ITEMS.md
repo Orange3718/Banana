@@ -10,18 +10,22 @@
   `NEURAL_PORT=8766`으로 분리했다.
 - API, Upbit 읽기 전용 수집기, Binance Futures 읽기 전용 수집기를
   `com.orange3718.upbit-auto-trader.*` LaunchAgent로 등록했다.
-- 현재 안전 상태: Upbit 읽기 전용 연결 성공, Binance Futures disabled,
+- 현재 안전 상태: Upbit 읽기 전용 연결 성공, Binance Futures 읽기 전용 연결 성공,
   주문 API 미연결, `DRY_RUN=true`, `ENABLE_REAL_TRADE=false`.
 - 2026-09-07 17:58 KST 기준 `/api/v1/overview`에서 Upbit 수집기
   `connected`, 계좌 스냅샷 `stale=false`를 확인했다. 일부 보유 종목은
   현재 티커 가격 미제공으로 `unpriced`에 남아 있어 총 평가금은 priced
   subtotal 중심으로 표시된다.
+- 2026-09-07 19:43 KST 기준 Google Docs `key` 문서의 Binance API 항목을
+  로컬 `.env`에 반영하고 `/api/v1/overview`에서 Binance Futures 수집기
+  `connected`, 스냅샷 수집 성공을 확인했다. 키 값은 문서와 로컬 `.env`에만
+  두고 저장소에는 기록하지 않는다.
 - 다음 할 일:
   1. Telegram 알림 토큰과 허용 chat id가 로컬 `.env`에 적용된 상태에서
      알림 중복 억제와 안전 메시지 형식을 확인한다.
-  2. Binance Futures는 읽기 전용 키와 IP 제한을 준비한 뒤
-     `BINANCE_FUTURES_ENABLED=true`로 전환한다.
-  3. Upbit 보유 종목 중 티커 미제공 종목의 가격 처리 정책을 정한다.
+  2. Upbit 보유 종목 중 티커 미제공 종목의 가격 처리 정책을 정한다.
+  3. Binance Futures 포지션/잔고 표시가 실제 앱 화면에서 기대한 계정과
+     일치하는지 대조한다.
   4. 실제 주문 기능은 paper trading과 위험 한도 검증 뒤 별도 승인으로만 연다.
 
 ## 2026-08-30 수익 운영 복구 배포 완료
