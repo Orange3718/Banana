@@ -36,6 +36,7 @@ jobs:
           node scripts/audit-content-quality.mjs
           node scripts/test-channel-drafts.mjs
           node scripts/test-site.mjs
+          node --test scripts/test-analytics.mjs scripts/test-public-package.mjs
       - name: Connect revenue and analytics accounts
         env:
           ATEMOYA_AFFILIATE_URL: ${{ vars.ATEMOYA_AFFILIATE_URL }}
@@ -55,10 +56,14 @@ jobs:
           AFFILIATE_TRAVEL: ${{ vars.AFFILIATE_TRAVEL }}
           AFFILIATE_BLACKFRIDAY: ${{ vars.AFFILIATE_BLACKFRIDAY }}
         run: node scripts/configure-site.mjs
+      - name: Package and verify public-only release
+        run: |
+          node scripts/build-public.mjs
+          node scripts/test-site.mjs dist-public
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'dist-public'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
