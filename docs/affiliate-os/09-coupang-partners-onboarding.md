@@ -34,6 +34,14 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 - 8월 최종 정산금액은 `9월 25일` 확정 예정이며 주문 취소 등에 따라 변경될 수 있다고 표시된다.
 - 이는 계정이 연결되지 않았다는 뜻이 아니라, 현재 기간에 기록된 전환·확정 수익이 없다는 뜻으로 해석한다.
 
+## 첫 수익 자산 게시
+
+- 선택 상품: `LG전자 프라엘 더마 LED 마스크, BWJ1, 스틸 핑크`
+- 쿠팡 상품 ID: `68486824`; item ID: `228589064`
+- 생성 링크: `https://link.coupang.com/a/g0MPccSO4q`
+- 적용 페이지: [LED 마스크 체크리스트](https://orange3718.github.io/Banana/offers/led-mask-checklist.html), [매일 사용 질문](https://orange3718.github.io/Banana/offers/led-mask-daily-use.html)
+- 두 공개 URL 모두 HTTP 200과 쿠팡 고지 문구를 확인했다. 링크가 실제 주문·수익을 보장한다는 뜻은 아니다.
+
 ## 제출 형식
 
 1. 구매자 이름·주소·전화·주문 상세 개인정보를 제거한다.
