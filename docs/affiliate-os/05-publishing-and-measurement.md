@@ -10,7 +10,7 @@ v1.0 · DESIGN · R03/R04/R05/R06/R10/R12
 | `GET /internal/events/v1/export` | collector_read 서비스 자격 | 미수입 이벤트 페이지 조회 |
 | `POST /internal/events/v1/ack` | collector_read 서비스 자격 | PostgreSQL 저장 완료 batch 확인 |
 | `POST /internal/imports/v1` | 운영망 import_operator | private 파일 참조 수입 요청 |
-| `POST /internal/approvals/v1/decision` | 승인 어댑터 전용 | 허용된 Owner 결정 반영 |
+| `POST /internal/approvals/v1/decision` | legacy 호환용 | 기존 승인 결과 반영; 신규 affiliate 게시에는 필수 아님 |
 | `POST /internal/publications/v1` | publisher 서비스 | 승인 revision의 배포 job 생성 |
 | `GET /internal/jobs/v1/{id}` | 운영 조회 역할 | 상태·결과·마스킹 오류 확인 |
 
@@ -74,25 +74,25 @@ DB `content_revisions.body_text`와 evidence가 불변 초안 원본이다. Git�
 
 build manifest 필수: revision_id, body_hash, template_version, policy_version, link_manifest_hash, target, git_commit, artifact_hash. revision의 affiliate_url을 확정한 뒤 고지·링크·검색 metadata·문자열 escaping·이미지 권리 검사를 수행한다.
 
-승인 대상은 원문만이 아니라 target·정책·확정 링크를 포함한 최종 artifact hash다. 승인 뒤 환경변수로 링크나 광고 내용을 바꾸면 hash가 바뀌어 기존 승인은 무효다.
+직접 게시 모드에서도 대상은 원문만이 아니라 target·정책·확정 링크를 포함한 최종 artifact hash다. 게시 전 hash·QA·allowlist·중복 키를 검증하고, 변경된 artifact는 새 publication으로 기록한다.
 
-`public.approvals`의 pending→approved/rejected/expired/cancelled 상태를 재사용한다. binding의 expires_at은 요청 후 7일 기본 제안이다. 승인 서비스가 row lock을 잡아 pending 조건과 Owner 역할을 검사한 뒤 상태·감사 event를 한 transaction으로 기록한다. 이미 approved인 경우 같은 결정을 반복해도 새로운 권한은 생기지 않는다.
+기존 `public.approvals` binding은 legacy 작업에만 사용한다. 신규 affiliate publication은 `authorization_mode=direct_user_instruction`으로 사용자 상시 지시를 참조하고, 실행마다 artifact hash·정책·QA·allowlist를 기술적으로 검증한다.
 
 Telegram 수신기는 기존 회사 봇의 webhook을 새로 등록해 대체하지 않는다. 현재 수신 흐름 내부에서 명시적인 신규 namespace 요청만 승인 어댑터로 전달한다. chat_id·from.id allowlist와 update_id 중복을 서버에서 확인한다. 채팅방에 있다는 사실만으로 승인자를 인정하지 않는다.
 
-예시 요청 의미: `approve affiliate:<approval_id> <artifact_hash_prefix>`. hash prefix는 UI 식별 보조이며 전체 hash 대조는 DB binding으로 수행한다. 자유로운 자연어 `좋아`를 가장 최근 대기 건의 무조건 승인으로 해석하지 않는다.
+기존 Telegram 승인 명령 형식은 legacy publisher에만 적용한다. 신규 affiliate direct publication은 사용자의 상시 지시를 authorization_mode로 기록하고 별도 승인 메시지를 생성하지 않는다.
 
 ## 5. 게시 job 상태
 
 ```text
-queued → building → awaiting_approval → ready → deploying → verifying → published
-             └→ qa_failed             └→ expired/rejected
+queued → building → ready → deploying → verifying → published
+             └→ qa_failed             └→ manual_review
                                               └→ retry_wait / manual_review
 ```
 
 publication의 idempotency_key는 SHA256(revision_id,target,artifact_hash,action)다. 같은 key의 같은 payload 요청은 기존 job 반환, 같은 key 다른 payload는 409다.
 
-dispatch 트랜잭션은 승인·binding·content ownership을 잠그고 만료·정책·현재 target·QA 결과를 재검증한다. binding에 publication ID를 연결한 뒤 동일 job만 재시도할 수 있다. 새 revision·다른 target에서 승인 재사용은 불가다.
+dispatch 트랜잭션은 authorization_mode, content ownership, 정책, 현재 target, QA 결과를 재검증한다. 동일 idempotency key만 재시도하며 새 revision·다른 target은 새 publication으로 만든다.
 
 lease는 10분, heartbeat 30초, 최대 3회 자동 시도 초기값이다. 유효 lease가 있어도 외부 side effect 전 fence_token 확인을 한다. 배포는 idempotency 지원 host 기능을 사용하거나 deterministic deployment reference로 기존 결과를 조회한다. host가 둘 다 지원하지 않으면 timeout 후 무조건 재배포하지 않고 manual_review다.
 

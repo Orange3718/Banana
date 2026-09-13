@@ -11,12 +11,12 @@ v1.1 · IMPLEMENTED CORE · I01–I04 보강 구현 및 합성 검증 완료; I0
 | I03 | fact version·journal posting | transaction·잠금·누계 delta·중복 방지 | F01–F07 PASS |
 | I04 | 귀속·payout·cash·cost 조회 | 명시적 근거·기간·통화·품질 상태 | 총액 불변·순현금 4500 사례·미귀속 보존 |
 | I05 | 실제 공급자 parser | 익명화 실제 샘플, field mapping, policy version | G1의 실제 형식 검증 완료 |
-| I06 | revision·approval·publication | binding, Owner adapter, 배포 mock | 오래된 승인·다른 artifact·부분 성공 테스트 |
+| I06 | revision·direct publication | direct authorization, hash binding, 배포 mock | 다른 artifact·부분 성공·중복 게시 테스트 |
 | I07 | collector·pull API | mock durable store, export/ack, dedup | 장애·재전송·gap·클릭 이동 독립 검증 |
 | I08 | 운영 host 연결·최종 QA | dist-public, manifest, 배포/롤백 기록 | G2 통과 후 허용된 파일럿만 게시 |
 | I09 | 데이터 성숙·실험 판정 | decision_rules v1, data readiness, 보고 | 소표본·미수집의 잘못된 확대/중단 0건 |
 
-I01–I04의 핵심 구현과 합성 검증은 완료했다. I05는 실제 보고서가 필요하고, I06–I09는 승인 어댑터·공개 수집기·호스팅·자연 전환 증거가 필요하다.
+I01–I04의 핵심 구현과 합성 검증은 완료했다. I05는 실제 보고서가 필요하고, I06–I09는 direct publisher·공개 수집기·호스팅·자연 전환 증거가 필요하다.
 
 ## 2. 테스트 추적표
 

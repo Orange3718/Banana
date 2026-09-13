@@ -66,13 +66,13 @@ Cloudflare는 Worker와 정적 자산을 함께 배포하는 기능을 문서화
 | 원본 보고 파일 | import loader | parser, 검토자 |
 | 정규화 fact version | normalizer | reconciler |
 | 수수료 원장 | posting service | 보고·판정, 조회 전용 |
-| 승인 상태 | approval service | publisher |
+| 승인 상태 | direct user instruction 또는 legacy approval service | publisher |
 | 공개 revision | 신규 publisher, 소유권 등록 후 | 웹 방문자 |
 | 클릭 원시 이벤트 | edge collector | 인증된 pull worker |
 | 운영 click table | pull worker | 분석 |
-| 경영 결정 | 규칙 엔진 결과 + Owner 승인 기록 | 실행 스케줄러 |
+| 경영 결정 | 사용자 상시 지시 + 규칙 엔진 기록 | 실행 스케줄러 |
 
-AI는 SQL·배포·승인 credential을 받지 않는다. n8n은 예약과 작업 요청을 담당하고 수입·원장 불변조건은 테스트 가능한 모듈로 분리한다.
+AI는 SQL·배포 credential을 받지 않는다. 사용자의 상시 지시는 직접 게시 권한으로 기록하되, AI가 임의로 권한을 확장하지 않는다. n8n은 예약과 작업 요청을 담당하고 수입·원장 불변조건은 테스트 가능한 모듈로 분리한다.
 
 ## 5. 기존 경로와 신규 경로의 공존
 

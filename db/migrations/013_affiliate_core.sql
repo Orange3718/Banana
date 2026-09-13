@@ -168,6 +168,8 @@ CREATE TABLE IF NOT EXISTS affiliate.publications (
   target TEXT NOT NULL, idempotency_key TEXT NOT NULL UNIQUE, state TEXT NOT NULL, artifact_hash CHAR(64) NOT NULL CHECK (artifact_hash ~ '^[0-9a-f]{64}$'),
   git_commit TEXT, external_deployment_id TEXT, public_url TEXT, verified_at TIMESTAMPTZ
 );
+ALTER TABLE affiliate.publications ALTER COLUMN approval_id DROP NOT NULL;
+ALTER TABLE affiliate.publications ADD COLUMN IF NOT EXISTS authorization_mode TEXT NOT NULL DEFAULT 'direct_user_instruction' CHECK (authorization_mode IN ('direct_user_instruction','legacy_approval_binding'));
 
 CREATE TABLE IF NOT EXISTS affiliate.click_events (
   event_id UUID PRIMARY KEY, link_id BIGINT REFERENCES affiliate.link_versions(id), revision_id BIGINT NOT NULL REFERENCES affiliate.content_revisions(id),

@@ -60,7 +60,7 @@ T0는 첫 공개 URL·측정 정상·보고 경로 검증이 모두 완료된 �
 | A02 | 수수료 원장 단일 소유, public.revenue 복사 없음 | status와 음수 제약 불일치·중복 합산 방지 | DESIGN |
 | A03 | 첫 parser는 파일 업로드 기반 | API 자격과 별개로 보고·대사 검증 가능. 자동 API는 후속 | DESIGN |
 | A04 | 불변 콘텐츠 revision·승인 binding | 승인 뒤 변경·오래된 배포 성공 오판 방지 | DESIGN |
-| A05 | 새 상업 승인은 public.approvals, 신규 publisher queue | 기존 approval_requests 기반 publisher와 분리 | DESIGN |
+| A05 | 사용자 상시 지시를 직접 게시 권한으로 기록하고 legacy approval은 호환 모드로만 유지 | 사용자가 명시적으로 승인 게이트 제거. 기술 QA·hash·중복 검사는 유지 | IMPLEMENTED |
 | A06 | 정적 사이트 + 독립 collector + iMac pull | iMac 장애가 사이트·구매 경로에 전파되지 않음 | DESIGN |
 | A07 | Cloudflare Workers Static Assets + Worker/D1 후보 | 정적 자산·API·버퍼 조합 가능. 계정/계약/비용 미확인 | PROPOSED |
 | A08 | 직접 제휴 링크, 비동기 클릭 | provider 파라미터 보존, 수집 장애와 구매 이동 분리 | DESIGN |
@@ -77,7 +77,7 @@ DESIGN은 상세 설계의 기준으로 채택했다는 뜻이다. 운영 환경
 | D02 | 계정 사용 가능한 첫 공급자 | Coupang Partners, 로그인·리포트 메뉴 확인, API 키는 승인 대기 | 실데이터 adapter 승인 전 |
 | D03 | 운영 호스팅·도메인·이전 | Cloudflare 후보, GitHub는 소스 유지 | 운영 계정 설정·배포 전 |
 | D04 | 월/실험 예산, 운영 책임 | 신규 유료 사용 0 허용, 시간 목표 제안 | 유료 작업 활성화 전 |
-| D06 | 게시 권한 | 최초 파일럿 개별 revision 승인 | 공개 게시 전 |
+| D06 | 게시 권한 | 사용자 상시 지시 기반 직접 게시, 기술 검증 실패 시 중단 | 콘텐츠·링크 생성 전 |
 | D07 | 데이터 처리·보존·동의 조건 | 최소 이벤트·원시 30일 제안 | 공개 수집 전 |
 
 D05(데이터 소유권)는 A01/A02/A04/A05로 상세 설계상 해결했다. 운영 호환성 테스트는 아직 필요하다. D01–D07을 미결이라는 이유로 기술 명세 작성까지 멈출 필요는 없다.
