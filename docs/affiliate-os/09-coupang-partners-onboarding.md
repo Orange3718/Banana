@@ -17,9 +17,9 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 
 | 항목 | 필요한 증거 | 상태 |
 |---|---|---|
-| account_approved | 파트너스 계정 승인 화면 또는 공식 메일 | PENDING |
+| account_approved | 과거 로그인 세션 기록은 있으나 현재 승인 상태 화면은 재검증하지 않음 | REVIEW |
 | domain_approved | 게시 도메인 등록/승인 상태 | PENDING |
-| link_generation | 실제 링크 생성 규칙·허용 파라미터 | PENDING |
+| link_generation | 저장소에 기존 생성 링크가 존재하며 공개 health workflow가 형식·고지를 검사 | OBSERVED(재검증 대기) |
 | report_download | 익명화한 겹치는 기간의 성과 보고서 2개 | PENDING |
 | stable_key | 링크/추적키 또는 주문·상품 식별자의 기간 간 안정성 | PENDING |
 | commission_state | 예상·확정·취소·공제의 상태 정의 | PENDING |
@@ -39,4 +39,4 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 - 익명화 샘플 2개로 parser mapping·control total·중복·취소를 검증한다.
 - 통과 후에만 `environment=prod`, `state=ready` 계정과 첫 실험 링크를 생성한다.
 
-현재는 로그인·가입·약관 동의·실제 광고비 지출·실제 게시를 수행하지 않았다.
+기존 작업에서 쿠팡파트너스 로그인 세션과 추적 링크가 이미 사용된 기록이 있다. 따라서 새 계정 연결은 기본적으로 필요하지 않다. 다만 현재 브라우저 세션의 유효성, 계정 승인 상태, 성과 리포트 다운로드 권한은 별도 재검증 대상이다.

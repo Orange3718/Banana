@@ -14,6 +14,8 @@
   `docs/affiliate-os/07-change-log-before-after.md`와 `08-reflection.md`를 본다.
 - 첫 공급자는 쿠팡파트너스로 결정했다. 온보딩 증거 목록은
   `docs/affiliate-os/09-coupang-partners-onboarding.md`에 기록했다.
+- 기존 쿠팡 로그인 세션·추적 링크 기록이 확인되어 새 계정 연결은 불필요하다고
+  판단했다. 현재 세션 유효성 및 성과 리포트 권한만 재검증한다.
 
 ## 2026-09-07 Upbit Auto Trader 서버 적용
 
