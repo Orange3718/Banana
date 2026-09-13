@@ -17,7 +17,7 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 
 | 항목 | 필요한 증거 | 상태 |
 |---|---|---|
-| account_approved | 과거 로그인 세션 기록은 있으나 현재 승인 상태 화면은 재검증하지 않음 | REVIEW |
+| account_approved | 현재 포털 로그인 세션과 메뉴 접근 확인. 최종 승인 상태는 API 화면에서 별도 확인 필요 | OBSERVED/REVIEW |
 | domain_approved | 게시 도메인 등록/승인 상태 | PENDING |
 | link_generation | 저장소에 기존 생성 링크가 존재하며 공개 health workflow가 형식·고지를 검사 | OBSERVED(재검증 대기) |
 | report_download | 익명화한 겹치는 기간의 성과 보고서 2개 | PENDING |
@@ -25,6 +25,7 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 | commission_state | 예상·확정·취소·공제의 상태 정의 | PENDING |
 | payout | 지급 ID·지급일·공제·실입금 관계 | PENDING |
 | disclosure | 쿠팡 파트너스 활동 고지 문구·위치·정책 | PENDING |
+| partners_api | 파트너스 API 안내 화면 확인. API 키 생성 버튼은 비활성화, 최종 승인 회원만 발급 가능 | REVIEW |
 
 ## 제출 형식
 
@@ -39,4 +40,4 @@ v1.0 · DECISION · 첫 공급자 선택 완료, 계정 증거 대기
 - 익명화 샘플 2개로 parser mapping·control total·중복·취소를 검증한다.
 - 통과 후에만 `environment=prod`, `state=ready` 계정과 첫 실험 링크를 생성한다.
 
-기존 작업에서 쿠팡파트너스 로그인 세션과 추적 링크가 이미 사용된 기록이 있다. 따라서 새 계정 연결은 기본적으로 필요하지 않다. 다만 현재 브라우저 세션의 유효성, 계정 승인 상태, 성과 리포트 다운로드 권한은 별도 재검증 대상이다.
+기존 작업에서 쿠팡파트너스 로그인 세션과 추적 링크가 이미 사용된 기록이 있고, 현재 포털에서도 로그인·메뉴 접근을 확인했다. 따라서 새 계정 연결은 필요하지 않다. 다만 API 키 발급은 최종 승인 조건 때문에 현재 자동화에 사용할 수 없다. 리포트는 포털에서 수동 다운로드하거나, 승인 후 API 키가 발급될 때만 API 연동을 검토한다.
