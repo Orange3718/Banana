@@ -1,5 +1,9 @@
 # Affiliate Business OS 상세 설계 v1.2
 
+**현재 실행 입구: [11. 실행 상태·다음 큐](11-execution-status.md). 반복 원인과 반영 내용: [12. 원인 분석·개선 전후](12-repeat-question-root-cause.md).**
+실제 쿠팡 원본 확보 및 파일 검사 결과는 [13. 원본 검사](13-coupang-report-inspection.md)를 본다. 실제 헤더 샘플은 확보했지만 데이터 행·확정 정산 mapping은 아직 미검증이다.
+상태 정정: DB core는 일부 구현됐지만 I01–I04 전체 인수 완료는 아니다. 과거 F01–F07 로그는 현재 CORE01–CORE07 smoke 검사이며 설계 fixture 전체와 동일하지 않다. 아래 구현 표현은 이 범위로 해석한다.
+
 작성일: 2026-09-13 KST · 작성: OpenAI Codex / GPT-6 · 상태: CORE IMPLEMENTED · DIRECT PUBLISH MODE
 
 이 문서 묶음은 기존 설계 리뷰의 B01–B04를 구체화하고, 구현된 affiliate core와 이후 게시·측정 계약을 연결한다. 핵심 DB schema와 멱등 원장은 운영 DB에 additive 적용됐고, provider parser·collector·게시 host는 후속 구현 대상이다.

@@ -7,6 +7,10 @@ echo "Atemoya preflight"
 echo "repo: $repo_root"
 git -C "$repo_root" status --short --branch
 
+if [ -f "$repo_root/docs/affiliate-os/11-execution-status.md" ]; then
+  sed -n '1,90p' "$repo_root/docs/affiliate-os/11-execution-status.md"
+fi
+
 echo
 echo "docker containers"
 docker ps --format '{{.Names}}\t{{.Status}}' | grep -E '^(atemoya-postgres|atemoya-n8n|atemoya-webhook-proxy)\b' || true
@@ -92,4 +96,4 @@ for row in json.loads(raw or "[]"):
 PY
 
 echo
-echo "Atemoya preflight: PASS"
+echo "Atemoya preflight: checks completed; not end-to-end workload acceptance. Review errors above."

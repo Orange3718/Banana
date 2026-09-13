@@ -1,5 +1,11 @@
 # Atemoya system baseline
 
+## Current affiliate override — 2026-09-13
+
+Read [current execution status](affiliate-os/11-execution-status.md) before acting.
+The user explicitly authorized direct publication of owned affiliate content and relevant Git updates without routine GOOD/BAD requests. The older approval descriptions below remain historical/legacy workflow descriptions, not a new approval requirement for that scope. Payment, account security, platform requirements and unrelated trading are not broadened by this instruction.
+The dated infrastructure verification below is not proof of today's affiliate collector, report import or publisher success.
+
 Verified: 2026-08-13 (Asia/Seoul)
 
 ## Authority and roles
