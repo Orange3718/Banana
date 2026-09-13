@@ -2,6 +2,16 @@
 
 기준일: 2026-08-23
 
+## 2026-09-13 Affiliate Business OS I01–I04
+
+- `affiliate` 전용 schema와 멱등 fact/journal/payout/cash 구조를
+  `db/migrations/013_affiliate_core.sql`로 additive 적용했다.
+- 백업 `/Users/orange/Atemoya/backups/20260913T092453Z`, 운영 검증 및
+  `tools/verify_affiliate_core.py` 합성 검증은 PASS했다.
+- 실제 공급자 계정·보고서 샘플, 복원 훈련, provider adapter, 공개 이벤트
+  collector는 아직 미완료다. 상세 근거와 전후 비교는
+  `docs/affiliate-os/07-change-log-before-after.md`와 `08-reflection.md`를 본다.
+
 ## 2026-09-07 Upbit Auto Trader 서버 적용
 
 - `origin/feat/upbit-auto-trader`를 iMac 운영 브랜치에 병합하고
