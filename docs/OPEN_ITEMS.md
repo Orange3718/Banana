@@ -12,6 +12,8 @@
 - 실제 공급자 계정·보고서 샘플, 복원 훈련, provider adapter, 공개 이벤트
   collector는 아직 미완료다. 상세 근거와 전후 비교는
   `docs/affiliate-os/07-change-log-before-after.md`와 `08-reflection.md`를 본다.
+- 첫 공급자는 쿠팡파트너스로 결정했다. 온보딩 증거 목록은
+  `docs/affiliate-os/09-coupang-partners-onboarding.md`에 기록했다.
 
 ## 2026-09-07 Upbit Auto Trader 서버 적용
 
