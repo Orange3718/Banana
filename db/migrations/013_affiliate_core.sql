@@ -130,11 +130,26 @@ CREATE TABLE IF NOT EXISTS affiliate.cost_entries (
   economic_date DATE NOT NULL, paid_at TIMESTAMPTZ, currency CHAR(3) NOT NULL CHECK (currency ~ '^[A-Z]{3}$'), recognized_amount NUMERIC(20,6) NOT NULL DEFAULT 0,
   cash_outflow NUMERIC(20,6) NOT NULL DEFAULT 0, classification TEXT NOT NULL, evidence_ref TEXT NOT NULL, source_key TEXT NOT NULL UNIQUE
 );
+ALTER TABLE affiliate.cost_entries ADD COLUMN IF NOT EXISTS legacy_cost_id BIGINT REFERENCES public.cost(id);
+
+CREATE TABLE IF NOT EXISTS affiliate.time_entries (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, experiment_id BIGINT REFERENCES public.experiments(id), content_id BIGINT REFERENCES public.content(id),
+  occurred_at TIMESTAMPTZ NOT NULL, minutes INT NOT NULL CHECK (minutes >= 0), actor_role TEXT NOT NULL, activity TEXT NOT NULL, source_key TEXT NOT NULL UNIQUE
+);
 
 CREATE TABLE IF NOT EXISTS affiliate.jobs (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, kind TEXT NOT NULL, job_key TEXT NOT NULL UNIQUE, payload_hash CHAR(64) NOT NULL CHECK (payload_hash ~ '^[0-9a-f]{64}$'),
   state TEXT NOT NULL, attempt INT NOT NULL DEFAULT 0, max_attempts INT NOT NULL DEFAULT 3, next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   lease_owner TEXT, lease_expires_at TIMESTAMPTZ, fence_token BIGINT NOT NULL DEFAULT 0, result_ref TEXT, correlation_id TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS affiliate.outbox (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, event_key TEXT NOT NULL UNIQUE, kind TEXT NOT NULL, payload JSONB NOT NULL,
+  state TEXT NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','sent','failed')), attempts INT NOT NULL DEFAULT 0, next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT now(), sent_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS affiliate.pull_checkpoints (
+  consumer_key TEXT PRIMARY KEY, cursor TEXT NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), last_success_at TIMESTAMPTZ, last_error_code TEXT
 );
 
 CREATE TABLE IF NOT EXISTS affiliate.approval_bindings (
@@ -172,6 +187,9 @@ DECLARE old affiliate.fact_versions%ROWTYPE; new_id BIGINT; account BIGINT;
 BEGIN
   SELECT fs.account_id INTO account FROM affiliate.fact_series fs WHERE fs.id = p_series_id FOR UPDATE;
   IF account IS NULL THEN RAISE EXCEPTION 'unknown fact series %', p_series_id; END IF;
+  IF NOT EXISTS (SELECT 1 FROM affiliate.fact_series WHERE id=p_series_id AND currency=p_currency) THEN
+    RAISE EXCEPTION 'currency % does not match series %', p_currency, p_series_id;
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM affiliate.import_batches WHERE id=p_batch_id AND account_id=account AND state IN ('normalized','received')) THEN
     RAISE EXCEPTION 'batch % is not ready for posting', p_batch_id;
   END IF;

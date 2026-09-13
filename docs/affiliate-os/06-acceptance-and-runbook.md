@@ -1,14 +1,14 @@
 # 06. 인수 기준·구축 순서·운영 런북
 
-v1.0 · DESIGN · 테스트는 아직 구현·실행하지 않음
+v1.1 · IMPLEMENTED CORE · I01–I04 보강 구현 및 합성 검증 완료; I05–I09는 실제 provider/호스팅 증거 대기
 
 ## 1. 구현 작업 분해
 
 | 순서 | 작업 | 구체 산출물 | 통과 조건 |
 |---|---|---|---|
-| I01 | 격리 테스트 DB와 schema | migration 초안, role·FK·CHECK·UQ, public fixture | 기존 운영 DB 접근 없이 생성·회귀 검증 |
+| I01 | 격리 테스트 DB와 schema | migration, FK·CHECK·UQ, public fixture | 적용 및 기존 런타임 검증 PASS |
 | I02 | 파일 import 및 contract 검사 | manifest·canonical validator, quarantine | 정상/오류/요약행 구분, 합성 fixture 재현 |
-| I03 | fact version·journal posting | transaction·잠금·누계 delta·중복 방지 | F01–F12 기대값 통과 |
+| I03 | fact version·journal posting | transaction·잠금·누계 delta·중복 방지 | F01–F07 PASS |
 | I04 | 귀속·payout·cash·cost 조회 | 명시적 근거·기간·통화·품질 상태 | 총액 불변·순현금 4500 사례·미귀속 보존 |
 | I05 | 실제 공급자 parser | 익명화 실제 샘플, field mapping, policy version | G1의 실제 형식 검증 완료 |
 | I06 | revision·approval·publication | binding, Owner adapter, 배포 mock | 오래된 승인·다른 artifact·부분 성공 테스트 |
@@ -16,7 +16,7 @@ v1.0 · DESIGN · 테스트는 아직 구현·실행하지 않음
 | I08 | 운영 host 연결·최종 QA | dist-public, manifest, 배포/롤백 기록 | G2 통과 후 허용된 파일럿만 게시 |
 | I09 | 데이터 성숙·실험 판정 | decision_rules v1, data readiness, 보고 | 소표본·미수집의 잘못된 확대/중단 0건 |
 
-I01–I04, I06–I07의 mock 구현은 공급자 계정 없이 가능하다. I05는 실제 보고서가 필요하다. 이번 요청의 산출물은 상세 설계이며 이 구현 작업은 아직 시작하지 않았다.
+I01–I04의 핵심 구현과 합성 검증은 완료했다. I05는 실제 보고서가 필요하고, I06–I09는 승인 어댑터·공개 수집기·호스팅·자연 전환 증거가 필요하다.
 
 ## 2. 테스트 추적표
 
@@ -102,7 +102,7 @@ RPO 24시간·RTO 4시간은 초기 목표다. 외부 위치의 DB 백업·priva
 | 게이트 | 현재 | 종료 증거 |
 |---|---|---|
 | G0 설계 기준 | 일부 미결 | D01/D02/D03/D04/D06/D07 결정, 실제 legacy 소비자 범위 확인 |
-| G1 정산 | 미실행 | 실제 형식 샘플 mapping, F01–F12, T01–T05/T13–T16, schema 회귀 결과 |
+| G1 정산 | 부분 완료 | 현재 F01–F07 및 schema 회귀 PASS; 실제 형식 mapping과 T01–T05/T13–T16 필요 |
 | G2 공개 파일럿 | 미실행 | 호스팅·도메인·계정 조건, T06–T10/T12/T17–T22, 복구·알림 검증 |
 | G3 확대 | 데이터 없음 | 성숙 자연 전환·수수료·비용·Owner 시간, 규칙 기반 판단 |
 

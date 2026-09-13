@@ -30,6 +30,19 @@ INSERT INTO affiliate.payouts(account_id,external_payout_id,currency,evidence_re
 \gset payout_
 INSERT INTO affiliate.cash_movements(account_id,payout_id,external_statement_key,paid_at,currency,signed_amount,evidence_ref) VALUES (:account_id,:payout_id,'fixture-statement',now(),'USD',7500,'fixture://statement');
 SELECT CASE WHEN (SELECT cash_amount FROM affiliate.v_cash_flow WHERE account_id=:account_id AND currency='USD')=7500 THEN 'F05 cash view ok' ELSE 'FAIL F05' END;
+DO $$ BEGIN
+  BEGIN
+    PERFORM affiliate.post_fact_version((SELECT ib.id FROM affiliate.import_batches ib WHERE ib.source_ref='fixture://batch'),(SELECT fs.id FROM affiliate.fact_series fs WHERE fs.series_key='fixture-series'),'v4','eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee','2026-01-01','reported',0,1,'EUR','row-4','{}');
+    RAISE EXCEPTION 'expected currency failure';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM NOT LIKE 'currency % does not match series %' THEN RAISE; END IF;
+  END;
+END $$;
+SELECT 'F06 currency guard ok';
+INSERT INTO affiliate.outbox(event_key,kind,payload) VALUES ('fixture-event','fixture','{}');
+INSERT INTO affiliate.pull_checkpoints(consumer_key,cursor) VALUES ('fixture-consumer','cursor-1');
+INSERT INTO affiliate.time_entries(experiment_id,occurred_at,minutes,actor_role,activity,source_key) VALUES (NULL,now(),15,'operator','fixture','fixture-time');
+SELECT CASE WHEN (SELECT count(*) FROM affiliate.outbox WHERE event_key='fixture-event')=1 AND (SELECT cursor FROM affiliate.pull_checkpoints WHERE consumer_key='fixture-consumer')='cursor-1' THEN 'F07 delivery controls ok' ELSE 'FAIL F07' END;
 ROLLBACK;
 """
 
@@ -38,7 +51,7 @@ if proc.returncode:
     print(proc.stderr, file=sys.stderr)
     sys.exit(proc.returncode)
 lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
-expected = ["F01 pending journal ok", "F02 delta posting ok", "F03 idempotent replay ok", "F04 reversal delta ok", "F05 cash view ok"]
+expected = ["F01 pending journal ok", "F02 delta posting ok", "F03 idempotent replay ok", "F04 reversal delta ok", "F05 cash view ok", "F06 currency guard ok", "F07 delivery controls ok"]
 missing = [item for item in expected if item not in lines]
 if missing:
     print("missing acceptance markers:", ", ".join(missing), file=sys.stderr)

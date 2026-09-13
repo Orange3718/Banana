@@ -27,8 +27,8 @@
 
 | 변경 ID | 파일 | 변경 | 상태 | 검증 |
 |---|---|---|---|---|
-| C01 | db/migrations/013_affiliate_core.sql | affiliate schema, 핵심 FK/UQ/CHECK, fact posting 함수 | 완료(I01–I04 범위) | migration 적용, `./ops/scripts/verify.sh` PASS |
-| C02 | tools/verify_affiliate_core.py | 합성 수입·정정·중복·현금 뷰 테스트 | 완료(I01–I04 범위) | F01–F05 PASS, transaction rollback |
+| C01 | db/migrations/013_affiliate_core.sql | affiliate schema, FK/UQ/CHECK, fact posting, outbox/checkpoint/time cost | 완료(I01–I04 범위) | migration 적용, `./ops/scripts/verify.sh` PASS |
+| C02 | tools/verify_affiliate_core.py | 합성 수입·정정·중복·통화 차단·전달 제어 테스트 | 완료(I01–I04 범위) | F01–F07 PASS, transaction rollback |
 | C03 | docs/affiliate-os/08-reflection.md | 구축 중 발견·인지하지 못한 부분 기록 | 진행 중 | 실제 provider 샘플 수령 시 갱신 |
 | C04 | 기존 n8n·Publisher·Pages | 변경 없음 | 유지 | preflight, 코드·워크플로 읽기 검토 |
 

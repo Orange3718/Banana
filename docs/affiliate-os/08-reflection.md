@@ -28,6 +28,7 @@
 - 승인 대상은 최종 artifact hash이며, revision·policy·target과 함께 묶는다.
 - AI는 근거 정리와 설명을 맡고 금액·권한·상태 전이는 결정론적 코드가 맡는다.
 - `013_affiliate_core.sql`을 적용하며 위 경계를 실제 FK/UQ/CHECK와 `post_fact_version` 함수로 고정했다. 합성 fixture는 재수입·정정·현금 뷰까지 통과했지만 실제 공급자 포맷의 증거는 아니다.
+- 2차 점검에서 설계의 outbox·pull checkpoint·time entry·legacy cost 연결이 초기 DDL에서 빠진 것을 발견해 보강했다. 구현 범위가 커질수록 문서의 엔터티 목록과 실제 DDL을 자동 대조하는 검사가 필요하다.
 
 ### 아직 답하지 못한 질문
 
@@ -44,6 +45,7 @@
 - migration을 운영 DB에 적용하기 전 백업·복원 결과를 기록한다.
 - 첫 실제 자연 전환 뒤 귀속 수준과 현금 대사를 다시 검토한다.
 - 복원 훈련을 완료하기 전까지 백업 성공을 복구 가능성으로 해석하지 않는다.
+- `F01–F07 PASS`는 구조·멱등성·통화 경계를 증명할 뿐, provider report mapping·실제 공개 수집·승인 게시 성공을 증명하지 않는다.
 
 ## 반추 작성 규칙
 
