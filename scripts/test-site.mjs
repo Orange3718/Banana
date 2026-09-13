@@ -27,7 +27,7 @@ for (const file of html) {
   for (const match of text.matchAll(/<a\b[^>]*data-affiliate[^>]*>/g)) {
     const href = match[0].match(/href="([^"]+)"/)?.[1];
     if (href && /^https:\/\/link\.coupang\.com\//.test(href)) {
-      if (!text.includes('쿠팡 파트너스 활동의 일환으로') || !text.includes('수수료를 제공받을 수 있습니다')) errors.push(`${file}: Coupang disclosure missing`);
+      if (!text.includes('쿠팡 파트너스 활동의 일환으로') || !text.includes('수수료를 제공받습니다')) errors.push(`${file}: Coupang disclosure missing`);
       if (!/data-link-key="[a-z0-9_-]+"/i.test(match[0])) errors.push(`${file}: tracking key missing`);
       if (!/rel="[^"]*sponsored/.test(match[0])) errors.push(`${file}: sponsored marker missing`);
     }
