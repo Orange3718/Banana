@@ -73,7 +73,7 @@ def snapshot():
  revenue_ops=db_json("select metric_date,channel,page_views,outbound_clicks,affiliate_clicks,conversions,revenue_amount,source from revenue_channel_metrics order by metric_date desc,collected_at desc limit 14")
  failures=n8n_failures()
  h=run(['curl','-fsS','--max-time','2','http://127.0.0.1:5678/healthz'])
- return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'revenue_ops':revenue_ops}
+ return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'revenue_ops':revenue_ops,'affiliate_measurement':{'state':'no_provider_rows' if not revenue_ops else 'rows_present','interpretation':'UNKNOWN—not zero; GA4/Coupang receipt is not connected to this dashboard' if not revenue_ops else 'rows present; source and period still required'}}
 class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?',1)[0]=='/api/status':

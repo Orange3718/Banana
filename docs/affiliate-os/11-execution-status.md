@@ -48,6 +48,7 @@
 - 공개 경로 `docs/OPEN_ITEMS.md`, `tools/atemoya-dashboard.html`: HTTP 404. 내부 문서와 대시보드는 사이트 산출물에서 제외됐으며 Git 저장소 자체의 가시성은 변경하지 않았다.
 - 로컬 11개 테스트와 공개 44 HTML/57개 파일 검사 PASS. CORE01–CORE07 DB smoke도 재실행 PASS. 실제 GA 수신·정산 수입·전체 설계 인수와는 별개다.
 - 후속 고지 정정: 포털이 표시한 ‘수수료를 제공받습니다’ 문구로 세 제휴 페이지와 검사 기준을 일치시켰다. main `65e0bbcda0ea28ab15cdc1aac009cc8d0cb62c47`, [배포 실행 34756097722](https://github.com/Orange3718/Banana/actions/runs/34756097722) success, 공개 daily-use 본문에서 정확한 문구를 확인했다.
+- 대시보드 점검: 로컬 UI/API는 정상 응답하지만 `revenue_ops=[]`라서 유입·수익 수신이 연결되지 않았고, 레거시 `awaiting_approval` 1건과 반복 오류가 표시된다. 상세 근거와 API 개선은 [14. 운영 대시보드 점검](14-dashboard-audit.md).
 
 ## 관련 기록
 
