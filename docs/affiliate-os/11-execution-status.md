@@ -1,7 +1,7 @@
 # 11. 실행 상태·다음 작업 — 단일 재개 입구
 
-갱신: 2026-09-14 09:20 KST
-전체 판정: **REVIEW — 직접 게시 운영 중, 유입·수익 효과는 아직 미검증**
+갱신: 2026-09-14 20:50 KST
+전체 판정: **REVIEW — 쿠팡 직접 게시 3/10 공개·7건 예약, 네이버 첫 게시 인증 대기, 유입·수익 효과는 아직 미검증**
 
 ## 현재 사용자 지시
 
@@ -15,8 +15,9 @@
 | 항목 | 상태 | 확인 증거 |
 |---|---|---|
 | 쿠팡 직접 게시 대기열 | LIVE | `affiliate.jobs`·`affiliate.publications` 10건, 모두 `direct_user_instruction` |
-| 첫 추가 글 | PUBLISHED | 2026-09-14 09:00 KST, commit `356164d`, 공개 HTTP 200·제목·링크·고지 확인 |
-| 남은 추가 글 | SCHEDULED 9 | 09-14 14:00·20:00, 09-15 3건, 09-16 3건, 09-17 09:00 |
+| 오늘 추가 글 | PUBLISHED 3 | 09:00 LED `356164d`, 14:00 밀폐용기 `19562a5`, 20:00 로봇청소기 `c5e3898`; 세 공개 URL 모두 publisher 검증 완료 |
+| 남은 추가 글 | SCHEDULED 7 | 09-15 3건, 09-16 3건, 09-17 09:00 |
+| 네이버 블로그 첫 글 | LOGIN BLOCKED | LED 마스크용 별도 원고 QA 완료. Chrome에 QR 로그인 화면을 열었으며 활성·저장 세션이 없어 사용자 앱 스캔 1회가 필요 |
 | 실행기 | LIVE | `com.atemoya.affiliate-direct-publisher`, 15분 간격, 최근 exit 0 |
 | 사용자 승인 | NOT REQUIRED | `approval_id=NULL`, 기술 QA만 수행 |
 | 레거시 승인형 n8n | INACTIVE | `AtemoyaRevenueAutopilot01 active=false`; 진행 가능 24건은 rejected, 미결 승인 5건은 deferred, pending 0 |
@@ -27,8 +28,8 @@
 
 ## 다음 실행 큐
 
-1. 2026-09-14 14:00 KST: `밀프렙 밀폐용기 수량과 크기 정하는 법` 게시 대상. 15분 poll SLA에 따라 14:15까지 실행·검증한다.
-2. 2026-09-14 20:00 KST: `로봇청소기 구매 전 우리 집 동선 실측`.
+1. 네이버 앱에서 현재 Chrome의 QR을 스캔하면 첫 LED 글을 편집기에 입력하고 공개 직전 내용·링크를 다시 검사한다.
+2. 2026-09-15 09:00 KST: `요가매트 두께와 방 크기 맞추는 기준` 직접 게시 대상. 15분 poll SLA에 따라 09:15까지 실행·검증한다.
 3. 이후 [18번 운영 설계](18-autonomous-volume-publication.md)의 표에 따라 하루 최대 3건, 총 10건에서 자동 중단한다.
 4. 실패가 발생하면 같은 아티팩트만 재시도한다. 콘텐츠·링크·해시 오류는 후속 전부를 멈추고 대시보드와 Watchdog에 표시한다.
 5. 이번 10건 완료 후에는 측정과 호스트 결정 없이 새 배치를 자동 생성하지 않는다.
@@ -59,7 +60,7 @@
 - 상업 운영 호스트·도메인을 확정할 때
 - 포털이 2FA, 약관 동의, 결제 또는 본인 확인을 요구할 때
 
-현재 게시를 위해 사용자가 할 일은 없다.
+GitHub Pages의 남은 7건에는 사용자가 할 일이 없다. 네이버 첫 게시에는 저장된 로그인 정보가 없으므로, 열린 QR을 네이버 앱으로 스캔하는 동작만 필요하다. 비밀번호·OTP는 채팅이나 저장소에 남기지 않는다.
 
 ## 남은 P1/P2
 
@@ -74,14 +75,14 @@
 - DB 백업: `/Users/orange/Atemoya/backups/20260913T235613Z`, `/Users/orange/Atemoya/backups/20260913T235720Z`, `/Users/orange/Atemoya/backups/20260914T001323Z`.
 - direct publisher 단위 테스트 9개 PASS.
 - Watchdog 단위 테스트 11개 PASS.
-- 첫 공개 URL: `https://orange3718.github.io/Banana/offers/led-mask-first-two-weeks-routine.html`.
-- 첫 공개 commit: `356164df0074d557789c52fc881502095ed075cd`.
+- 첫 세 공개 URL: LED 마스크, 밀폐용기, 로봇청소기 페이지.
+- 공개 commit: `356164df0074d557789c52fc881502095ed075cd`, `19562a5ce811d131aa1ad16491ccfd84a43c8b8d`, `c5e3898e17505b2558f5d66eafe6a48a1f7c4735`.
 - 첫 Pages 실행 `34791301806` 및 tracking 무결성 보강 실행 `34791632103`: completed/success.
 - 전역 affiliate 검사 기준 공개 commit: `6ae3d89f1e352d14912aa148b16143ca4df1c2ef`.
-- DB: 첫 job `succeeded`, publication `published`, attempt 1, verified_at 기록.
+- DB: 첫 3개 job `succeeded`, publication `published`, 각 attempt 1·verified_at 기록. 나머지 7개는 queued.
 - n8n DB: `AtemoyaRevenueAutopilot01 active=false` 확인.
 - 레거시 격리 전 백업 `/Users/orange/Atemoya/backups/20260914T000846Z`; 삭제 없이 pending approval 0 확인.
-- Dashboard API: 첫 글 공개 URL과 두 번째 14:00 예약을 반환.
+- Dashboard API·DB 원장: 3건 published와 다음 2026-09-15 09:00 예약을 반환.
 
 ## 관련 기록
 
@@ -90,3 +91,4 @@
 - [조회·클릭·수익 측정 경로](10-measurement-map.md)
 - [10개 원래 카테고리 링크·게시 증거](16-ten-category-publication-plan.md)
 - [운영 대시보드 점검](14-dashboard-audit.md)
+- [네이버 블로그 첫 게시 설계·실행 기록](19-naver-blog-publication.md)

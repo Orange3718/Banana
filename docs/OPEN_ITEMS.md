@@ -9,11 +9,13 @@
 
 - 레거시 해외 커머스 뉴스 승인 흐름을 비활성화하고 쿠팡 직접 게시 10건을 별도 DB queue로 만들었다.
 - `com.atemoya.affiliate-direct-publisher`가 15분마다 확인하며 09:00·14:00·20:00 KST, 하루 최대 3건을 처리한다.
-- 첫 추가 글은 `356164d`로 main에 게시됐고 공개 HTTP 200·제목·링크·고지를 확인했다. 다음은 14:00 밀폐용기 글이다.
-- 대시보드는 direct queue 10건의 진행률·다음 예약·공개 URL을 표시한다. 사용자가 할 게시 승인·PR 병합·계정 연결은 없다.
+- 09-14 예약 3건은 `356164d`·`19562a5`·`c5e3898`로 main에 게시됐고 공개 검증을 통과했다. 다음은 09-15 09:00 요가매트 글이다.
+- 대시보드는 direct queue 10건의 진행률·다음 예약·공개 URL을 표시한다. 남은 쿠팡 7건에는 사용자가 할 게시 승인·PR 병합·계정 연결이 없다.
+- 네이버 첫 LED 파일럿은 별도 원고 QA를 통과했고, 현재 상태는 `auth_required`다. 제어 가능한 브라우저에 활성·저장 세션이 없어 열린 QR을 네이버 앱으로 한 번 스캔해야 한다.
 - 신규 게시기는 확정 원고를 렌더링하므로 게시당 모델 토큰은 0이다. 새 상품 발굴·새 링크 생성은 쿠팡 API 최종 승인 전에는 자동화하지 않는다.
 - 이번 10건 뒤에는 호스팅 적합성, 자연 유입과 쿠팡 외부 판매 근거 없이 수량을 더 늘리지 않는다.
 - 상세 설계·전후 비교·중단 기준: `docs/affiliate-os/18-autonomous-volume-publication.md`.
+- 네이버 브라우저 게시의 실행·검증 기준: `docs/affiliate-os/19-naver-blog-publication.md`.
 
 기준일: 2026-08-23
 
@@ -125,7 +127,7 @@
 - 실제 수집은 한국·해외 쇼핑, 제품 비교, 제휴, creator commerce, social
   shopping 검색으로 확대하며 로컬 작업은 수익 의도 점수 20점 이상만 처리한다.
 - 유입·클릭·전환·수익 저장 구조와 대시보드 표시는 준비했다. GA4 Data API와
-  네이버/Blogger 게시 OAuth는 계정 인증이 있어야 실제 수집·게시를 시작한다.
+  Blogger 게시에는 Google OAuth가 필요하고, 네이버 게시에는 현재 브라우저 세션 인증이 필요하다.
 - 실제 iMac 적용 순서: 백업 → migration 010 → n8n 두 workflow 재import/publish
   → Reconciler LaunchAgent 등록 → 전체 검증 → feature branch push → PR 병합.
 - 채널별 공식 지원 범위와 활성화 검증 조건은
@@ -216,7 +218,7 @@
 1. Telegram `GOOD / BAD / 수정` 답장을 최신 로컬 결과의 `metadata.owner_review`에 연결 완료 (`AtemoyaLocalLLMReviewGate01`)
 2. 근거 URL이 포함된 초안만 승인 요청하도록 QA 강화
 3. GOOD 승인 후 GitHub Pages 게시와 게시 URL 저장을 먼저 완성
-4. 네이버·Blogger OAuth 게시를 각각 연결하고 실제 게시 URL까지 검증
+4. Blogger OAuth 게시와 네이버의 명시적 브라우저 게시를 각각 연결하고 실제 게시 URL까지 검증
 5. GA4·제휴 클릭·구매 신호를 콘텐츠별로 회수
 6. 로컬 이미지 모델은 MLX 런타임만 설치됨. FLUX/SDXL 가중치·썸네일 생성·품질 검증은 미완료
 

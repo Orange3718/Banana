@@ -1,7 +1,7 @@
 # 18. 승인 없는 쿠팡 수량 확대 운영 설계와 구축 기록
 
-갱신: 2026-09-14 09:20 KST
-상태: **LIVE — 10건 대기열 중 1건 공개 검증 완료, 9건 예약**
+갱신: 2026-09-14 20:50 KST
+상태: **LIVE — 10건 대기열 중 3건 공개 검증 완료, 7건 예약**
 
 ## 결론
 
@@ -12,7 +12,7 @@
 - 레거시 `AtemoyaRevenueAutopilot01`: 신규 승인 요청을 만들지 않도록 비활성화했다. 진행 가능 상태였던 24건은 `rejected`, 미결 승인 5건은 `deferred`로 이력 보존했고 삭제하지 않았다.
 - 신규 `com.atemoya.affiliate-direct-publisher`: 검토된 쿠팡 링크·원고·시각만 처리한다. 사람 승인과 모델 호출은 없다.
 - PostgreSQL `affiliate.jobs`와 `affiliate.publications`: 예약, 시도, 해시, 권한 방식, 공개 URL과 검증 시각의 단일 실행 원장이다.
-- 수량: 추가 10건, 하루 최대 3건. 첫 글은 2026-09-14 09:00 KST 공개 검증 완료했다.
+- 수량: 추가 10건, 하루 최대 3건. 2026-09-14 예약 3건은 모두 공개 검증 완료했다.
 
 ## 왜 사용자가 같은 질문을 계속했는가
 
@@ -54,8 +54,8 @@ published 상태·commit·URL·검증시각 → 대시보드 / Watchdog
 | 예약 KST | 카테고리 | 글 | 상태 |
 |---|---|---|---|
 | 09-14 09:00 | 뷰티 | LED 마스크 첫 2주 사용 루틴 | 공개 완료 |
-| 09-14 14:00 | 주방 | 밀프렙 밀폐용기 수량·크기 | 예약 |
-| 09-14 20:00 | 생활가전 | 로봇청소기 집 동선 실측 | 예약 |
+| 09-14 14:00 | 주방 | 밀프렙 밀폐용기 수량·크기 | 공개 완료 |
+| 09-14 20:00 | 생활가전 | 로봇청소기 집 동선 실측 | 공개 완료 |
 | 09-15 09:00 | 운동 | 요가매트 두께·방 크기 | 예약 |
 | 09-15 14:00 | 반려동물 | 자동급식기 정전·막힘 대응 | 예약 |
 | 09-15 20:00 | 육아 | 물티슈 집·외출 보관 | 예약 |
@@ -74,7 +74,7 @@ published 상태·commit·URL·검증시각 → 대시보드 / Watchdog
 |---|---|
 | 없음. Telegram `GOOD/BAD`, PR 병합, 게시 확인 요청 없음 | 대상·권한·상품/링크 binding·본문 길이·금지 표현·정확한 고지·추적키·canonical·아티팩트 해시·공개 경계 검사 |
 
-DB에는 모든 신규 publication을 `approval_id=NULL`, `authorization_mode=direct_user_instruction`으로 저장한다. 링크나 본문이 manifest와 달라지면 자동 승인하지 않고 `manual_review`로 바꾸며 뒤의 9건도 멈춘다.
+DB에는 모든 신규 publication을 `approval_id=NULL`, `authorization_mode=direct_user_instruction`으로 저장한다. 링크나 본문이 manifest와 달라지면 자동 승인하지 않고 `manual_review`로 바꾸며 아직 게시되지 않은 후속 작업도 모두 멈춘다.
 
 ## 수량을 하루 3건으로 정한 근거
 
@@ -110,16 +110,16 @@ DB에는 모든 신규 publication을 `approval_id=NULL`, `authorization_mode=di
 - DB: migration 014 적용, direct queue 10건과 immutable revision/link/publication binding 저장.
 - 정적·회귀 테스트: Publisher 9건, 전체 Python 53건, 공개 산출물 Node 11건, affiliate inventory·site 검사 PASS.
 - Watchdog: 미래 예약 정상, 45분 정체 BAD, manual review BAD를 포함한 회귀 검증 PASS.
-- 첫 공개 commit: `356164df0074d557789c52fc881502095ed075cd`.
+- 첫날 공개 commit: LED `356164df0074d557789c52fc881502095ed075cd`, 밀폐용기 `19562a5ce811d131aa1ad16491ccfd84a43c8b8d`, 로봇청소기 `c5e3898e17505b2558f5d66eafe6a48a1f7c4735`.
 - 첫 Pages 실행: `34791301806`, completed/success.
 - 전역 tracking 검사 배포 commit: `6ae3d89f1e352d14912aa148b16143ca4df1c2ef`; Pages 실행 `34791632103`, completed/success.
-- 첫 공개 URL: `https://orange3718.github.io/Banana/offers/led-mask-first-two-weeks-routine.html`.
-- 공개 검증: HTTP 200, 예상 제목·`g0MPccSO4q` 링크·정확한 쿠팡 고지 문구 확인.
+- 첫날 공개 URL: `https://orange3718.github.io/Banana/offers/led-mask-first-two-weeks-routine.html`, `https://orange3718.github.io/Banana/offers/airtight-container-meal-prep-sizing.html`, `https://orange3718.github.io/Banana/offers/robot-vacuum-home-layout-audit.html`.
+- 공개 검증: Publisher가 세 글의 HTTP 200, 예상 제목·제휴 링크·정확한 쿠팡 고지 문구를 확인한 뒤에만 `published`로 기록했다.
 - 운영 상태: legacy n8n workflow `active=false`; direct LaunchAgent 등록, 마지막 종료 코드 0.
 
 ## 사용자가 해야 하는 일
 
-현재 10건 게시에는 없다. 로그인, 승인 답장, 링크 생성, PR 병합을 요구하지 않는다. 사용자가 개입할 상황은 다음 둘뿐이다.
+현재 GitHub Pages의 남은 7건 게시에는 없다. 로그인, 승인 답장, 링크 생성, PR 병합을 요구하지 않는다. 사용자가 개입할 상황은 다음 둘뿐이다.
 
 1. 루프를 중단하고 싶을 때 운영 대시보드에서 확인 후 중단을 지시한다.
 2. 다음 10건을 넘어 확대하기 전에 상업 호스트/도메인 선택처럼 소유자 결정이 필요한 새 범위가 생겼을 때 결정한다.
