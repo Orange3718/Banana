@@ -52,5 +52,8 @@ LED마스크, 홈뷰티, 뷰티디바이스, 피부관리기, LED마스크체크
 - 원본 키: `coupang-direct-20260914-led-mask-first-two-weeks`
 - 원본 URL: `https://orange3718.github.io/Banana/offers/led-mask-first-two-weeks-routine.html`
 - 제휴 링크 확인일: 2026-09-14
-- 게시 상태: 편집기 입력 완료·최종 발행 확인 대기
+- 게시 상태: 공개 검증 완료
+- 게시 URL: `https://blog.naver.com/yoojaseok/224411705269`
+- 게시 시각: 2026-09-14 21:43:21 KST
+- 운영 원장: content `49`, revision `41`, publication `41`
 - 중복 방지 키: `naver:coupang-direct-20260914-led-mask-first-two-weeks`
