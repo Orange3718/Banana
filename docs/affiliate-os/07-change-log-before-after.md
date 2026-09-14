@@ -4,6 +4,31 @@
 
 이 문서는 설계 개선과 I01–I04 구축 변경을 한 곳에서 추적하는 기록이다. 실제 변경이 없는 운영 구성요소는 unchanged로 표시한다. 추측한 기능은 구현 완료로 적지 않는다.
 
+## 2026-09-14 — 직접 게시 수량 확대 전후
+
+| 영역 | 개선 전 | 개선 후 | 근거 / 효과 |
+|---|---|---|---|
+| 사용자 권한 | 문서에는 직접 게시, 실행기는 승인 대기 | 신규 publication은 `direct_user_instruction`, `approval_id=NULL` | 같은 승인을 다시 묻지 않으며 기술 QA는 유지 |
+| 콘텐츠 큐 | 해외 커머스 뉴스 23건과 쿠팡 작업이 같은 Autopilot 문맥 | 레거시 n8n 비활성, 쿠팡 10건을 `affiliate.jobs`로 분리 | 오래된 뉴스의 무분별한 자동 승인 방지 |
+| 다음 게시 | 수동 배포 뒤 다음 시각 없음 | 09:00·14:00·20:00, 하루 3건, DB와 manifest에 저장 | 사용자가 “다음은?”을 물어 실행을 재개할 필요 제거 |
+| 배포 브랜치 | 구형 Publisher가 다른 feature branch를 하드코딩, PR 병합 대기 | detached 전용 worktree에서 세 공개 경로만 stage하고 `main` push | 현재 개발 worktree와 Upbit 변경 격리 |
+| 완료 기준 | 게시 파일·push와 공개 성공이 혼용 | HTTP 200 + 제목 + 고지 + 예상 링크가 모두 일치해야 `published` | Pages 실패나 전파 지연을 완료로 오보고하지 않음 |
+| 토큰 | 후보 선별·장문 생성에 로컬 모델 사용 | 검토된 구조화 원고를 결정론적으로 렌더링 | 예약 게시당 Ollama/Gemini/클라우드 토큰 0 |
+| 수량 통제 | 한 번의 10건 수동 배치 또는 하루 1건 승인 요청 | 추가 10건, 하루 최대 3건, 10건 뒤 자동 중단 | 실패 확산·얇은 콘텐츠·무제한 양산 제한 |
+| 운영 관측 | 대시보드에 레거시 단계만 표시 | 직접 큐의 진행률·예약·URL·오류와 Watchdog SLA 표시 | 다음 사건과 정체 이유를 한 화면에서 확인 |
+| 추적키 | 두 LED 글이 `lg-pral-bwj1`를 공유 | daily-use 키 분리, 모든 제휴 페이지 전역 고유성 검사 | 콘텐츠별 클릭 귀속 충돌 제거 |
+
+추가 구축 ID:
+
+- C05: migration 014 — direct job payload, 상태·lease 제약, dispatch 인덱스와 상태 뷰.
+- C06: reviewed manifest·seed — 10개 immutable revision/link/publication/job binding.
+- C07: direct publisher·LaunchAgent — 15분 poll, 일일 상한, 재시도, 격리 배포, 공개 확인.
+- C08: dashboard·Watchdog — 다음 시각과 end-to-end 정체 SLA.
+- C09: 첫 공개 `356164df0074d557789c52fc881502095ed075cd`, HTTP 본문 검증.
+- C10: migration 015 — 레거시 진행 가능 job 24건과 미결 승인 5건을 삭제하지 않고 rejected/deferred로 격리, pending 0.
+
+상세 결정과 rollback은 [18번 문서](18-autonomous-volume-publication.md)를 따른다.
+
 ## 전후 비교
 
 | 영역 | 개선 전 | 개선 후 | 근거 / 효과 |

@@ -59,6 +59,18 @@ class WatchdogTests(unittest.TestCase):
         check = watchdog.revenue_pipeline_check({"queued": 2, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 1, "oldest_minutes": 120})
         self.assertEqual(check.status, "good")
 
+    def test_direct_publication_is_good_while_future_work_is_scheduled(self):
+        check = watchdog.direct_publication_check({"total": 10, "queued": 9, "running": 0, "retry_wait": 0, "manual_review": 0, "failed": 0, "published": 1, "due": 0, "oldest_due_minutes": 0})
+        self.assertEqual(check.status, "good")
+
+    def test_direct_publication_is_bad_after_due_item_stalls(self):
+        check = watchdog.direct_publication_check({"total": 10, "queued": 9, "running": 0, "retry_wait": 0, "manual_review": 0, "failed": 0, "published": 1, "due": 1, "oldest_due_minutes": 46})
+        self.assertEqual(check.status, "bad")
+
+    def test_direct_publication_stops_on_manual_review(self):
+        check = watchdog.direct_publication_check({"total": 10, "queued": 8, "running": 0, "retry_wait": 0, "manual_review": 1, "failed": 0, "published": 1, "due": 0, "oldest_due_minutes": 0})
+        self.assertEqual(check.status, "bad")
+
 
 if __name__ == "__main__":
     unittest.main()

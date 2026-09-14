@@ -13,11 +13,15 @@ test "$(git -C "$repo_root" branch --show-current)" != "main" || {
 "$repo_root/ops/scripts/backup.sh"
 "$repo_root/ops/scripts/apply-migrations.sh"
 
-for workflow in AtemoyaRevenueAutopilot01 AtemoyaOpsGuardian01; do
+for workflow in AtemoyaOpsGuardian01; do
   docker cp "$repo_root/n8n/workflows/exports/$workflow.json" "atemoya-n8n:/tmp/$workflow.json"
   docker exec atemoya-n8n n8n import:workflow --input="/tmp/$workflow.json"
   docker exec atemoya-n8n n8n publish:workflow --id="$workflow"
 done
+
+# Generic revenue-news drafting is retained for history but must not recreate
+# approval requests after the direct affiliate publisher is installed.
+docker exec atemoya-n8n n8n unpublish:workflow --id=AtemoyaRevenueAutopilot01 >/dev/null 2>&1 || true
 
 install -m 0644 "$repo_root/ops/launchd/com.atemoya.revenue-reconciler.plist" "$agent"
 launchctl bootout "gui/$uid/com.atemoya.revenue-reconciler" 2>/dev/null || true

@@ -6,6 +6,8 @@ Read [current execution status](affiliate-os/11-execution-status.md) before acti
 The user explicitly authorized direct publication of owned affiliate content and relevant Git updates without routine GOOD/BAD requests. The older approval descriptions below remain historical/legacy workflow descriptions, not a new approval requirement for that scope. Payment, account security, platform requirements and unrelated trading are not broadened by this instruction.
 The dated infrastructure verification below is not proof of today's affiliate collector, report import or publisher success.
 
+Runtime update 2026-09-14: the reviewed Coupang direct queue is now implemented in `affiliate.jobs`/`affiliate.publications`. `com.atemoya.affiliate-direct-publisher` polls every 15 minutes and publishes at most three reviewed artifacts per KST day from a ten-item manifest. It does not call an LLM or create an approval request. The legacy `AtemoyaRevenueAutopilot01` is unpublished and must remain inactive because its generic commerce-news approval queue is not the Coupang publication queue. Current evidence and the next timestamp are in [18. direct volume publication](affiliate-os/18-autonomous-volume-publication.md).
+
 Verified: 2026-08-13 (Asia/Seoul)
 
 ## Authority and roles
@@ -153,7 +155,7 @@ must remain unloaded to prevent duplicate summaries.
 
 ## Revenue Autopilot
 
-`AtemoyaRevenueAutopilot01` runs every 30 minutes. It promotes fresh,
+`AtemoyaRevenueAutopilot01` is a retained legacy workflow and is currently inactive. It previously ran every 30 minutes and promoted fresh,
 evidence-backed `local_llm_runs` into a local-Qwen long-form draft, performs
 deterministic QA, stores the result in PostgreSQL, and sends at most one active
 Telegram publication approval request. No external model API is required.
@@ -172,3 +174,5 @@ business health includes publication throughput, not only infrastructure.
 Traffic, outbound clicks, affiliate clicks, conversions and revenue are stored
 in `revenue_channel_metrics` with evidence provenance; missing GA4 OAuth is
 reported as unavailable rather than silently interpreted as zero.
+
+The active Coupang route is `com.atemoya.affiliate-direct-publisher`. It uses an isolated detached worktree, immutable reviewed links and artifact hashes, a three-per-day cap and public HTTP verification. It writes no legacy approval rows and stops the batch on a permanent QA or policy failure.

@@ -2,7 +2,7 @@
   {
     "id": "AtemoyaRevenueAutopilot01",
     "name": "Atemoya Revenue Autopilot",
-    "active": true,
+    "active": false,
     "settings": {
       "timezone": "Asia/Seoul",
       "executionOrder": "v1",

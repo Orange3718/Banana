@@ -36,6 +36,7 @@ for label in \
   com.atemoya.source-scout \
   com.atemoya.ops-watchdog \
   com.atemoya.revenue-reconciler \
+  com.atemoya.affiliate-direct-publisher \
   com.atemoya.autopilot-publisher \
   com.atemoya.local-llm-status \
   com.atemoya.obsidian-inbox
@@ -48,6 +49,15 @@ do
     echo "$label not-registered"
   fi
 done
+
+echo
+echo "direct affiliate publication"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "
+SELECT scheduled_at,category,title,publication_state,attempt,public_url,last_error
+FROM affiliate.v_direct_publication_status
+ORDER BY scheduled_at;"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "
+SELECT id,active,\"activeVersionId\" FROM workflow_entity WHERE id='AtemoyaRevenueAutopilot01';"
 
 echo
 echo "recent n8n failures"

@@ -1,5 +1,9 @@
 # 14. 운영 대시보드 점검
 
+## 2026-09-14 교정
+
+대시보드 API와 화면에 `direct_publications`를 추가했다. 이제 쿠팡 직접 게시 10건의 예약시각, job/publication 상태, 시도 횟수, 공개 URL, commit, 검증 시각과 오류를 표시한다. 첫 글은 published, 다음 글은 14:00 queued로 실제 API에서 확인했다. 기존 `revenue_autopilot_jobs`는 `레거시 수익 Autopilot`로 명시하고 신규 direct queue와 합산하지 않는다. 예약 작업 표에는 `com.atemoya.affiliate-direct-publisher` 등록·실행·로그 상태를 별도로 표시한다.
+
 점검일: 2026-09-13 KST · 상태: **REVIEW**
 
 ## 확인한 화면과 API

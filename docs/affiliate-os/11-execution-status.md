@@ -1,61 +1,92 @@
 # 11. 실행 상태·다음 작업 — 단일 재개 입구
 
-갱신: 2026-09-13 KST. 전체 판정: **REVIEW — 부분 구축, 전체 수익 자동화 미검증**.
+갱신: 2026-09-14 09:20 KST
+전체 판정: **REVIEW — 직접 게시 운영 중, 유입·수익 효과는 아직 미검증**
 
-## 현재 사용자 지시와 범위
+## 현재 사용자 지시
 
-- 사용자 지시: 설계에 따라 구축·테스트·MD 기록을 이어가고, 소유한 제휴 콘텐츠는 직접 게시한다. 반복적인 GOOD/BAD 승인과 계정 재연결 안내를 하지 않는다.
-- 최신 운영 위임: 제휴 콘텐츠의 게시·운영 판단은 이 실행 큐가 담당한다. 사용자는 루프/그래프를 중단할 때만 개입한다. 결제·새 계정 보안·법적 동의처럼 사용자 본인 의사가 필요한 항목만 예외로 보고한다.
-- 로컬 모델·토큰 효율 기준은 [15번 문서](15-local-model-token-efficiency.md)에 기록한다. 관측되지 않은 비용 절감이나 전면 로컬 전환을 완료로 표시하지 않는다.
-- 기존 쿠팡 세션·링크 생성 이력이 있다. 이번 Google Analytics 접근도 로그인된 Atemoya 화면까지 도달했다. 계정 부재와 보고서 수신 미검증을 혼동하지 않는다.
-- 기존 권한 내 코드·문서·테스트·관련 브랜치 push 및 검증된 공개 파일 수정은 실행한다. 새 지출·계정 보안·제3자 플랫폼 요구사항까지 임의로 바꾸는 권한으로 해석하지 않는다.
-- Upbit 변경은 별도 사용자 작업이다. 포함·덮어쓰기·커밋하지 않는다.
+- 소유한 쿠팡 제휴 콘텐츠의 검토·게시·운영은 AI가 직접 수행한다.
+- 반복적인 승인, PR 병합, 계정 재연결을 사용자에게 요구하지 않는다.
+- 사용자는 운영 루프를 중단하거나 새 지출·계정 보안·법적 동의·호스트 선택처럼 본인 결정이 필요한 경우에만 개입한다.
+- Upbit와 영상 작업 변경은 별도 범위다. 이번 커밋·배포에 포함하지 않는다.
 
-## 이번에 실제 진행한 다음 작업
+## 지금 실제로 동작하는 것
 
-| 작업 | 상태 | 증거와 한계 |
+| 항목 | 상태 | 확인 증거 |
 |---|---|---|
-| 클릭 측정 오분류 수정 | 로컬 테스트 통과 | 내부 계산기는 internal_cta_click, 실제 지정 쿠팡 링크만 affiliate_click; 중복 초기화 억제. 8개 오프라인 테스트 |
-| 공개 산출물 격리 | 로컬 테스트 통과 | 57개 공개 파일·44 HTML만 허용; docs/DB/운영 대시보드 제외, 오염·심볼릭 링크·금지 확장자 3개 테스트 |
-| 제휴 고지·추적키 보완 | 로컬 검사 통과 | daily-use 페이지에 쿠팡 수수료 고지 추가, 기존 식초 페이지에 안정적 추적키 추가. 링크 목적지는 변경하지 않음 |
-| 최신 운영 지시 연결 | 반영 | AGENTS·baseline·OPEN_ITEMS·preflight에서 이 문서를 먼저 확인 |
-| 사이트 배포 | 공개 반영 확인 | 사이트 전용 commit d986c33, main 선택 반영 19ed415. Actions 성공·공개 JS 일치·두 페이지 링크/고지·비공개 경로 404 확인 |
-| Google Analytics | 수신 미검증 | 기존 로그인 확인. 이메일 수신 설정 창이 보고서를 가리고 Escape·바깥 클릭으로 닫히지 않음. 설정을 임의 변경하지 않았으며 데이터 수신·속성/측정 ID 매핑을 확인한 것으로 보고하지 않음 |
-| 공급자 원본 검사 | 실파일 확보·검사 완료, 재무 수입 미완료 | 9/12 일별 XLSX는 두 시트 헤더만 존재. 비공개 해시 보관·검사기 5개 테스트 PASS. 확정 수익/현금은 null, 원장 전기 없음 |
-| DailyTrend 로컬 효율·안정성 | 반영·정적 검증 완료 | Gemini 출력 상한 4096→1400, Ollama fallback의 실제 줄바꿈 SyntaxError 방지, Qwen 900 토큰 상한. n8n에 백업 후 active workflow 적용. 실제 다음 예약 실행의 성공·지연은 별도 관측 |
-| 쿠팡 10개 카테고리 배치 | 공개 완료 | 내장 브라우저의 기존 세션으로 9개 신규 링크 발급, 기존 검증 링크 1개 포함. main `ef2eb84`, Pages 실행 `34784252932` 성공. 허브와 10개 글 HTTP 200, 각 공개 본문의 링크·고지 확인 |
+| 쿠팡 직접 게시 대기열 | LIVE | `affiliate.jobs`·`affiliate.publications` 10건, 모두 `direct_user_instruction` |
+| 첫 추가 글 | PUBLISHED | 2026-09-14 09:00 KST, commit `356164d`, 공개 HTTP 200·제목·링크·고지 확인 |
+| 남은 추가 글 | SCHEDULED 9 | 09-14 14:00·20:00, 09-15 3건, 09-16 3건, 09-17 09:00 |
+| 실행기 | LIVE | `com.atemoya.affiliate-direct-publisher`, 15분 간격, 최근 exit 0 |
+| 사용자 승인 | NOT REQUIRED | `approval_id=NULL`, 기술 QA만 수행 |
+| 레거시 승인형 n8n | INACTIVE | `AtemoyaRevenueAutopilot01 active=false`; 진행 가능 24건은 rejected, 미결 승인 5건은 deferred, pending 0 |
+| 대시보드 | LIVE | direct 10건의 예약·상태·공개 URL과 다음 시각을 `/api/status`에서 반환 |
+| 로컬/클라우드 토큰 | ZERO FOR PUBLISH | 원고와 링크가 확정된 JSON manifest를 결정론적으로 렌더링. Ollama/Gemini 호출 없음 |
+| 수익 | OBSERVED ZERO | 쿠팡 포털에서 확인한 현재 수익·판매는 0. 게시량 증가를 매출 증가로 표현하지 않음 |
+| 유입 측정 | UNKNOWN | GA4/Coupang 실수신 행이 대시보드에 아직 없음. UNKNOWN을 0 조회로 바꾸지 않음 |
 
-## 다음 큐 — 사용자에게 ‘다음은?’을 묻게 하지 않기
+## 다음 실행 큐
 
-1. 완료: 현재 공개 수정의 배포 완료와 HTTP 본문 일치 확인. 아래 증거 참조.
-2. P1: 기존 호스팅 연결·운영 기록에서 상업 운영에 적합한 배포 경로를 조사한다. GitHub Pages의 상업 목적 제한은 현재 적합성 문제다. 해결 전 대량 발행·유료 유입 확대를 하지 않는다. 기존 콘텐츠의 오류·노출 수정은 진행한다.
-3. P1: 조회 데이터 수신 확인. 기존 GA 화면·기존 연결 수단을 먼저 확인하고, 수신 설정 변경을 일괄 실행하지 않는다. 조회 불가를 0명으로 저장하지 않는다.
-4. P1: 실제 원본 확보·헤더 검사까지 완료([13번 증거](13-coupang-report-inspection.md)). 다음은 중복 클릭 헤더와 일별 수익/취소 의미를 공식 정의·실제 데이터로 확인한 후 정규화·격리 import/대사 구현. 원본은 비공개 보관 경로를 먼저 확인하며 사용자에게 다시 다운로드를 요청하지 않는다.
-5. P1: DB 조회의 다중 귀속·비용 행 및 통화 혼합 테스트를 추가한다. 현재 7개 smoke 검사는 전체 인수 테스트를 대체하지 못한다.
-6. P2: 직접 게시기와 collector를 계약에 맞게 구현·실행·재시도 검증한다. 현재 검증된 소유 페이지 게시·운영은 계속하되, 링크·근거가 없는 레거시 승인 대기 후보를 자동 게시하지 않는다. schema와 outbox 테이블의 존재만으로 자동화 완료를 선언하지 않는다.
-7. P2: 실제 수신·정산·유입 근거가 갖춰진 후 검색 유입/배포 채널 실험을 한다. 현재 페이지가 존재한다는 사실을 검색 노출·방문자·수익 확보로 보고하지 않는다.
+1. 2026-09-14 14:00 KST: `밀프렙 밀폐용기 수량과 크기 정하는 법` 게시 대상. 15분 poll SLA에 따라 14:15까지 실행·검증한다.
+2. 2026-09-14 20:00 KST: `로봇청소기 구매 전 우리 집 동선 실측`.
+3. 이후 [18번 운영 설계](18-autonomous-volume-publication.md)의 표에 따라 하루 최대 3건, 총 10건에서 자동 중단한다.
+4. 실패가 발생하면 같은 아티팩트만 재시도한다. 콘텐츠·링크·해시 오류는 후속 전부를 멈추고 대시보드와 Watchdog에 표시한다.
+5. 이번 10건 완료 후에는 측정과 호스트 결정 없이 새 배치를 자동 생성하지 않는다.
 
-## 재개·종료 규칙
+## 이번 변경의 실제 결과
 
-- 각 작업은 `코드 작성 / 로컬 검증 / 배포 / 실제 수신 / 운영 자동화` 상태를 따로 기록한다.
-- 차단된 항목은 원인·시도한 대안·영향 범위를 적고, 독립적으로 가능한 다음 작업으로 이동한다. 전체 작업을 ‘사용자 대기’로 만들지 않는다.
-- 새 질문이 필요하면 과거 지시·계정·실행 기록을 먼저 찾고, 왜 기존 지시만으로 해결할 수 없는 새 제약인지 설명한다. 정보가 기록돼 있었는데 놓쳤다면 누락 지점과 수정 위치를 함께 기록한다.
-- 종료 보고에는 실제 변경, 정확한 테스트 범위, 공개 반영 증거, 남은 항목을 적는다. 전체 완료·수익 보장·가짜 백그라운드 진행 표현을 금지한다.
-- 이 문서는 작업 큐이며 스케줄러가 아니다. 이 큐를 자동 실행하는 작업은 현재 연결·검증되지 않았다. 기존 LaunchAgent가 있다고 이 새 큐를 수행한다고 말하지 않는다.
+- `db/migrations/014_direct_affiliate_publication.sql`: 작업 payload, 상태·lease 제약, 인덱스와 직접 게시 상태 뷰.
+- `ops/affiliate-publication/coupang-volume-pilot-20260914.json`: 검증된 기존 10개 쿠팡 링크를 사용하는 추가 10개 원고와 일정.
+- `tools/affiliate_direct_publisher.py`: 링크·본문·권한·해시를 재검증하고 격리 worktree에서 `main`으로 게시 후 공개 HTTP를 확인.
+- `tools/seed_affiliate_publication_batch.py`: public content/revision/offer/link/publication/job을 한 트랜잭션으로 멱등 저장.
+- `com.atemoya.affiliate-direct-publisher`: 로그인 화면 없이 15분마다 실행.
+- 대시보드와 Watchdog: 직접 게시 진행률, 다음 일정, 정체·중단 상태를 운영 표면에 추가.
+- 기존 두 LED 페이지의 중복 `data-link-key`를 분리하고 전체 제휴 페이지에서 추적키 고유성을 검사.
 
-## 배포 증거
+## 실패와 사용자 개입 기준
 
-- 2026-09-13 약 20:30 KST, main `19ed415ced56e28437f02692c96e188b18536020`.
-- [배포 실행 34754415577](https://github.com/Orange3718/Banana/actions/runs/34754415577): completed/success.
-- 공개 `assets/analytics.js`: HTTP 200, 로컬 수정본과 바이트 내용 일치, SHA-256 `ba04ff70d956884090cec46231966c8bb3e40bf0733258d6c2dfd49cc00bd359`.
-- LED 두 공개 페이지: HTTP 200, 지정 쿠팡 URL·쿠팡 수수료 고지 확인.
-- 공개 경로 `docs/OPEN_ITEMS.md`, `tools/atemoya-dashboard.html`: HTTP 404. 내부 문서와 대시보드는 사이트 산출물에서 제외됐으며 Git 저장소 자체의 가시성은 변경하지 않았다.
-- 로컬 11개 테스트와 공개 44 HTML/57개 파일 검사 PASS. CORE01–CORE07 DB smoke도 재실행 PASS. 실제 GA 수신·정산 수입·전체 설계 인수와는 별개다.
-- 후속 고지 정정: 포털이 표시한 ‘수수료를 제공받습니다’ 문구로 세 제휴 페이지와 검사 기준을 일치시켰다. main `65e0bbcda0ea28ab15cdc1aac009cc8d0cb62c47`, [배포 실행 34756097722](https://github.com/Orange3718/Banana/actions/runs/34756097722) success, 공개 daily-use 본문에서 정확한 문구를 확인했다.
-- 대시보드 점검: 로컬 UI/API는 정상 응답하지만 `revenue_ops=[]`라서 유입·수익 수신이 연결되지 않았고, 레거시 `awaiting_approval` 1건과 반복 오류가 표시된다. 상세 근거와 API 개선은 [14. 운영 대시보드 점검](14-dashboard-audit.md).
+사용자에게 다시 물어보지 않고 자동으로 처리하는 범위:
+
+- 일시적인 Git/네트워크 오류 재시도
+- 공개 URL 전파 지연 재확인
+- 만료된 실행 lease 회수
+- 사이트·고지·tracking·공개 경계 회귀 검사
+
+사용자 결정이 필요한 경우:
+
+- 사용자가 게시 루프 중단을 원할 때
+- 10건 상한을 넘는 새 상품·새 플랫폼·유료 유입을 시작할 때
+- 상업 운영 호스트·도메인을 확정할 때
+- 포털이 2FA, 약관 동의, 결제 또는 본인 확인을 요구할 때
+
+현재 게시를 위해 사용자가 할 일은 없다.
+
+## 남은 P1/P2
+
+1. P1: GitHub Pages는 상업 거래 중심 호스팅에 제한이 있다. 이번 10건을 제한된 편집 파일럿으로 끝내고 다음 배치 전에 상업 허용 호스트 ADR을 확정한다.
+2. P1: 자연 조회·제휴 클릭·쿠팡 외부 판매를 수신한다. 수신 전에는 효과를 판단하지 않는다.
+3. P1: 쿠팡 보고서의 중복 클릭 헤더, 주문/취소/수익 grain을 실제 데이터와 공식 정의로 확인한 뒤 importer를 연결한다.
+4. P1: 다중 귀속·다중 비용·혼합 통화 회귀 테스트를 추가한다.
+5. P2: 게시 10건 완료 후 카테고리별 조회·클릭을 비교해 다음 글을 선택한다. 수량만 자동 확대하지 않는다.
+
+## 검증 기록
+
+- DB 백업: `/Users/orange/Atemoya/backups/20260913T235613Z`, `/Users/orange/Atemoya/backups/20260913T235720Z`, `/Users/orange/Atemoya/backups/20260914T001323Z`.
+- direct publisher 단위 테스트 9개 PASS.
+- Watchdog 단위 테스트 11개 PASS.
+- 첫 공개 URL: `https://orange3718.github.io/Banana/offers/led-mask-first-two-weeks-routine.html`.
+- 첫 공개 commit: `356164df0074d557789c52fc881502095ed075cd`.
+- 첫 Pages 실행 `34791301806` 및 tracking 무결성 보강 실행 `34791632103`: completed/success.
+- 전역 affiliate 검사 기준 공개 commit: `6ae3d89f1e352d14912aa148b16143ca4df1c2ef`.
+- DB: 첫 job `succeeded`, publication `published`, attempt 1, verified_at 기록.
+- n8n DB: `AtemoyaRevenueAutopilot01 active=false` 확인.
+- 레거시 격리 전 백업 `/Users/orange/Atemoya/backups/20260914T000846Z`; 삭제 없이 pending approval 0 확인.
+- Dashboard API: 첫 글 공개 URL과 두 번째 14:00 예약을 반환.
 
 ## 관련 기록
 
-- [반복 원인·개선 전후·반추](12-repeat-question-root-cause.md)
-- [조회·클릭·수익의 실제 측정 경로](10-measurement-map.md)
-- [설계 인수 범위와 미실행 테스트](06-acceptance-and-runbook.md)
+- [승인 없는 수량 확대 상세 설계·구축](18-autonomous-volume-publication.md)
+- [왜 같은 질문을 반복하게 했는가](12-repeat-question-root-cause.md)
+- [조회·클릭·수익 측정 경로](10-measurement-map.md)
+- [10개 원래 카테고리 링크·게시 증거](16-ten-category-publication-plan.md)
+- [운영 대시보드 점검](14-dashboard-audit.md)

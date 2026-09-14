@@ -9,13 +9,19 @@ python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaOpsGuardian01.json
 python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaRevenueAutopilot01.json" >/dev/null
 python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaDailyTrend01.json" >/dev/null
 python3 -m json.tool "$repo_root/n8n/workflows/exports/AtemoyaTelegramMemory01.json" >/dev/null
+python3 -m json.tool "$repo_root/ops/affiliate-publication/coupang-volume-pilot-20260914.json" >/dev/null
 test -x "$repo_root/ops/scripts/export-obsidian-inbox.sh"
 test -x "$repo_root/ops/scripts/apply-n8n-workflows.sh"
 test -x "$repo_root/scripts/preflight.sh"
 test -r "$repo_root/tools/ops-watchdog.py"
 test -r "$repo_root/tools/autopilot-publisher.py"
+test -r "$repo_root/tools/affiliate_direct_publisher.py"
+test -r "$repo_root/tools/seed_affiliate_publication_batch.py"
 test -r "$repo_root/tools/revenue-ops-reconciler.py"
 plutil -lint "$repo_root/ops/launchd/com.atemoya.revenue-reconciler.plist" >/dev/null
+plutil -lint "$repo_root/ops/launchd/com.atemoya.affiliate-direct-publisher.plist" >/dev/null
+PYTHONPATH="$repo_root/tools" python3 "$repo_root/tools/affiliate_direct_publisher.py" --validate-all >/dev/null
+PYTHONPATH="$repo_root/tools" python3 -m unittest "$repo_root/tools/test_affiliate_direct_publisher.py" >/dev/null
 
 docker compose --env-file "$repo_root/.env.example" -f "$repo_root/docker-compose.yml" config --quiet
 docker exec atemoya-postgres sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null
@@ -36,4 +42,7 @@ test "$autopilot_actual" = "$autopilot_expected" || { echo "Revenue Autopilot ta
 revenue_ops_expected='revenue_autopilot_reconciliations revenue_channel_metrics'
 revenue_ops_actual="$(docker exec atemoya-postgres sh -lc 'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "select table_name from information_schema.tables where table_schema='"'"'public'"'"' and table_name in ('"'"'revenue_autopilot_reconciliations'"'"','"'"'revenue_channel_metrics'"'"') order by table_name"' | tr '\n' ' ' | sed 's/ $//')"
 test "$revenue_ops_actual" = "$revenue_ops_expected" || { echo "Revenue operations tables are incomplete: $revenue_ops_actual" >&2; exit 1; }
+
+direct_publication_schema="$(docker exec atemoya-postgres sh -lc 'psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "select concat_ws('"'"'|'"'"',to_regclass('"'"'affiliate.jobs'"'"'),to_regclass('"'"'affiliate.publications'"'"'),to_regclass('"'"'affiliate.v_direct_publication_status'"'"'))"')"
+test "$direct_publication_schema" = 'affiliate.jobs|affiliate.publications|affiliate.v_direct_publication_status' || { echo "Direct affiliate publication schema is incomplete: $direct_publication_schema" >&2; exit 1; }
 echo "Atemoya runtime verification: PASS"

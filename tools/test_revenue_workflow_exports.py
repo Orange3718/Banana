@@ -21,6 +21,7 @@ class RevenueWorkflowExportTests(unittest.TestCase):
 
     def test_autopilot_requires_revenue_candidate_task(self):
         autopilot = workflow("AtemoyaRevenueAutopilot01.json")
+        self.assertFalse(autopilot["active"], "legacy approval workflow must stay unpublished")
         query = next(node["parameters"]["query"] for node in autopilot["nodes"] if node["name"] == "후보 동기화와 1건 점유")
         self.assertIn("r.task_name='신규 수익 콘텐츠 후보'", query)
         self.assertIn("approval_requests", query)
@@ -29,6 +30,10 @@ class RevenueWorkflowExportTests(unittest.TestCase):
         qa_code = next(node["parameters"]["jsCode"] for node in autopilot["nodes"] if node["name"] == "자동 QA와 안전 정리")
         self.assertIn("replace(/무조건적으로?/g,'자동으로')", qa_code)
         self.assertIn("unsupportedNumbers", qa_code)
+
+    def test_inactive_workflow_export_is_unpublished_on_apply(self):
+        script = (ROOT / "ops/scripts/apply-n8n-workflows.sh").read_text(encoding="utf-8")
+        self.assertIn('n8n unpublish:workflow --id="$workflow_id"', script)
 
     def test_one_telegram_router_handles_approvals_and_local_reviews(self):
         memory = workflow("AtemoyaTelegramMemory01.json")

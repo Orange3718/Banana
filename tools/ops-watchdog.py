@@ -129,6 +129,28 @@ def revenue_pipeline_check(facts):
     return Check("revenue", "pipeline_throughput", status, message, details=facts)
 
 
+def direct_publication_check(facts):
+    total = int(facts.get("total", 0))
+    queued = int(facts.get("queued", 0))
+    running = int(facts.get("running", 0))
+    retry_wait = int(facts.get("retry_wait", 0))
+    manual_review = int(facts.get("manual_review", 0)) + int(facts.get("failed", 0))
+    published = int(facts.get("published", 0))
+    due = int(facts.get("due", 0))
+    oldest_due = int(facts.get("oldest_due_minutes", 0))
+    if manual_review or (due and oldest_due >= 45) or running > 1:
+        status = "bad"
+    elif total == 0 or (due and oldest_due >= 15) or retry_wait:
+        status = "review"
+    else:
+        status = "good"
+    message = (
+        f"직접 게시 {published}/{total}건 · 예약 {queued} · 실행 {running} · "
+        f"재시도 {retry_wait} · 수동검토 {manual_review} · 기한초과 {due}건/{oldest_due}분"
+    )
+    return Check("affiliate", "direct_publication", status, message, details=facts)
+
+
 def collect_checks():
     checks = [container_check(name) for name in CONTAINERS]
     ok, latency, detail = http_ok("http://127.0.0.1:5678/healthz")
@@ -145,8 +167,8 @@ def collect_checks():
         checks.append(Check("local-llm", "freshness", status, "최근 완료 없음" if age < 0 else f"최근 완료 {age // 60}분 전", details={"age_seconds": age}))
         errors = int(db_scalar("SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '2 hours';") or 0)
         checks.append(Check("n8n", "recent_errors", "bad" if errors >= 3 else "review" if errors else "good", f"최근 2시간 n8n 오류 {errors}건", details={"count": errors}))
-        raw = db_scalar("SELECT json_build_object('queued',count(*) FILTER(WHERE stage='queued'),'retry',count(*) FILTER(WHERE stage='retry'),'awaiting_approval',count(*) FILTER(WHERE stage='awaiting_approval'),'approved',count(*) FILTER(WHERE stage='approved'),'branch_ready',count(*) FILTER(WHERE stage='branch_ready'),'published_7d',(SELECT count(*) FROM content WHERE published_at>NOW()-interval '7 days' AND published_url IS NOT NULL),'oldest_minutes',COALESCE((SELECT EXTRACT(EPOCH FROM (NOW()-min(created_at)))/60 FROM revenue_autopilot_jobs WHERE stage IN ('queued','retry','awaiting_approval','approved','rendering','branch_ready')),0)::int) FROM revenue_autopilot_jobs;")
-        checks.append(revenue_pipeline_check(json.loads(raw or "{}")))
+        direct_raw = db_scalar("SELECT json_build_object('total',count(*),'queued',count(*) FILTER(WHERE j.state='queued'),'running',count(*) FILTER(WHERE j.state='running'),'retry_wait',count(*) FILTER(WHERE j.state='retry_wait'),'manual_review',count(*) FILTER(WHERE j.state='manual_review'),'failed',count(*) FILTER(WHERE j.state='failed'),'published',count(*) FILTER(WHERE p.state='published'),'due',count(*) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now()),'oldest_due_minutes',COALESCE(EXTRACT(EPOCH FROM (now()-min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now())))/60,0)::int,'next_scheduled',min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait'))) FROM affiliate.jobs j JOIN affiliate.publications p ON p.idempotency_key=j.payload->>'publication_key' WHERE j.kind='direct_affiliate_publish';")
+        checks.append(direct_publication_check(json.loads(direct_raw or "{}")))
     except Exception as exc:
         checks.append(Check("postgres", "query", "bad", "PostgreSQL 상태 조회 실패", details={"error": str(exc)[:300]}))
     checks.append(source_check())
@@ -189,6 +211,10 @@ def remediate(checks, state):
             result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.revenue-reconciler"], timeout=30)
             if result.returncode == 0:
                 action = "launchctl kickstart com.atemoya.revenue-reconciler"
+        elif check.component == "affiliate" and check.code == "direct_publication":
+            result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.affiliate-direct-publisher"], timeout=30)
+            if result.returncode == 0:
+                action = "launchctl kickstart com.atemoya.affiliate-direct-publisher"
         if action:
             state.setdefault("last_remediation", {})[check.fingerprint] = now
             actions.append((check.fingerprint, action))

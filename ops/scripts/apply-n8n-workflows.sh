@@ -41,6 +41,8 @@ for input in "$@"; do
   if [[ "$workflow_active" == "true" ]]; then
     docker exec "$container" n8n update:workflow --id="$workflow_id" --active=true >/dev/null
     docker exec "$container" n8n publish:workflow --id="$workflow_id" >/dev/null || true
+  else
+    docker exec "$container" n8n unpublish:workflow --id="$workflow_id" >/dev/null 2>&1 || true
   fi
   docker exec "$container" rm -f "$container_path" >/dev/null 2>&1 || true
   echo "applied $base_name id=$workflow_id active=$workflow_active"

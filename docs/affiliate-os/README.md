@@ -18,6 +18,7 @@
 | [04. 데이터와 정산](04-data-and-reconciliation.md) | 테이블·키·제약·귀속·정산 알고리즘·금액 검증 예시 |
 | [05. 게시와 측정](05-publishing-and-measurement.md) | API·승인·배포·수집 상태·공개 경계·권한 |
 | [06. 인수 기준과 운영](06-acceptance-and-runbook.md) | 구현 순서·실패 테스트·복구·출시 게이트 |
+| [18. 승인 없는 수량 확대](18-autonomous-volume-publication.md) | 직접 게시 10건의 일정·기술 승인·배포·중단·운영 증거 |
 
 ## 범위와 준비도
 

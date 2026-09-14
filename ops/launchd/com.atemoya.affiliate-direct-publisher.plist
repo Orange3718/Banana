@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.atemoya.affiliate-direct-publisher</string>
+  <key>ProgramArguments</key><array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/orange/Developer/Banana-atemoya-ops/tools/affiliate_direct_publisher.py</string>
+    <string>--verify-timeout</string><string>240</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/orange/Developer/Banana-atemoya-ops</string>
+  <key>RunAtLoad</key><true/>
+  <key>StartInterval</key><integer>900</integer>
+  <key>ThrottleInterval</key><integer>60</integer>
+  <key>StandardOutPath</key><string>/tmp/atemoya-affiliate-direct-publisher.out</string>
+  <key>StandardErrorPath</key><string>/tmp/atemoya-affiliate-direct-publisher.err</string>
+</dict></plist>
