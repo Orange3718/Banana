@@ -36,6 +36,7 @@ jobs:
           node scripts/audit-content-quality.mjs
           node scripts/test-channel-drafts.mjs
           node scripts/test-site.mjs
+          node scripts/test-affiliate-batch.mjs
           node --test scripts/test-analytics.mjs scripts/test-public-package.mjs
       - name: Connect revenue and analytics accounts
         env:
