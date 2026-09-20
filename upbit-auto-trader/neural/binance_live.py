@@ -23,13 +23,13 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'next_data'
 STATE_PATH = DATA / 'binance_live_state.json'
 SYMBOL = 'BTCUSDT'
-QUANTITY = Decimal('0.001')
-STOP_RATE = Decimal('0.02')
-ENTRY_LOOKBACK = 24
-EXIT_LOOKBACK = 12
-ENTRY_COOLDOWN_SECONDS = 60 * 60
-DAILY_LOSS_LIMIT = Decimal('3')
-MAX_CONSECUTIVE_LOSSES = 3
+QUANTITY = Decimal(os.environ.get('BINANCE_LIVE_QUANTITY', '0.001'))
+STOP_RATE = Decimal(os.environ.get('BINANCE_STOP_RATE', '0.02'))
+ENTRY_LOOKBACK = int(os.environ.get('BINANCE_ENTRY_LOOKBACK', '24'))
+EXIT_LOOKBACK = int(os.environ.get('BINANCE_EXIT_LOOKBACK', '12'))
+ENTRY_COOLDOWN_SECONDS = int(os.environ.get('BINANCE_ENTRY_COOLDOWN_SECONDS', '3600'))
+DAILY_LOSS_LIMIT = Decimal(os.environ.get('BINANCE_DAILY_LOSS_LIMIT', '3'))
+MAX_CONSECUTIVE_LOSSES = int(os.environ.get('BINANCE_MAX_CONSECUTIVE_LOSSES', '3'))
 LOSS_STREAK_COOLDOWN_SECONDS = int(os.environ.get('BINANCE_LOSS_STREAK_COOLDOWN_SECONDS',
                                                    str(6 * 60 * 60)))
 
