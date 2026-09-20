@@ -182,7 +182,12 @@ class Binance:
         realized = sum((Decimal(item['realizedPnl']) for item in trades), Decimal())
         fees = sum((Decimal(item['commission']) for item in trades
                     if item['commissionAsset'] == 'USDT'), Decimal())
-        return realized - fees
+        funding_rows = self.signed('GET', '/fapi/v1/income', {
+            'symbol': SYMBOL, 'incomeType': 'FUNDING_FEE',
+            'startTime': start_ms, 'limit': 1000})
+        funding = sum((Decimal(item['income']) for item in funding_rows
+                       if item.get('asset') == 'USDT'), Decimal())
+        return realized - fees + funding
 
     def record_close(self, state, reason, order_id=None):
         pnl = self.position_pnl(state, order_id)
@@ -198,11 +203,10 @@ class Binance:
     def daily_net(self):
         start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0,
                                                    microsecond=0)
-        trades = self.signed('GET', '/fapi/v1/userTrades', {
+        income = self.signed('GET', '/fapi/v1/income', {
             'symbol': SYMBOL, 'startTime': int(start.timestamp() * 1000), 'limit': 1000})
-        return sum((Decimal(x['realizedPnl']) -
-                    (Decimal(x['commission']) if x['commissionAsset'] == 'USDT' else Decimal())
-                    for x in trades), Decimal())
+        return sum((Decimal(item['income']) for item in income
+                    if item.get('asset') == 'USDT'), Decimal())
 
     def candles(self, interval, limit=61):
         return self.public('/fapi/v1/klines', {'symbol': SYMBOL, 'interval': interval,
@@ -230,7 +234,7 @@ class Binance:
                     'algoType': 'CONDITIONAL', 'symbol': SYMBOL, 'side': close_side,
                     'positionSide': 'BOTH', 'type': order_type,
                     'triggerPrice': str(trigger), 'closePosition': 'true',
-                    'workingType': 'MARK_PRICE', 'priceProtect': 'true',
+                    'workingType': 'MARK_PRICE', 'priceProtect': 'false',
                     'clientAlgoId': 'at_local_' + label + '_' + str(int(time.time() * 1000))})
                 created.append(result['algoId'])
             active = {x['algoId'] for x in self.algos()}

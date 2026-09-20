@@ -38,11 +38,28 @@ def test_position_pnl_includes_entry_and_exit_fees():
     from neural.binance_live import Binance
 
     api = object.__new__(Binance)
+    def signed(_method, path, _params):
+        if path == '/fapi/v1/income':
+            return [{'income': '-0.02', 'asset': 'USDT'}]
+        return [
+            {'orderId': 1, 'realizedPnl': '0', 'commission': '0.04',
+             'commissionAsset': 'USDT'},
+            {'orderId': 2, 'realizedPnl': '1.00', 'commission': '0.04',
+             'commissionAsset': 'USDT'},
+        ]
+    api.signed = signed
+
+    assert api.position_pnl({'entry_time': 100}, close_order_id=2) == Decimal('0.90')
+
+
+def test_daily_net_uses_income_ledger_including_funding():
+    from neural.binance_live import Binance
+
+    api = object.__new__(Binance)
     api.signed = lambda *_args, **_kwargs: [
-        {'orderId': 1, 'realizedPnl': '0', 'commission': '0.04',
-         'commissionAsset': 'USDT'},
-        {'orderId': 2, 'realizedPnl': '1.00', 'commission': '0.04',
-         'commissionAsset': 'USDT'},
+        {'income': '1.00', 'asset': 'USDT', 'incomeType': 'REALIZED_PNL'},
+        {'income': '-0.08', 'asset': 'USDT', 'incomeType': 'COMMISSION'},
+        {'income': '-0.02', 'asset': 'USDT', 'incomeType': 'FUNDING_FEE'},
     ]
 
-    assert api.position_pnl({'entry_time': 100}, close_order_id=2) == Decimal('0.92')
+    assert api.daily_net() == Decimal('0.90')
