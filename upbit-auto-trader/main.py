@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 import json
 from dataclasses import asdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 from coin_registry import CoinEntry, load_registry, sync_markets
@@ -43,23 +43,6 @@ def _today_auto_trade_count() -> int:
         ):
             count += 1
     return count
-
-
-def _recent_auto_buy_exists(market: str, minutes: int = 30) -> bool:
-    if not HISTORY_PATH.exists():
-        return False
-    cutoff = datetime.now() - timedelta(minutes=minutes)
-    for line in HISTORY_PATH.read_text(encoding="utf-8", errors="replace").splitlines():
-        if not line.strip():
-            continue
-        try:
-            row = json.loads(line)
-            traded_at = datetime.strptime(str(row.get("time", "")), "%Y-%m-%d %H:%M:%S")
-        except (json.JSONDecodeError, ValueError):
-            continue
-        if row.get("event") == "auto_buy" and row.get("market") == market and traded_at >= cutoff:
-            return True
-    return False
 
 
 def _trade_cooldown_reason(market: str, settings) -> str:
@@ -218,9 +201,6 @@ def auto_buy_recommendation(
         return None
     if _today_auto_trade_count() >= settings.max_daily_trades:
         append_history("auto_buy_blocked", {"market": market, "reason": "하루 최대 거래 횟수 초과"})
-        return None
-    if _recent_auto_buy_exists(market):
-        append_history("auto_buy_blocked", {"market": market, "reason": "같은 코인 30분 내 반복 자동매수 차단"})
         return None
     cooldown_reason = _trade_cooldown_reason(market, settings)
     if cooldown_reason:
