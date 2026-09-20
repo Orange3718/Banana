@@ -380,9 +380,6 @@ def monitor_altcoin_exits(
             continue
 
         market = f"KRW-{currency}"
-        if market == config.market:
-            continue
-
         entry = registry.get(market, CoinEntry(market=market))
         if entry.excluded or not entry.watch or not entry.allow_auto_trade:
             continue
@@ -480,6 +477,22 @@ def monitor_altcoin_exits(
             )
 
     return results
+
+
+def _suppress_legacy_market_order(signal: dict, settings) -> dict:
+    if (
+        str(signal.get("action", "HOLD")) in {"BUY", "SELL"}
+        and settings.recommendation_enabled
+        and settings.operation_mode >= 3
+    ):
+        return {
+            "action": "HOLD",
+            "reason": "전체 마켓 추천 엔진에서만 신규매수와 포지션 관리를 실행합니다.",
+            "confidence": 0.0,
+            "buy_ratio": 0.0,
+            "sell_ratio": 0.0,
+        }
+    return signal
 
 
 def fetch_total_portfolio_value(client: UpbitClient) -> tuple[float, float, int]:
@@ -725,7 +738,7 @@ def main() -> None:
                 if exit_results:
                     notifier.step("보유 코인 매도 점검", f"{len(exit_results)}건의 자동매도 요청을 처리했습니다.", rule_key="order_result")
                 else:
-                    notifier.step("보유 코인 매도 점검", "BTC 외 보유 코인에 즉시 매도 조건이 없습니다.", telegram=False)
+                    notifier.step("보유 코인 매도 점검", "보유 코인에 즉시 매도 조건이 없습니다.", telegram=False)
             except Exception as exc:
                 append_history("auto_sell_failed", {"reason": str(exc), "operation_mode": settings.operation_mode})
                 notifier.step("보유 코인 매도 점검 실패", str(exc), rule_key="risk_alert")
@@ -758,18 +771,7 @@ def main() -> None:
             notifier.step("전략 판단", "매수, 매도, 대기 신호를 생성합니다.")
             strategy = MovingAverageStrategy(config, settings)
             signal = strategy.generate_signal(market_data, position)
-            if (
-                signal.get("action") == "BUY"
-                and settings.recommendation_enabled
-                and settings.operation_mode >= 3
-            ):
-                signal = {
-                    "action": "HOLD",
-                    "reason": "전체 마켓 추천 엔진에서만 신규매수를 실행합니다.",
-                    "confidence": 0.0,
-                    "buy_ratio": 0.0,
-                    "sell_ratio": 0.0,
-                }
+            signal = _suppress_legacy_market_order(signal, settings)
             update_market_status(
                 market="업비트 KRW 마켓 전체",
                 price=0.0,
