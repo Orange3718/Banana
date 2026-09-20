@@ -28,8 +28,12 @@ def scan_candidates(
     client: UpbitClient,
     registry: dict[str, CoinEntry],
     settings: TradingSettings,
+    *,
+    auto_trade_only: bool = False,
 ) -> pd.DataFrame:
     markets = eligible_markets(registry, include_btc=settings.include_btc)
+    if auto_trade_only:
+        markets = [market for market in markets if registry[market].allow_auto_trade]
     if not markets:
         return pd.DataFrame()
     tickers = get_tickers(client, markets)

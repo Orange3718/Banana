@@ -644,7 +644,12 @@ def main() -> None:
                 notifier.step("추천 코인 갱신", "설정된 코인 그룹과 제외 목록을 기준으로 추천을 계산합니다.", rule_key="recommendation")
                 try:
                     registry = sync_markets(get_krw_markets(client))
-                    candidates = scan_candidates(client, registry, settings)
+                    candidates = scan_candidates(
+                        client,
+                        registry,
+                        settings,
+                        auto_trade_only=settings.operation_mode >= 3 and not settings.approval_required,
+                    )
                     recommendation_state = generate_recommendations(client, candidates, registry, settings)
                     last_recommendation_at = now
                     append_history(
