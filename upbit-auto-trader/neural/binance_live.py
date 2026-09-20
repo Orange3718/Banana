@@ -27,6 +27,7 @@ QUANTITY = Decimal(os.environ.get('BINANCE_LIVE_QUANTITY', '0.001'))
 STOP_RATE = Decimal(os.environ.get('BINANCE_STOP_RATE', '0.02'))
 ENTRY_LOOKBACK = int(os.environ.get('BINANCE_ENTRY_LOOKBACK', '24'))
 EXIT_LOOKBACK = int(os.environ.get('BINANCE_EXIT_LOOKBACK', '12'))
+ENTRY_BUFFER_RATE = Decimal(os.environ.get('BINANCE_ENTRY_BUFFER_RATE', '0'))
 ENTRY_COOLDOWN_SECONDS = int(os.environ.get('BINANCE_ENTRY_COOLDOWN_SECONDS', '3600'))
 DAILY_LOSS_LIMIT = Decimal(os.environ.get('BINANCE_DAILY_LOSS_LIMIT', '3'))
 MAX_CONSECUTIVE_LOSSES = int(os.environ.get('BINANCE_MAX_CONSECUTIVE_LOSSES', '3'))
@@ -98,9 +99,11 @@ def breakout_signal(hourly, four_hour):
     previous_exit = hourly[-EXIT_LOOKBACK - 1:-1]
     close = Decimal(latest[4])
     entry = None
-    if regime == 'LONG' and close > max(Decimal(row[2]) for row in previous_entry):
+    entry_high = max(Decimal(row[2]) for row in previous_entry)
+    entry_low = min(Decimal(row[3]) for row in previous_entry)
+    if regime == 'LONG' and close > entry_high * (Decimal(1) - ENTRY_BUFFER_RATE):
         entry = 'LONG'
-    elif regime == 'SHORT' and close < min(Decimal(row[3]) for row in previous_entry):
+    elif regime == 'SHORT' and close < entry_low * (Decimal(1) + ENTRY_BUFFER_RATE):
         entry = 'SHORT'
     return {
         'candle': int(latest[6]),

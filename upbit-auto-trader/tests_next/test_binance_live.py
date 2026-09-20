@@ -34,6 +34,19 @@ def test_breakout_can_open_short_only_in_short_regime():
     assert result['entry'] == 'SHORT'
 
 
+def test_breakout_buffer_can_enter_before_exact_high(monkeypatch):
+    from neural import binance_live
+
+    monkeypatch.setattr(binance_live, 'ENTRY_BUFFER_RATE', Decimal('0.0025'))
+    hourly = [candle(100 + i, close_time=i) for i in range(30)]
+    hourly[-1] = candle(128.8, high=128.9, low=128.0, close_time=1001)
+    four_hour = [candle(100 + i, close_time=i) for i in range(60)]
+
+    result = binance_live.breakout_signal(hourly, four_hour)
+
+    assert result['entry'] == 'LONG'
+
+
 def test_position_pnl_includes_entry_and_exit_fees():
     from neural.binance_live import Binance
 
