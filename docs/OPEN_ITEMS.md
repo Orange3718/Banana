@@ -1,5 +1,24 @@
 # Atemoya 미결 작업 정리
 
+## 2026-09-28 클라우드 세션: PR #4 후속 점검
+
+- `docs/TRADING_HANDOFF_2026-09-28.md`의 "다음 실행 순서" 5개 중 클라우드
+  세션(iMac `.env`·실거래소 접근 불가)에서 검증 가능한 1번과 4번을 처리했다.
+- 1번: PR #4(`feat/trading-reliability-20260928` → `main`, open, clean,
+  CI 미구성) diff 94개 파일을 전수 검사해 실제 비밀값이나 런타임 산출물이
+  없음을 재확인했다.
+- 4번: Upbit 미가격 자산(`CFI,TIX,LUNC,SGB,LUNA2,FLR,PURSE`)으로 `equity`가
+  `null`이 되는 현상은 결함이 아니라 `neural/collector.py` +
+  `apps/dashboard/src/main.tsx`에 이미 구현·테스트된 의도된 정책임을
+  확인했다. 위 심볼은 Upbit KRW 마켓에서 영구 상장폐지된 자산이라 이 상태가
+  계속 유지된다. Owner는 현재의 보수적 표시 방식(0으로 위장하지 않고
+  `priced_subtotal` + 제외 배너로 표시)을 그대로 유지하기로 했으며, 0원
+  강제 반영이나 대시보드 숨김은 채택하지 않았다.
+- 2·3·5번(거래 원장 대조, Upbit 손실 원인 분석, Binance 포지션 대조)은
+  실거래소 원장과 iMac `.env`가 필요해 클라우드 세션에서는 수행하지 않았다.
+  iMac 로컬 세션에서 이어서 진행해야 한다.
+- 이 세션에서 iMac 실운영 워커·포지션·설정은 조회하지도 변경하지도 않았다.
+
 ## 2026-09-28 Upbit·Binance 거래 시스템 PR 인수인계
 
 - 최신 `origin/main`에서 `feat/trading-reliability-20260928` 브랜치를 만들고
