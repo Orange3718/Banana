@@ -1,7 +1,7 @@
 # 멀티자산 연동 상세설계서: Upbit · 국내주식 · Binance 선물
 
-작성일: 2026-07-22  
-개정일: 2026-09-07, Binance 선물 연결 설계 추가  
+작성일: 2026-07-22
+개정일: 2026-09-07, Binance 선물 연결 설계 추가
 상태: 상세설계 초안, 구현 전 검토 단계
 
 전체 구축 진입점: [통합 구축·서버 이전·뉴런형 대시보드 마스터 설계](MASTER_BUILD_AND_MIGRATION_PLAN.md). 배포·이전·기본 화면 구성은 해당 문서가 우선한다.
@@ -354,8 +354,8 @@ DRAFT → REVIEWED → SCHEDULED → ACTIVE → SUPERSEDED
 
 ## 15. 전략 A: 퀀트형
 
-내부 ID: `KR_QUANT_MULTIFACTOR`  
-참고 스타일: 공개된 퀀트·자산배분·모멘텀 투자 콘텐츠  
+내부 ID: `KR_QUANT_MULTIFACTOR`
+참고 스타일: 공개된 퀀트·자산배분·모멘텀 투자 콘텐츠
 권장 권한: 모의운영 후 제한 자동
 
 ### 데이터
@@ -402,8 +402,8 @@ DRAFT → REVIEWED → SCHEDULED → ACTIVE → SUPERSEDED
 
 ## 16. 전략 B: 주도주형
 
-내부 ID: `KR_LEADERSHIP_CYCLE`  
-참고 스타일: 장세·주도업종·기업가치 중심 공개 콘텐츠  
+내부 ID: `KR_LEADERSHIP_CYCLE`
+참고 스타일: 장세·주도업종·기업가치 중심 공개 콘텐츠
 권장 권한: 추천 또는 승인형
 
 ### 1단계: 시장 장세
@@ -439,8 +439,8 @@ DRAFT → REVIEWED → SCHEDULED → ACTIVE → SUPERSEDED
 
 ## 17. 전략 C: 삼박자형
 
-내부 ID: `KR_VALUE_PRICE_CATALYST`  
-참고 스타일: 가치·가격·정보를 함께 보는 공개 콘텐츠  
+내부 ID: `KR_VALUE_PRICE_CATALYST`
+참고 스타일: 가치·가격·정보를 함께 보는 공개 콘텐츠
 권장 권한: 승인형 스윙
 
 ### 가치 40점
@@ -484,6 +484,25 @@ DRAFT → REVIEWED → SCHEDULED → ACTIVE → SUPERSEDED
 - 가격 추세 훼손
 - 최대 보유기간 도달
 - 공통 손절·계좌 위험한도 도달
+
+### 17.1 구현 메모 (2026-09-28)
+
+`neural/kr_value_price_catalyst.py`에 위 채점·진입·청산 로직을 순수 함수로
+구현했다(`neural/strategy_lab.py`와 같은 offline·무자격증명 원칙). 단일
+캔들 시계열을 다루는 `strategy_lab`과 달리 이 전략은 종목별 가치·가격·재료
+입력을 받는 횡단면 모델이라 별도 모듈로 분리했고, 아직 `neural/api.py`의
+`/api/v1/strategies`에는 연결하지 않았다. 각 영역 내부의 세부 배점 분할은
+이 모듈이 임의로 정한 초안이며(예: 매출성장 10 + 영업이익성장 10 + 품질 10
++ 밸류에이션 10 − 부채·증자위험 최대 10, 40점 만점 내에서 클립), 40/35/25
+총점 배분과 진입·청산 조건만 위 설계 문서를 그대로 따른다.
+
+이 클라우드 세션은 KRX·DART·네이버금융 등 외부 데이터 사이트에 대한
+네트워크 접근이 조직 egress 정책으로 전부 차단되어 있어, 실제 종목
+데이터를 연결한 검증은 하지 못했다. `tests_next/test_kr_value_price_catalyst.py`는
+합성 입력값으로 채점 공식과 진입·청산 분기만 검증한다. 다음 단계는 실제
+KOSPI/KOSDAQ 과거 데이터(pykrx 등)와 DART 공시를 인터넷이 되는 환경(맥 또는
+이 환경의 네트워크 허용범위 확장)에서 연결해 26절 시뮬레이션 기준대로
+백테스트하는 것이다.
 
 ## 18. 전략 충돌 처리
 
@@ -784,7 +803,11 @@ Binance 연결 시 `암호화폐` 메뉴는 `Upbit 현물`로 명확히 표시�
 
 ## 29. 구현 전 결정사항
 
-1. 첫 연결 증권사
+1. ~~첫 연결 증권사~~ 2026-09-28 키움증권으로 확정. `kiwoom_client.py`에
+   REST 클라이언트 초기 코드(OAuth2 토큰 캐싱, 계좌평가현황, 매수/매도/정정/
+   취소)를 작성했다. 실제 App Key/Secret이 아직 없어 모의투자 도메인
+   (`mockapi.kiwoom.com`)과 `KIWOOM_DRY_RUN=true`를 기본값으로 두었고, 어떤
+   실행 워커에도 연결하지 않았다. 상세는 32절 참고.
 2. 계좌 유형: 일반, ISA, 연금 등
 3. 모의투자 사용 가능 여부
 4. 국내주식 데이터 제공 범위
@@ -975,3 +998,51 @@ Binance 키는 별도 비밀 저장소에서 해당 워커만 읽는다. 기존 
 
 - [Binance USDⓈ-M 주문·Algo 주문·포지션 모드 API](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/trade)
 - [Binance USDⓈ-M 계좌·잔고·수입 이력 API](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/account)
+
+## 32. 키움 REST API 연결 초기 코드
+
+### 32.1 현재 상태와 범위
+
+29절 1번 결정에 따라 국내주식 첫 연결 증권사를 키움증권으로 확정했다.
+이 절은 31절의 완결된 어댑터 계약 설계가 아니라, `kiwoom_client.py`에 실제로
+작성한 초기 REST 클라이언트의 범위와 검증되지 않은 부분을 기록한다. 아직
+어떤 실행 워커·전략·대시보드에도 연결하지 않았고, 실 App Key/Secret도
+발급받지 않은 상태다.
+
+### 32.2 인증과 도메인
+
+- 인증: `POST /oauth2/token`, body `{grant_type: client_credentials, appkey, secretkey}` → Bearer 토큰. `KiwoomClient._ensure_token()`이 만료 60초 전부터 재발급하며 캐시한다.
+- 실전 도메인 `https://api.kiwoom.com`, 모의투자 도메인 `https://mockapi.kiwoom.com`(엔드포인트는 동일, 도메인만 다름). `KIWOOM_BASE_URL` 기본값은 모의투자 도메인이다.
+- `KIWOOM_DRY_RUN` 기본값 `true`. 클라이언트 자체는 `upbit_client.UpbitClient`와 동일하게 DRY_RUN을 강제하지 않는 순수 REST 래퍼이며, 실행 차단은 `upbit_client.py`가 그렇듯 호출부(향후 전략/워커 계층)의 책임으로 남긴다.
+
+### 32.3 계좌·주문 API
+
+- 계좌평가현황: `POST /api/dostk/acnt`, `api_id=kt00004`, body `{qry_tp, dmst_stex_tp}`.
+- 주문: `POST /api/dostk/ordr`, `api_id`로 매수(`kt10000`)/매도(`kt10001`)/정정(`kt10002`)/취소(`kt10003`) 구분. body에 `dmst_stex_tp`(KRX/NXT/SOR), `stk_cd`, `ord_qty`, `trde_tp`(0:보통, 3:시장가 등), `ord_uv`, `cond_uv`를 담는다.
+
+### 32.4 검증되지 않은 부분 (실 키 확보 후 반드시 재확인)
+
+이 클라우드 세션은 `api.kiwoom.com`/`mockapi.kiwoom.com`에 대한 아웃바운드
+네트워크가 조직 egress 정책으로 차단되어 있고 실제 App Key/Secret도 없어,
+아래는 공개된 예제 코드 구조를 근거로 한 추정이며 실기기·실 계좌로 검증되지
+않았다.
+
+1. `api_id`를 HTTP 헤더 `api-id`로 보내는지, 혹은 body 필드로 보내는지.
+2. 토큰 응답의 만료 필드명(`expires_in` 가정, 실제로는 절대시각 `expires_dt`일 수 있음).
+3. 계좌평가현황·주문 응답의 실제 필드명과 에러 코드 체계.
+
+실 App Key/Secret을 발급받으면 모의투자 도메인으로 먼저
+`get_account_balance()`를 호출해 위 세 가지를 확인하고, 필요하면
+`kiwoom_client.py`를 수정한 뒤에만 `KIWOOM_DRY_RUN=false`나 실전 도메인
+전환을 검토한다.
+
+### 32.5 다음 단계
+
+1. 사용자가 키움 App Key/Secret(모의투자용 우선)을 발급받는다.
+2. **실제 키가 있는 로컬 기기(맥)에서** `.env`에 값을 채우고
+   `python tools/test_kiwoom_connection.py`를 실행해 32.4의 세 항목을
+   실제 응답으로 검증한다. 이 스크립트는 읽기 전용(토큰 발급 + 계좌조회만)이며
+   주문을 내지 않는다. `.env`와 키는 어떤 경우에도 Git에 커밋하지 않는다 —
+   프라이빗 저장소라도 예외 없음.
+3. 검증 결과에 맞춰 필요하면 `kiwoom_client.py`를 보정한다.
+4. 검증 후에만 전략/워커/대시보드 연결을 설계한다(31절과 동일한 공유·격리 원칙 적용 검토).

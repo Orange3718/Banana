@@ -5,17 +5,17 @@
 ## 1. GitHub 위치
 
 - 저장소: <https://github.com/Orange3718/Banana>
-- 작업 브랜치: `feat/upbit-auto-trader`
+- 작업 브랜치: `feat/trading-reliability-20260928`
 - 작업 폴더: `upbit-auto-trader/`
-- 브랜치 바로가기: <https://github.com/Orange3718/Banana/tree/feat/upbit-auto-trader/upbit-auto-trader>
-- PR 생성 화면: <https://github.com/Orange3718/Banana/pull/new/feat/upbit-auto-trader>
+- 브랜치 바로가기: <https://github.com/Orange3718/Banana/tree/feat/trading-reliability-20260928/upbit-auto-trader>
+- 인수인계: `../docs/TRADING_HANDOFF_2026-09-28.md`
 
 현재 `Banana/main`은 기존 프로젝트이므로, 자동매매 프로젝트는 작업 브랜치 안의 `upbit-auto-trader` 폴더에서 관리합니다. 기존 `main`에 병합하기 전까지는 기존 프로젝트에 영향을 주지 않습니다.
 
 ## 2. 다른 컴퓨터에서 최초 준비
 
 ```bash
-git clone -b feat/upbit-auto-trader https://github.com/Orange3718/Banana.git
+git clone -b feat/trading-reliability-20260928 https://github.com/Orange3718/Banana.git
 cd Banana/upbit-auto-trader
 chmod +x tools/*.sh
 ./tools/setup_macos.sh
@@ -68,8 +68,8 @@ cp .env.example .env
 작업 시작 전:
 
 ```bash
-git switch feat/upbit-auto-trader
-git pull origin feat/upbit-auto-trader
+git switch feat/trading-reliability-20260928
+git pull origin feat/trading-reliability-20260928
 ```
 
 수정 후:
@@ -77,7 +77,7 @@ git pull origin feat/upbit-auto-trader
 ```bash
 git add .
 git commit -m "변경 내용을 짧게 작성"
-git push origin feat/upbit-auto-trader
+git push origin feat/trading-reliability-20260928
 ```
 
 작업을 중단할 때는 커밋하고 push합니다. 다른 컴퓨터에서는 다시 `git pull`하면 이어서 작업할 수 있습니다.
@@ -107,7 +107,7 @@ curl http://127.0.0.1:8766/api/v1/health
 - 수수료, 슬리피지, 손절, 익절, 승률, 순수익, 최대낙폭 계산
 - 전략/파라미터 설명, 초보자용 도움말
 - 맥 실행 스크립트와 세션 인계 문서
-- 주문 API 미연결 상태의 안전한 실행 경계
+- 조회 API와 Upbit·Binance 독립 실주문 워커의 분리된 실행 경계
 
 ## 8. 다음 작업 체크리스트
 
@@ -116,15 +116,22 @@ curl http://127.0.0.1:8766/api/v1/health
 - [x] API, Upbit 수집기, Binance Futures 수집기를 LaunchAgent로 등록
 - [x] 안전 기본값 확인: 키 미설정, Binance disabled, 주문 API 미연결
 
-- [ ] Upbit API 허용 IP를 실제 실행 환경 IP로 등록
-- [ ] Upbit 읽기 전용 잔고/주문조회 연결 검증
-- [ ] Binance Futures 읽기 전용 키와 IP 제한 설정
+- [x] Upbit API 허용 IP와 실계좌 연결 검증
+- [x] Upbit 읽기 전용 수집기와 독립 실주문 워커 검증
+- [x] Binance Futures 키·IP 제한·실계좌 연결 검증
 - [ ] 텔레그램 알림 주기, 우선순위, 중복 억제 검증
 - [ ] 보유자산별 거래 이력과 실현/미실현 손익 대조
 - [ ] 전략 백테스트 결과와 실제 로그의 공통 포맷 확정
 - [ ] 모의주문 또는 paper trading 검증
-- [ ] 주문 executor, 위험 한도, kill switch를 별도 승인 후 구현
-- [ ] 운영 서버 배포, 비밀정보 저장소, 모니터링/백업 구성
+- [x] 거래소별 독립 주문 executor, 위험 한도와 kill switch 구현
+- [x] iMac LaunchAgent 배포와 5분 외부 연결·수집 신선도 감시 구성
+- [ ] 현재 전략의 신규 종료 거래 20건을 수수료 포함 원장으로 검증
+- [x] 미가격 Upbit 자산 처리 정책 확정 — `equity=null` + `priced_subtotal` 대체
+      표시가 의도된 정책임을 확인 (`docs/TRADING_HANDOFF_2026-09-28.md` 참고)
+- [ ] 키움증권 REST 연결 실계좌 검증 (`kiwoom_client.py`,
+      `tools/test_kiwoom_connection.py` — App Key/Secret 있는 기기에서)
+- [ ] KOSPI/KOSDAQ 전략 C(`neural/kr_value_price_catalyst.py`) 실제 데이터
+      백테스트 (pykrx/DART, 인터넷 되는 기기에서)
 
 ## 9. 장애 대응
 

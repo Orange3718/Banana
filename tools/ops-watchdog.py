@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Deterministic Atemoya watchdog with allow-listed recovery and incident dedup."""
 import argparse
+import datetime as dt
 import json
 import os
 import re
 import shutil
+import socket
+import sqlite3
 import subprocess
 import time
 from dataclasses import asdict, dataclass
@@ -19,6 +22,13 @@ DB_CMD = ["/usr/local/bin/docker", "exec", "atemoya-postgres", "psql", "-U", "n8
 INCIDENT_WEBHOOK = "http://127.0.0.1:5678/webhook/atemoya-ops-incident"
 CONTAINERS = ("atemoya-postgres", "atemoya-n8n", "atemoya-webhook-proxy")
 REMEDIATION_COOLDOWN = 3600
+TRADING_DB = ROOT / "upbit-auto-trader/next_data/neural.db"
+EXTERNAL_ENDPOINTS = (
+    ("upbit", "https://api.upbit.com/v1/market/all?is_details=false"),
+    ("binance", "https://fapi.binance.com/fapi/v1/ping"),
+)
+DNS_HOSTS = ("api.upbit.com", "fapi.binance.com")
+TRADING_COLLECTORS = ("upbit", "binance_futures")
 
 
 @dataclass
@@ -49,6 +59,60 @@ def http_ok(url, timeout=3):
             return 200 <= response.status < 300, int((time.monotonic() - started) * 1000), body.decode("utf-8", "replace")
     except Exception as exc:
         return False, int((time.monotonic() - started) * 1000), str(exc)
+
+
+def dns_check():
+    started = time.monotonic()
+    failures = {}
+    resolved = {}
+    for host in DNS_HOSTS:
+        try:
+            addresses = sorted({row[4][0] for row in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)})
+            resolved[host] = addresses[:4]
+        except OSError as exc:
+            failures[host] = str(exc)[:200]
+    latency = int((time.monotonic() - started) * 1000)
+    if failures:
+        return Check("network", "dns", "bad", f"외부 DNS 실패 {len(failures)}/{len(DNS_HOSTS)}", latency, {"failures": failures, "resolved": resolved})
+    return Check("network", "dns", "good", f"외부 DNS 정상 {len(resolved)}/{len(DNS_HOSTS)}", latency, {"resolved": resolved})
+
+
+def external_http_checks():
+    checks = []
+    for name, url in EXTERNAL_ENDPOINTS:
+        ok, latency, detail = http_ok(url, timeout=5)
+        checks.append(Check("network", f"exchange:{name}", "good" if ok else "bad", f"{name} 외부 API 정상" if ok else f"{name} 외부 API 응답 실패", latency, {"response": detail[:300]}))
+    return checks
+
+
+def trading_collector_checks(now=None):
+    now = now or dt.datetime.now(dt.timezone.utc)
+    if not TRADING_DB.exists():
+        return [Check("trading", "collector_db", "bad", "거래 수집 DB 없음", details={"path": str(TRADING_DB)})]
+    try:
+        with sqlite3.connect(TRADING_DB, timeout=5) as conn:
+            rows = conn.execute("SELECT account,time,status FROM collector_health").fetchall()
+    except Exception as exc:
+        return [Check("trading", "collector_db", "bad", "거래 수집 DB 조회 실패", details={"error": str(exc)[:300]})]
+    by_account = {row[0]: row[1:] for row in rows}
+    checks = []
+    for account in TRADING_COLLECTORS:
+        row = by_account.get(account)
+        if not row:
+            checks.append(Check("trading", f"collector:{account}", "bad", f"{account} 수집 상태 없음"))
+            continue
+        raw_time, collector_status = row
+        try:
+            recorded_at = dt.datetime.fromisoformat(raw_time.replace("Z", "+00:00"))
+            if recorded_at.tzinfo is None:
+                recorded_at = recorded_at.replace(tzinfo=dt.timezone.utc)
+            age = max(0, int((now - recorded_at.astimezone(dt.timezone.utc)).total_seconds()))
+        except Exception:
+            checks.append(Check("trading", f"collector:{account}", "bad", f"{account} 수집 시각 손상", details={"time": raw_time, "status": collector_status}))
+            continue
+        status = "bad" if collector_status != "connected" or age > 300 else "review" if age > 120 else "good"
+        checks.append(Check("trading", f"collector:{account}", status, f"{account} {collector_status} · {age}초 전", details={"age_seconds": age, "time": raw_time, "collector_status": collector_status}))
+    return checks
 
 
 def sql_quote(value):
@@ -153,6 +217,13 @@ def direct_publication_check(facts):
 
 def collect_checks():
     checks = [container_check(name) for name in CONTAINERS]
+    checks.append(dns_check())
+    checks.extend(external_http_checks())
+    ok, latency, detail = http_ok("http://127.0.0.1:8766/api/v1/health")
+    checks.append(Check("trading", "api", "good" if ok else "bad", "거래 대시보드 API 정상" if ok else "거래 대시보드 API 응답 실패", latency, {"response": detail[:300]}))
+    checks.extend(trading_collector_checks())
+    ok, latency, detail = http_ok("https://orange-imac.tail14202a.ts.net:9443/", timeout=5)
+    checks.append(Check("remote-access", "tailscale-dashboard", "good" if ok else "bad", "Tailscale 대시보드 정상" if ok else "Tailscale 대시보드 응답 실패", latency, {"response": detail[:300]}))
     ok, latency, detail = http_ok("http://127.0.0.1:5678/healthz")
     checks.append(Check("n8n", "healthz", "good" if ok else "bad", "n8n HTTP 정상" if ok else "n8n HTTP 응답 실패", latency, {"response": detail[:300]}))
     ok, latency, detail = http_ok("http://127.0.0.1:11434/api/tags")
@@ -199,6 +270,11 @@ def remediate(checks, state):
             result = command(["/usr/local/bin/docker", "restart", "atemoya-n8n"], timeout=90)
             if result.returncode == 0:
                 action = "docker restart atemoya-n8n"
+        elif check.component == "trading" and check.code == "api":
+            uid = str(os.getuid())
+            result = command(["/bin/launchctl", "kickstart", "-k", f"gui/{uid}/com.orange3718.upbit-auto-trader.api"], timeout=30)
+            if result.returncode == 0:
+                action = "launchctl kickstart com.orange3718.upbit-auto-trader.api"
         elif check.component == "collection" and check.code == "source_freshness":
             uid = str(os.getuid())
             result = command(["/bin/launchctl", "kickstart", "-k", f"gui/{uid}/com.atemoya.source-scout"], timeout=30)

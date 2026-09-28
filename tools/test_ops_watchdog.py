@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import importlib.util
+import datetime as dt
 import json
+import sqlite3
 import sys
 import tempfile
 import unittest
@@ -46,6 +48,31 @@ class WatchdogTests(unittest.TestCase):
             check = watchdog.memory_pressure_check()
         self.assertEqual(check.status, "good")
         self.assertEqual(check.details["free_percent"], 63)
+
+    def test_dns_failure_is_bad(self):
+        with patch.object(watchdog.socket, "getaddrinfo", side_effect=OSError("resolver unavailable")):
+            check = watchdog.dns_check()
+        self.assertEqual(check.status, "bad")
+        self.assertEqual(len(check.details["failures"]), len(watchdog.DNS_HOSTS))
+
+    def test_trading_collector_freshness(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "neural.db"
+            with sqlite3.connect(path) as conn:
+                conn.execute("CREATE TABLE collector_health(account TEXT PRIMARY KEY,time TEXT,status TEXT)")
+                conn.executemany(
+                    "INSERT INTO collector_health VALUES(?,?,?)",
+                    [
+                        ("upbit", "2026-09-27T06:00:00+00:00", "connected"),
+                        ("binance_futures", "2026-09-27T05:50:00+00:00", "connected"),
+                    ],
+                )
+            now = dt.datetime(2026, 9, 27, 6, 1, tzinfo=dt.timezone.utc)
+            with patch.object(watchdog, "TRADING_DB", path):
+                checks = watchdog.trading_collector_checks(now=now)
+        statuses = {check.code: check.status for check in checks}
+        self.assertEqual(statuses["collector:upbit"], "good")
+        self.assertEqual(statuses["collector:binance_futures"], "bad")
 
     def test_revenue_pipeline_is_review_when_nothing_published(self):
         check = watchdog.revenue_pipeline_check({"queued": 4, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 0, "oldest_minutes": 60})

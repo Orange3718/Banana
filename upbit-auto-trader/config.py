@@ -51,6 +51,11 @@ class Config:
     notify_hold_signals: bool
     telegram_bot_token: str
     telegram_allowed_chat_id: str
+    kiwoom_app_key: str
+    kiwoom_app_secret: str
+    kiwoom_account_no: str
+    kiwoom_base_url: str
+    kiwoom_dry_run: bool
 
     @classmethod
     def load(cls, env_path: str | Path = ".env") -> "Config":
@@ -86,6 +91,11 @@ class Config:
             notify_hold_signals=_to_bool(os.getenv("NOTIFY_HOLD_SIGNALS"), False),
             telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
             telegram_allowed_chat_id=os.getenv("TELEGRAM_ALLOWED_CHAT_ID", ""),
+            kiwoom_app_key=os.getenv("KIWOOM_APP_KEY", ""),
+            kiwoom_app_secret=os.getenv("KIWOOM_APP_SECRET", ""),
+            kiwoom_account_no=os.getenv("KIWOOM_ACCOUNT_NO", ""),
+            kiwoom_base_url=os.getenv("KIWOOM_BASE_URL", "https://mockapi.kiwoom.com").rstrip("/"),
+            kiwoom_dry_run=_to_bool(os.getenv("KIWOOM_DRY_RUN"), True),
         )
         config.validate()
         return config
