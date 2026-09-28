@@ -129,3 +129,104 @@ python -m unittest tools/test_ops_watchdog.py
 접근 불가)에서 코드와 PR diff만으로 검증·확인 가능해 완료했다. 2·3·5번은
 실거래소 원장, iMac 로컬 `.env`, 실행 중인 워커 상태가 있어야 하므로 iMac
 로컬 세션이나 실거래소 접근이 가능한 환경에서 이어서 진행해야 한다.
+
+## 2026-09-28 클라우드 세션 2차: 키움 초기 코드 + KR 전략 착수
+
+같은 클라우드 세션에서 이어서 다음을 추가했다. 전부 PR #4 브랜치
+(`feat/trading-reliability-20260928`)에 이미 fast-forward push됐다.
+
+1. `kiwoom_client.py` — `upbit_client.py`와 같은 dataclass·재시도 구조의
+   키움증권 REST 클라이언트 초기 코드(OAuth2 토큰, 계좌평가현황 `kt00004`,
+   매수/매도/정정/취소 `kt10000`~`kt10003`). App Key/Secret이 없고 이
+   세션은 `api.kiwoom.com`/`mockapi.kiwoom.com`에 네트워크로 닿지 못해
+   실계좌 검증은 안 됐다 — 헤더명(`api-id`) 등은 추정치다
+   (`MULTI_ASSET_STOCK_DESIGN.md` 32.4 참고).
+2. `config.py`·`.env.example`에 `KIWOOM_*` 환경변수 추가. 기본값은 모의투자
+   도메인과 `KIWOOM_DRY_RUN=true`, 키는 빈 값 — 기존 동작에 영향 없음.
+3. `tools/test_kiwoom_connection.py` — 읽기 전용(토큰 발급 + 계좌조회만,
+   주문 없음) 연결 확인 스크립트. 실제 키가 있는 로컬 기기에서만 실행한다.
+4. `neural/kr_value_price_catalyst.py` — `MULTI_ASSET_STOCK_DESIGN.md` 17절
+   "전략 C: 삼박자형"(가치 40·가격 35·재료 25)의 채점·진입·청산 로직을
+   `neural/strategy_lab.py`와 같은 오프라인·무자격증명 원칙으로 구현했다.
+   재료 점수는 정형 공시만 사용하고 원문 뉴스 헤드라인은 신호로 쓰지
+   않는다(16절 원칙 유지). 이 세션은 KRX·DART·네이버금융도 네트워크
+   정책상 전부 막혀 있어 **실제 종목 데이터로는 검증하지 못했고**, 합성
+   입력값 테스트(`tests_next/test_kr_value_price_catalyst.py`, 18개)만
+   통과했다. "이 조합이 실제로 돈을 번다"는 근거가 아니라 "설계 방향이
+   학술적으로 타당하다"는 근거(강환국 퀀트 백테스트, 한국 시장 PEAD 논문,
+   거래량-수익률 상관관계 KCI 논문)만 있다는 점을 다음 세션도 그대로
+   유지해야 한다.
+5. `python -m pytest -q tests_next` 61개 전부 통과(기존 43 + 신규 18),
+   `python -m compileall -q .` 통과. 클린 venv에서 실행: 이 컨테이너는
+   `requirements.txt`의 `ta` 패키지가 최신 setuptools와 충돌해 빌드
+   실패하므로, 검증 시 `pip install "setuptools<66"`를 먼저 하거나
+   `python -m venv`로 새 가상환경을 만들어야 한다.
+
+### 맥에서 할 일 (지금 시점 기준)
+
+- [ ] `git pull` — 이 절의 커밋들(키움 클라이언트, 연결 테스트 스크립트,
+      KR 전략 모듈)을 받는다.
+- [ ] `.env`에 `KIWOOM_APP_KEY`/`KIWOOM_APP_SECRET`/`KIWOOM_ACCOUNT_NO`를
+      채운다 (키움에서 모의투자용으로 먼저 발급). **Git에는 절대 커밋하지
+      않는다.**
+- [ ] `python tools/test_kiwoom_connection.py` 실행 — 토큰 발급과 계좌조회
+      원본 응답을 32.4의 가정과 대조하고, 다르면 `kiwoom_client.py`를
+      맥에서 직접 고치거나 다음 세션에 그 응답을 알려준다.
+- [ ] (여유가 되면) `pip install pykrx` 등으로 KOSPI/KOSDAQ 과거 시세와
+      DART 공시를 받아 `neural/kr_value_price_catalyst.py`를 실제 데이터로
+      백테스트한다. 이건 맥의 일반 인터넷이 필요하고, 이 클라우드 세션은
+      할 수 없었던 부분이다.
+- [ ] 기존 Upbit/Binance 실거래 워커·설정은 이 작업들과 무관하게 그대로
+      둔다 (이번 작업들은 어떤 실행 워커에도 연결되지 않았다).
+
+### Git 푸시 기준 — 여러 곳에서 한 프로젝트 다루는 법
+
+혼동의 원인: 클라우드 세션은 매번 `feat/trading-reliability-20260928-<임의문자열>`
+같은 세션 전용 브랜치를 자동으로 만든다. 그래서 "내가 어느 브랜치에
+푸시해야 하지?"가 헷갈릴 수 있다. 실제 규칙은 하나뿐이다.
+
+> **어디서 작업하든 진짜 작업 브랜치는 `feat/trading-reliability-20260928`
+> 하나뿐이다.** 클라우드 세션 전용 브랜치 이름은 무시하고, 항상 이
+> 브랜치를 pull하고 이 브랜치로 push한다.
+
+```bash
+git switch feat/trading-reliability-20260928
+git pull origin feat/trading-reliability-20260928
+
+# ...작업...
+
+git add <바뀐 파일>
+git commit -m "설명"
+git push origin feat/trading-reliability-20260928
+```
+
+클라우드 세션이 자체 브랜치에 커밋했다면(이 세션이 그랬듯), 다음처럼 같은
+브랜치로 강제 없이 fast-forward push하면 된다 — 이미 이번 세션 내내 이
+방식으로 PR #4에 반영했다.
+
+```bash
+git push origin <클라우드-세션-브랜치>:feat/trading-reliability-20260928
+```
+
+**장소별 역할 분담 (이번 세션에서 확인된 사실 기준):**
+
+| 장소 | 할 수 있는 것 | 할 수 없는 것 |
+| --- | --- | --- |
+| 클라우드 세션(여기) | 코드 작성, 테스트, 문서화, Git/GitHub 조작, 일반 웹 검색 | 키움·업비트·바이낸스·KRX·DART 등 거의 모든 외부 사이트 접속(egress 정책 차단), 실제 `.env`/키 취급, 라이브 워커 실행·재시작 |
+| 맥(iMac) | 실제 네트워크 전부, `.env`/키 보관, 라이브 트레이딩 워커 실행, 실제 데이터 백테스트 | (기기 자체 제약은 없음 — 사람이 직접 조작) |
+
+**공통 원칙:**
+
+1. 항상 `.env`·키·거래 원장은 Git에 올리지 않는다 — 어느 장소에서도 예외
+   없음. 프라이빗 저장소도 예외 아님(위 원칙은 이미 이 문서와
+   `.gitignore`에 반영돼 있다).
+2. 작업을 시작하기 전 항상 `git pull`, 끝내기 전 항상 `git commit && git push`.
+   두 장소를 오갈 때 이 습관만 지키면 "어느 게 최신인지 모르겠다"는 문제가
+   생기지 않는다.
+3. 같은 거래소의 실주문 워커를 두 컴퓨터에서 동시에 실행하지 않는다(이미
+   상단에 명시된 규칙).
+4. 이 문서(`docs/TRADING_HANDOFF_2026-09-28.md`)를 항상 최신 상태로 갱신되는
+   단일 기준점으로 삼는다 — 새 파일을 계속 만들지 않고, 여기에 날짜별
+   섹션을 추가하는 방식으로 이어간다. `REMOTE_RUNBOOK_KO.md`는 최초
+   설치·실행 절차(포트, launchd 등록 등) 전용이고, 이 문서는 "지금 무엇을
+   했고 다음에 뭘 해야 하는가" 전용이다.

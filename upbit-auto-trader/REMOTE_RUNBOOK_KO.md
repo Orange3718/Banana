@@ -126,7 +126,12 @@ curl http://127.0.0.1:8766/api/v1/health
 - [x] 거래소별 독립 주문 executor, 위험 한도와 kill switch 구현
 - [x] iMac LaunchAgent 배포와 5분 외부 연결·수집 신선도 감시 구성
 - [ ] 현재 전략의 신규 종료 거래 20건을 수수료 포함 원장으로 검증
-- [ ] 미가격 Upbit 자산 처리 정책 확정
+- [x] 미가격 Upbit 자산 처리 정책 확정 — `equity=null` + `priced_subtotal` 대체
+      표시가 의도된 정책임을 확인 (`docs/TRADING_HANDOFF_2026-09-28.md` 참고)
+- [ ] 키움증권 REST 연결 실계좌 검증 (`kiwoom_client.py`,
+      `tools/test_kiwoom_connection.py` — App Key/Secret 있는 기기에서)
+- [ ] KOSPI/KOSDAQ 전략 C(`neural/kr_value_price_catalyst.py`) 실제 데이터
+      백테스트 (pykrx/DART, 인터넷 되는 기기에서)
 
 ## 9. 장애 대응
 
