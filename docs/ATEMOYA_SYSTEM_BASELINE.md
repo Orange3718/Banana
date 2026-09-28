@@ -111,6 +111,18 @@ The iMac LaunchAgent `com.atemoya.obsidian-inbox` refreshes this dashboard
 every 15 minutes and once at login. Its configuration is local because the
 absolute Vault and worktree paths are machine-specific.
 
+A sibling bridge, `10 Operations/Atemoya Connections.md`, lists relationships
+between recent `source_observations`/`local_llm_runs` rows, written by
+`ops/scripts/export-obsidian-links.sh` (LaunchAgent `com.atemoya.obsidian-connections`,
+hourly, also local-only) from a new `vault_links` table
+(`db/migrations/016_vault_links.sql`). The relationships themselves are meant
+to come from the `AtemoyaVaultLinker01` n8n workflow
+(`n8n/workflows/exports/AtemoyaVaultLinker01.json`) — imported but **not yet
+activated**, pending Owner review, per the recovery-order rule below. Until
+activated, `vault_links` stays empty and the Connections note says so. See
+`docs/OPEN_ITEMS.md`'s 2026-09-28 entry for the full design and its stated
+limits (it is a flat relationship list, not yet per-item wikilink notes).
+
 ## AI provider routing
 
 - Google Gemini `gemini-2.5-flash` replaced the direct Ollama HTTP calls in the
