@@ -113,6 +113,7 @@ def generate_recommendations(
             recommendations=[],
             market_regime=regime.label,
             market_regime_reason=regime.reason,
+            market_regime_warning=regime.momentum_warning_reason,
         )
         return save_recommendation_state(state)
 
@@ -152,6 +153,7 @@ def generate_recommendations(
         pending_market=recommendations[0].market if recommendations else "",
         market_regime=regime.label,
         market_regime_reason=regime.reason,
+        market_regime_warning=regime.momentum_warning_reason,
     )
     return save_recommendation_state(state)
 

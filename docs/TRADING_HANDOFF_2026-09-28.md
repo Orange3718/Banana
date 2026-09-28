@@ -230,3 +230,53 @@ git push origin <클라우드-세션-브랜치>:feat/trading-reliability-2026092
    섹션을 추가하는 방식으로 이어간다. `REMOTE_RUNBOOK_KO.md`는 최초
    설치·실행 절차(포트, launchd 등록 등) 전용이고, 이 문서는 "지금 무엇을
    했고 다음에 뭘 해야 하는가" 전용이다.
+
+## 2026-09-28 맥 세션: 브랜치 합류 + 키움 대시보드 + 장세 조기경보
+
+같은 날 맥 로컬 세션(`/Users/orange/Developer/Banana-atemoya-ops`, 실제 라이브
+워커가 도는 위치)에서 이어서 다음을 했다.
+
+1. **브랜치 합류**: 맥에 쌓여 있던 미푸시 14커밋+미커밋 변경(대시보드,
+   Binance 리스크 로직 수정 등)을 클라우드 세션의 `feat/trading-reliability-20260928`
+   (키움 클라이언트·KR 전략)와 병합. `neural/binance_live.py`는 충돌 없이
+   자동 병합됨. 충돌 22개는 파일별로 검토해서 해소(설정 계열은 양쪽 다
+   유지, 문서는 더 최신 쪽 채택). 병합 커밋을 `feat/trading-reliability-20260928`에
+   fast-forward push함.
+2. **키움 대시보드 추가**: 실전 키로 라이브 검증해서 정확한 요청 필드를
+   확인한 뒤 `kiwoom_client.py`에 `get_top_change_rate`/`get_top_volume_today`
+   (ka10027/ka10030, 순위정보)와 `get_order_book`(ka10004, 10호가) 추가.
+   `neural/api.py`에 `/api/v1/kiwoom/rankings`(30초 캐시)·
+   `/api/v1/kiwoom/orderbook`(3초 캐시, REST 폴링이라 진짜 웹소켓 실시간은
+   아님) 추가. 대시보드에 "키움" 탭 신설(등락률/거래량 상위 + 종목코드
+   입력 10단계 호가창). 이 컨테이너엔 node/pnpm이 없어서 Node.js LTS를
+   공식 tarball로 `~/.local`에 직접 설치(sudo 없이)해서 `pnpm run build`까지
+   완료·라이브 반영함. 키움은 여전히 계좌조회·시세조회만 가능하고 어떤
+   실주문 워커에도 연결되지 않았다.
+3. **Upbit 장세 조기경보 검증**: 실제 업비트 공개 API로 받은 6개월치
+   1시간봉으로 EMA20-EMA60 격차 축소를 "약세장 조기경보" 후보로 백테스트.
+   재현율 89%/정밀도 58%/평균 선행 8.3시간. 정밀도가 낮아 `allow_new_buys`는
+   건드리지 않고 텔레그램 메시지에 참고용 경고 한 줄만 추가(`strategy_router.py`
+   의 `momentum_warning` 필드). 상세: `docs/UPBIT_REGIME_EARLY_WARNING_2026-09-28.md`.
+4. 위 세 가지 모두 `python -m pytest -q tests_next` 61개 통과, `compileall`
+   정상 확인 후 배포했고, `upbit-worker`·`api` LaunchAgent 재시작 시마다
+   기존 포지션·설정이 유실 없이 정상 인식되는지 로그로 직접 확인했다.
+5. 9/28 손익 점검(실거래 원장 기준): Upbit 9/13~ 매도 159건 순 +1,936원
+   (9/27 정식 FIFO 검증의 +6,377원과는 계산 방식이 달라 참고용 근사치),
+   9/27 이후 -2,335원. Binance(거래소 income 원장, 정확) 9/13~ +11.56 USDT,
+   9/27~ -8.76 USDT. 두 거래소 다 9/27 전략 재검증 이후 소폭 마이너스
+   흐름 — 위 3번 조기경보 검증도 이 관찰에서 시작됐다.
+
+### 다음 세션이 이어받을 것
+
+- [ ] 장세 조기경보(`market_regime_warning`)를 `trade_history.jsonl`에 매
+      사이클 기록하도록 이미 연결해뒀다. 몇 주 뒤 라이브 재현율·정밀도를
+      백테스트 수치(89%/58%)와 대조해서, 정보용 유지/포지션 축소/완전 차단
+      중 어느 쪽으로 갈지 결정한다.
+- [ ] 키움 실계좌 잔고가 계속 0원으로 나온다 — 실제 빈 계좌인지, 필드
+      해석이 여전히 틀린 건지 `MULTI_ASSET_STOCK_DESIGN.md` 32.4와 재대조
+      필요.
+- [ ] 두 번째 실전 계좌(단타/중장기 분리 운영 목적) App Key/Secret 아직
+      없음 — 받으면 `KIWOOM_SCALP_*`/`KIWOOM_SWING_*` 식으로 설정 스키마
+      확장.
+- [ ] 종목 추천(KR_VALUE_PRICE_CATALYST)은 여전히 실데이터 미연결 —
+      DART는 사용자가 "아직 하지 말자"고 보류함.

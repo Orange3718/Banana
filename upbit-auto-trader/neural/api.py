@@ -131,6 +131,83 @@ def create_app(store=None):
     def universe():
         return read_json('coin_registry.json')
 
+    _kiwoom_cache: dict = {'as_of': None, 'data': None}
+
+    @app.get('/api/v1/kiwoom/rankings')
+    def kiwoom_rankings():
+        """국내주식 당일 동향(등락률/거래량 상위) — 읽기 전용, 주문 없음.
+
+        Kiwoom rate limits are unverified, so results are cached in-process
+        for 30s instead of hitting the API on every dashboard poll.
+        """
+        now = datetime.now(timezone.utc)
+        cached = _kiwoom_cache['data']
+        if cached and (now - _kiwoom_cache['as_of']).total_seconds() < 30:
+            return cached
+
+        from config import Config
+        from kiwoom_client import KiwoomAPIError, KiwoomClient
+
+        config = Config.load(Path(__file__).resolve().parents[1] / '.env')
+        if not config.kiwoom_app_key or not config.kiwoom_app_secret:
+            result = {'as_of': now.isoformat(), 'connected': False,
+                      'error': 'KIWOOM_APP_KEY/SECRET이 설정되지 않았습니다.',
+                      'top_change': [], 'top_volume': []}
+            _kiwoom_cache.update(as_of=now, data=result)
+            return result
+
+        client = KiwoomClient(app_key=config.kiwoom_app_key, app_secret=config.kiwoom_app_secret,
+                               base_url=config.kiwoom_base_url)
+        try:
+            top_change = client.get_top_change_rate()
+            top_volume = client.get_top_volume_today()
+            result = {'as_of': now.isoformat(), 'connected': True, 'error': None,
+                      'top_change': top_change[:15], 'top_volume': top_volume[:15]}
+        except KiwoomAPIError as exc:
+            result = {'as_of': now.isoformat(), 'connected': False, 'error': str(exc)[:300],
+                      'top_change': [], 'top_volume': []}
+        _kiwoom_cache.update(as_of=now, data=result)
+        return result
+
+    _orderbook_cache: dict = {}
+
+    @app.get('/api/v1/kiwoom/orderbook')
+    def kiwoom_orderbook(code: str = '005930'):
+        """개별 종목 10호가 — 읽기 전용, 주문 없음.
+
+        REST 스냅샷이라 진짜 웹소켓 실시간은 아니다. 3초 캐시로 폴링에
+        맞춘다(프론트도 같은 주기로 다시 부른다).
+        """
+        code = re.sub(r'[^0-9]', '', code)[:6] or '005930'
+        now = datetime.now(timezone.utc)
+        cached = _orderbook_cache.get(code)
+        if cached and (now - cached['as_of']).total_seconds() < 3:
+            return cached['data']
+
+        from config import Config
+        from kiwoom_client import KiwoomAPIError, KiwoomClient
+
+        config = Config.load(Path(__file__).resolve().parents[1] / '.env')
+        if not config.kiwoom_app_key or not config.kiwoom_app_secret:
+            result = {'as_of': now.isoformat(), 'connected': False,
+                      'error': 'KIWOOM_APP_KEY/SECRET이 설정되지 않았습니다.',
+                      'stk_cd': code, 'base_time': '', 'asks': [], 'bids': [],
+                      'total_ask_qty': '0', 'total_bid_qty': '0'}
+            _orderbook_cache[code] = {'as_of': now, 'data': result}
+            return result
+
+        client = KiwoomClient(app_key=config.kiwoom_app_key, app_secret=config.kiwoom_app_secret,
+                               base_url=config.kiwoom_base_url)
+        try:
+            book = client.get_order_book(code)
+            result = {'as_of': now.isoformat(), 'connected': True, 'error': None, **book}
+        except KiwoomAPIError as exc:
+            result = {'as_of': now.isoformat(), 'connected': False, 'error': str(exc)[:300],
+                      'stk_cd': code, 'base_time': '', 'asks': [], 'bids': [],
+                      'total_ask_qty': '0', 'total_bid_qty': '0'}
+        _orderbook_cache[code] = {'as_of': now, 'data': result}
+        return result
+
     @app.get('/api/v1/drafts')
     def drafts():
         return db.draft_list()

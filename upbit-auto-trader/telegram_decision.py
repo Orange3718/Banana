@@ -35,8 +35,10 @@ def _format_recommendation_list(state: RecommendationState, settings: TradingSet
         f"운영 단계: {settings.mode_label}",
         f"시장 상태: {state.market_regime or '-'}",
         f"판단: {state.market_regime_reason or '-'}",
-        "",
     ]
+    if state.market_regime_warning:
+        lines.append(f"⚠️ 조기경보: {state.market_regime_warning}")
+    lines.append("")
     for index, rec in enumerate(state.recommendations, start=1):
         lines.append(
             f"{index}. {rec.market} | 점수 {rec.score:.1f} | 현재가 {rec.price:,.0f} KRW | "

@@ -41,6 +41,7 @@ class RecommendationState:
     last_decision: str = ""
     market_regime: str = ""
     market_regime_reason: str = ""
+    market_regime_warning: str = ""
 
 
 def now_text() -> str:
@@ -68,6 +69,7 @@ def load_recommendation_state(path: Path = STATE_PATH) -> RecommendationState:
         last_decision=str(data.get("last_decision", "")),
         market_regime=str(data.get("market_regime", "")),
         market_regime_reason=str(data.get("market_regime_reason", "")),
+        market_regime_warning=str(data.get("market_regime_warning", "")),
     )
 
 
@@ -79,6 +81,7 @@ def save_recommendation_state(state: RecommendationState, path: Path = STATE_PAT
         "last_decision": state.last_decision,
         "market_regime": state.market_regime,
         "market_regime_reason": state.market_regime_reason,
+        "market_regime_warning": state.market_regime_warning,
     }
     _atomic_write(path, json.dumps(payload, ensure_ascii=False, indent=2))
     return state

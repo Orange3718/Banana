@@ -735,6 +735,7 @@ def main() -> None:
                             "trading_style": settings.trading_style,
                             "market_regime": recommendation_state.market_regime,
                             "market_regime_reason": recommendation_state.market_regime_reason,
+                            "market_regime_warning": recommendation_state.market_regime_warning,
                         },
                     )
                 except Exception as exc:
