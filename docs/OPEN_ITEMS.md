@@ -1,5 +1,19 @@
 # Atemoya 미결 작업 정리
 
+## 2026-09-28 Upbit·Binance 거래 시스템 PR 인수인계
+
+- 최신 `origin/main`에서 `feat/trading-reliability-20260928` 브랜치를 만들고
+  거래 시스템, 실주문 위험 제한, 대시보드, 전략 검증 문서와 5분 외부 연결
+  Watchdog을 한 PR로 정리했다.
+- 실제 `.env`, API 키, `trade_history.jsonl`, SQLite 원장, 로그와 런타임 상태는
+  포함하지 않는다.
+- 거래 테스트 43개, Watchdog 테스트 13개, Python 컴파일, diff 검사와
+  React/TypeScript/Vite 프로덕션 빌드가 통과했다.
+- iMac 실운영 워커와 수집기는 계속 실행 중이며 PR 준비 과정에서 주문 크기,
+  레버리지, 포지션 또는 실행 상태를 변경하지 않았다.
+- 다음 작업과 원격 재개 절차는
+  `docs/TRADING_HANDOFF_2026-09-28.md`를 단일 기준점으로 사용한다.
+
 기준일: 2026-08-23
 
 ## 2026-08-30 수익 운영 복구 배포 완료

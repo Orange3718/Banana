@@ -1,0 +1,8 @@
+requests
+pyjwt
+python-dotenv
+pandas
+numpy
+ta
+colorlog
+streamlit
