@@ -49,6 +49,9 @@ class TradingSettings:
     min_cash_reserve_krw: float = 100_000.0
     min_cash_reserve_ratio: float = 0.20
     max_daily_loss_rate: float = 0.015
+    max_open_risk_rate: float = 0.015
+    taker_fee_rate: float = 0.0005
+    risk_slippage_rate: float = 0.0005
     loss_cooldown_minutes: int = 240
     profit_cooldown_minutes: int = 60
     max_consecutive_losses: int = 3
@@ -162,6 +165,12 @@ class TradingSettings:
             errors.append("현금 보유 비율은 0 이상 1 이하여야 합니다.")
         if not 0 < self.max_daily_loss_rate <= 1:
             errors.append("하루 계좌 손실 제한은 0보다 크고 1 이하여야 합니다.")
+        if not 0 < self.max_open_risk_rate <= 1:
+            errors.append("총 오픈 리스크 한도는 0보다 크고 1 이하여야 합니다.")
+        if not 0 <= self.taker_fee_rate <= 0.1:
+            errors.append("시장가 수수료율을 확인해 주세요.")
+        if not 0 <= self.risk_slippage_rate <= 0.1:
+            errors.append("리스크 슬리피지율을 확인해 주세요.")
         if not 0 <= self.min_entry_rsi < self.max_entry_rsi <= 100:
             errors.append("진입 RSI 범위를 확인해 주세요.")
         if self.min_entry_volume_ratio <= 0:

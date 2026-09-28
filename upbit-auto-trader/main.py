@@ -102,7 +102,7 @@ def _active_auto_position_count(
     client: UpbitClient,
     registry: dict[str, CoinEntry],
     min_position_krw: float,
-) -> tuple[int, set[str]]:
+) -> tuple[int, set[str], float]:
     accounts = client.get_accounts()
     amounts: dict[str, float] = {}
     for account in accounts:
@@ -118,6 +118,7 @@ def _active_auto_position_count(
             amounts[market] = amount
 
     active: set[str] = set()
+    exposure_krw = 0.0
     markets = sorted(amounts)
     for index in range(0, len(markets), 80):
         batch = markets[index : index + 80]
@@ -129,7 +130,8 @@ def _active_auto_position_count(
             value = amounts.get(market, 0.0) * float(ticker.get("trade_price", 0) or 0)
             if value >= min_position_krw:
                 active.add(market)
-    return len(active), active
+                exposure_krw += value
+    return len(active), active, exposure_krw
 
 
 def _execution_status(result: dict) -> str:
@@ -159,7 +161,30 @@ def _latest_entry_strategy(market: str) -> tuple[str, datetime | None]:
     return "", None
 
 
-def _daily_loss_block_reason(total_equity: float, settings) -> str:
+def _estimated_entry_loss_krw(order_krw: float, settings) -> float:
+    """Conservative loss estimate for a new market-order position."""
+    round_trip_cost_rate = 2 * (settings.taker_fee_rate + settings.risk_slippage_rate)
+    return max(0.0, order_krw) * (settings.stop_loss_rate + round_trip_cost_rate)
+
+
+def _open_risk_block_reason(
+    current_exposure_krw: float,
+    order_krw: float,
+    total_equity: float,
+    settings,
+) -> str:
+    risk_krw = _estimated_entry_loss_krw(current_exposure_krw + order_krw, settings)
+    limit_krw = max(0.0, total_equity) * settings.max_open_risk_rate
+    if risk_krw > limit_krw:
+        return f"총 오픈 리스크 한도 초과 ({risk_krw:,.0f}/{limit_krw:,.0f} KRW)"
+    return ""
+
+
+def _daily_loss_block_reason(
+    total_equity: float,
+    settings,
+    projected_loss_krw: float = 0.0,
+) -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     baseline = 0.0
     if HISTORY_PATH.exists():
@@ -176,9 +201,12 @@ def _daily_loss_block_reason(total_equity: float, settings) -> str:
     if baseline <= 0:
         append_history("daily_equity_baseline", {"total_equity": total_equity})
         return ""
-    loss_rate = max(0.0, (baseline - total_equity) / baseline)
+    loss_rate = max(0.0, (baseline - total_equity + max(0.0, projected_loss_krw)) / baseline)
     if loss_rate >= settings.max_daily_loss_rate:
-        return f"하루 계좌 손실 제한 도달 ({loss_rate:.2%}/{settings.max_daily_loss_rate:.2%})"
+        return (
+            f"하루 계좌 손실 제한 도달·예상 "
+            f"({loss_rate:.2%}/{settings.max_daily_loss_rate:.2%})"
+        )
     return ""
 
 
@@ -219,7 +247,11 @@ def auto_buy_recommendation(
     position_volume = float(balance.get("balance", 0.0)) + float(balance.get("locked", 0.0))
     position_value = position_volume * float(recommendation.price)
     remaining_coin_limit = max(0.0, settings.per_coin_max_krw - position_value)
-    active_count, active_markets = _active_auto_position_count(client, registry, config.min_order_krw)
+    active_count, active_markets, active_exposure_krw = _active_auto_position_count(
+        client,
+        registry,
+        config.min_order_krw,
+    )
     if active_count > settings.max_positions or (market not in active_markets and active_count >= settings.max_positions):
         append_history(
             "auto_buy_blocked",
@@ -233,14 +265,11 @@ def auto_buy_recommendation(
         return None
 
     total_equity, available_krw, _ = fetch_total_portfolio_value(client)
-    daily_loss_reason = _daily_loss_block_reason(total_equity, settings)
-    if daily_loss_reason:
-        append_history("auto_buy_blocked", {"market": market, "reason": daily_loss_reason})
-        return None
     reserve_krw = max(settings.min_cash_reserve_krw, total_equity * settings.min_cash_reserve_ratio)
     spendable_krw = max(0.0, available_krw - reserve_krw)
     strategy_order_krw = settings.buy_amount_krw * max(0.0, min(recommendation.position_size_ratio, 1.0))
-    order_krw = min(strategy_order_krw, remaining_coin_limit, spendable_krw)
+    fee_adjusted_spendable = spendable_krw / (1.0 + settings.taker_fee_rate)
+    order_krw = min(strategy_order_krw, remaining_coin_limit, fee_adjusted_spendable)
 
     if order_krw < config.min_order_krw:
         append_history(
@@ -253,6 +282,38 @@ def auto_buy_recommendation(
                 "available_krw": available_krw,
                 "required_cash_reserve_krw": reserve_krw,
                 "strategy": recommendation.strategy_label,
+            },
+        )
+        return None
+
+    projected_loss_krw = _estimated_entry_loss_krw(order_krw, settings)
+    open_risk_reason = _open_risk_block_reason(
+        active_exposure_krw,
+        order_krw,
+        total_equity,
+        settings,
+    )
+    if open_risk_reason:
+        append_history(
+            "auto_buy_blocked",
+            {
+                "market": market,
+                "reason": open_risk_reason,
+                "active_exposure_krw": active_exposure_krw,
+                "projected_loss_krw": projected_loss_krw,
+                "order_krw": order_krw,
+            },
+        )
+        return None
+    daily_loss_reason = _daily_loss_block_reason(total_equity, settings, projected_loss_krw)
+    if daily_loss_reason:
+        append_history(
+            "auto_buy_blocked",
+            {
+                "market": market,
+                "reason": daily_loss_reason,
+                "projected_loss_krw": projected_loss_krw,
+                "order_krw": order_krw,
             },
         )
         return None
@@ -567,6 +628,7 @@ def print_status(
 def main() -> None:
     project_dir = Path(__file__).resolve().parent
     config = Config.load(project_dir / ".env")
+    startup_settings = load_settings()
     logger = setup_logger(log_dir=str(project_dir / "logs"))
     notifier = StepNotifier(config, logger)
 
@@ -583,6 +645,25 @@ def main() -> None:
         config.market,
         config.dry_run,
         config.enable_real_trade,
+    )
+    logger.info(
+        "Upbit strategy config. trend=%s pullback=%s breakout=%s mean_reversion=%s "
+        "buy_krw=%.0f per_coin_max_krw=%.0f max_positions=%d max_daily_trades=%d "
+        "cash_reserve_ratio=%.3f stop_rate=%.4f max_open_risk_rate=%.4f "
+        "fee_rate=%.4f risk_slippage_rate=%.4f",
+        startup_settings.enable_trend_confirmation,
+        startup_settings.enable_trend_pullback,
+        startup_settings.enable_volatility_breakout,
+        startup_settings.enable_mean_reversion,
+        startup_settings.buy_amount_krw,
+        startup_settings.per_coin_max_krw,
+        startup_settings.max_positions,
+        startup_settings.max_daily_trades,
+        startup_settings.min_cash_reserve_ratio,
+        startup_settings.stop_loss_rate,
+        startup_settings.max_open_risk_rate,
+        startup_settings.taker_fee_rate,
+        startup_settings.risk_slippage_rate,
     )
     logger.warning("This program is for education and personal testing. It does not guarantee profit.")
     notifier.step(
@@ -602,7 +683,7 @@ def main() -> None:
     if not config.dry_run:
         try:
             startup_equity, _, _ = fetch_total_portfolio_value(client)
-            _daily_loss_block_reason(startup_equity, load_settings())
+            _daily_loss_block_reason(startup_equity, startup_settings)
         except Exception as exc:
             logger.warning("Daily equity baseline could not be initialized: %s", exc)
 

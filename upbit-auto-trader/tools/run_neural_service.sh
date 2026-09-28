@@ -16,17 +16,21 @@ if [[ -f "$ROOT/.env" ]]; then
 fi
 
 NEURAL_PORT="${NEURAL_PORT:-8765}"
+NEURAL_HOST="${NEURAL_HOST:-127.0.0.1}"
 export PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-http://127.0.0.1:${NEURAL_PORT}}"
 
 case "$SERVICE" in
   api)
-    exec "$PYTHON" -m uvicorn neural.api:create_app --factory --host 127.0.0.1 --port "$NEURAL_PORT"
+    exec "$PYTHON" -m uvicorn neural.api:create_app --factory --host "$NEURAL_HOST" --port "$NEURAL_PORT"
     ;;
   upbit-collector)
     exec "$PYTHON" -m neural.collector
     ;;
   binance-futures-collector)
     exec "$PYTHON" -m neural.binance_futures
+    ;;
+  binance-live)
+    exec "$PYTHON" -m neural.binance_live
     ;;
   paper)
     exec "$PYTHON" -m neural.paper

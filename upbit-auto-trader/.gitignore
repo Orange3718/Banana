@@ -16,3 +16,4 @@ notification_*.json
 coin_registry.json
 artifacts/
 tools/telegram-portable/
+neural.db

@@ -11,6 +11,7 @@ from neural.legacy import import_history
 from neural.store import Store
 from neural.preflight import report as preflight_report
 from neural.strategy_lab import CATALOG, backtest, demo_reports, sample_candles
+from coin_registry import CoinEntry, eligible_markets, save_registry, sync_markets
 
 
 def store(tmp_path):
@@ -60,6 +61,39 @@ def test_binance_signature_is_stable():
         'timestamp': 1000,
         'signature': '4ab147591dd16c30ece17c433ba5494654026cf4b9337744038cab494f1f4751',
     }
+
+
+def test_sync_markets_excludes_stale_krw_markets(tmp_path):
+    registry_path = tmp_path / 'coin_registry.json'
+    save_registry({
+        'KRW-BTC': CoinEntry(market='KRW-BTC', allow_recommend=True, allow_auto_trade=True),
+        'KRW-STORJ': CoinEntry(market='KRW-STORJ', allow_recommend=True, allow_auto_trade=True),
+    }, registry_path)
+
+    registry = sync_markets([
+        {'market': 'KRW-BTC', 'korean_name': '비트코인', 'english_name': 'Bitcoin'},
+    ], registry_path)
+
+    assert registry['KRW-STORJ'].excluded is True
+    assert registry['KRW-STORJ'].allow_recommend is False
+    assert registry['KRW-STORJ'].allow_auto_trade is False
+    assert 'KRW-STORJ' not in eligible_markets(registry, include_btc=True)
+
+
+def test_binance_loss_streak_cooldown_resets(tmp_path, monkeypatch):
+    from neural import binance_live
+
+    monkeypatch.setattr(binance_live, 'DATA', tmp_path)
+    monkeypatch.setattr(binance_live, 'STATE_PATH', tmp_path / 'binance_live_state.json')
+    state = {'consecutive_losses': 3, 'last_loss_time': 100}
+
+    assert binance_live.loss_streak_blocked(state, now=200) is True
+    assert state['consecutive_losses'] == 3
+    assert binance_live.loss_streak_blocked(
+        state,
+        now=100 + binance_live.LOSS_STREAK_COOLDOWN_SECONDS + 1,
+    ) is False
+    assert state['consecutive_losses'] == 0
 
 
 def test_store_separates_exchange_accounts(tmp_path):
@@ -135,11 +169,11 @@ def test_drafts_do_not_modify_legacy(tmp_path, monkeypatch):
     client = TestClient(create_app(store(tmp_path)))
     headers = {'Origin': 'http://testserver', 'X-Neural-Client': 'dashboard'}
     r = client.post('/api/v1/drafts', json={'scope': 'trading'}, headers=headers)
-    assert r.status_code == 201
-    assert r.json()['applied'] is False
+    assert r.status_code == 403
+    assert '전략과 그룹은 자동 루프가 관리합니다.' in r.json()['detail']
     assert json.loads(file.read_text()) == {'operation_mode': 4}
-    assert len(client.get('/api/v1/drafts').json()) == 1
-    assert client.post('/api/v1/commands', headers=headers).status_code == 409
+    assert len(client.get('/api/v1/drafts').json()) == 0
+    assert client.post('/api/v1/commands', headers=headers).status_code == 422
 
 
 def test_origin_and_risk_limits(tmp_path):

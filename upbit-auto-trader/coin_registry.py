@@ -65,6 +65,24 @@ def save_registry(registry: dict[str, CoinEntry], path: Path = REGISTRY_PATH) ->
 
 def sync_markets(markets: list[dict[str, Any]], path: Path = REGISTRY_PATH) -> dict[str, CoinEntry]:
     registry = load_registry(path)
+    active_markets = {
+        str(item.get("market", ""))
+        for item in markets
+        if str(item.get("market", "")).startswith("KRW-")
+    }
+    if active_markets:
+        for market, entry in registry.items():
+            if not market.startswith("KRW-") or market in active_markets:
+                continue
+            entry.group = "excluded"
+            entry.watch = False
+            entry.allow_recommend = False
+            entry.allow_telegram_approval = False
+            entry.allow_auto_trade = False
+            entry.excluded = True
+            if not entry.note:
+                entry.note = "업비트 현재 KRW 마켓 목록에서 제외됨"
+
     for item in markets:
         market = str(item.get("market", ""))
         if not market.startswith("KRW-"):

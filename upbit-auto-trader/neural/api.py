@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field
 from neural.legacy import read_json
 from neural.store import Store
 from neural.strategy_lab import CATALOG, demo_reports
+from runtime_state import set_command
 
 
 class Draft(BaseModel):
@@ -24,6 +26,10 @@ class Draft(BaseModel):
     events: list[Literal['risk', 'fill', 'recommendation', 'summary']] = ['risk', 'fill']
     symbols: list[str] = Field(default_factory=list, max_length=1000)
     group: str = Field(default='watch', max_length=40)
+
+
+class ControlCommand(BaseModel):
+    action: Literal['pause', 'kill']
 
 
 def snapshot_age(snapshot):
@@ -98,6 +104,29 @@ def create_app(store=None):
     def events():
         return db.event_list()
 
+    @app.get('/api/v1/terminal')
+    def terminal():
+        """Return a bounded, read-only view of operational logs."""
+        root = Path(__file__).resolve().parents[1]
+        files = {
+            'Upbit 실거래': root / 'next_data/logs/launchd-upbit-worker.out.log',
+            'Upbit 오류': root / 'next_data/logs/launchd-upbit-worker.err.log',
+            'Binance 실거래': root / 'next_data/logs/launchd-binance-live.out.log',
+            '대시보드': root / 'next_data/logs/launchd-api.err.log',
+        }
+        ansi = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')
+        sections = []
+        for label, path in files.items():
+            try:
+                lines = path.read_text(encoding='utf-8', errors='replace').splitlines()[-80:]
+            except FileNotFoundError:
+                lines = ['기록 파일이 아직 없습니다.']
+            sections.append({'label': label, 'text': ansi.sub('', '\n'.join(lines)),
+                             'updated_at': datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat()
+                             if path.exists() else None})
+        return {'mode': 'read_only', 'sections': sections,
+                'as_of': datetime.now(timezone.utc).isoformat()}
+
     @app.get('/api/v1/universe')
     def universe():
         return read_json('coin_registry.json')
@@ -111,25 +140,41 @@ def create_app(store=None):
         return {'catalog': CATALOG, 'demo': demo_reports(),
                 'execution': 'offline_research_only'}
 
-    @app.post('/api/v1/drafts', status_code=201)
+    @app.post('/api/v1/drafts')
     def save_draft(draft: Draft):
-        number = db.add_draft(draft.scope, draft.model_dump())
-        return {'id': number, 'state': 'DRAFT', 'applied': False}
+        raise HTTPException(403, '전략과 그룹은 자동 루프가 관리합니다.')
 
     @app.post('/api/v1/commands')
-    def commands():
-        raise HTTPException(409, '거래 실행기는 아직 연결되지 않았습니다.')
+    def commands(command: ControlCommand):
+        state = set_command(command.action, 'neural_dashboard')
+        return {'accepted': True, 'action': command.action, 'paused': state.paused,
+                'kill_switch': state.kill_switch, 'updated_at': state.last_updated}
 
     @app.websocket('/api/v1/events/live')
     async def stream(websocket: WebSocket):
-        expected = os.environ.get('PUBLIC_BASE_URL', f'http://{websocket.headers.get("host")}')
-        if websocket.headers.get('origin') != expected:
+        host = websocket.headers.get('host')
+        allowed_origins = {
+            os.environ.get('PUBLIC_BASE_URL', ''),
+            f'http://{host}',
+            f'https://{host}',
+        }
+        if websocket.headers.get('origin') not in allowed_origins:
             await websocket.close(code=1008)
             return
         await websocket.accept()
         try:
             while True:
-                await websocket.send_json(await asyncio.to_thread(overview))
+                payload = await asyncio.gather(
+                    asyncio.to_thread(overview),
+                    asyncio.to_thread(terminal),
+                    asyncio.to_thread(events),
+                )
+                await websocket.send_json({
+                    'overview': payload[0],
+                    'terminal': payload[1],
+                    'events': payload[2],
+                    'streamed_at': datetime.now(timezone.utc).isoformat(),
+                })
                 await asyncio.sleep(5)
         except Exception:
             return

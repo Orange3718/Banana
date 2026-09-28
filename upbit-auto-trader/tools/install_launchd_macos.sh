@@ -54,6 +54,8 @@ write_agent com.orange3718.upbit-auto-trader.upbit-collector upbit-collector \
   launchd-upbit-collector.out.log launchd-upbit-collector.err.log
 write_agent com.orange3718.upbit-auto-trader.binance-futures-collector binance-futures-collector \
   launchd-binance-futures-collector.out.log launchd-binance-futures-collector.err.log
+write_agent com.orange3718.upbit-auto-trader.binance-live binance-live \
+  launchd-binance-live.out.log launchd-binance-live.err.log
 
 write_agent com.orange3718.upbit-auto-trader.paper paper \
   launchd-paper.out.log launchd-paper.err.log

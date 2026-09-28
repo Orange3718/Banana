@@ -1,8 +1,16 @@
 from types import SimpleNamespace
 
+import pytest
+
 import main
 from coin_registry import CoinEntry
-from main import _suppress_legacy_market_order, monitor_altcoin_exits
+from main import (
+    _daily_loss_block_reason,
+    _estimated_entry_loss_krw,
+    _open_risk_block_reason,
+    _suppress_legacy_market_order,
+    monitor_altcoin_exits,
+)
 from market_scanner import scan_candidates
 from settings_store import TradingSettings
 
@@ -115,3 +123,41 @@ def test_portfolio_exit_manager_includes_primary_btc_market(monkeypatch):
 
     assert client.sold_markets == ["KRW-BTC"]
     assert results[0]["market"] == "KRW-BTC"
+
+
+def test_estimated_entry_loss_includes_stop_fee_and_slippage():
+    settings = TradingSettings(
+        stop_loss_rate=0.025,
+        taker_fee_rate=0.0005,
+        risk_slippage_rate=0.0005,
+    )
+
+    assert _estimated_entry_loss_krw(40_000.0, settings) == pytest.approx(1_080.0)
+
+
+def test_daily_loss_gate_includes_projected_entry_loss(monkeypatch, tmp_path):
+    history_path = tmp_path / "trade_history.jsonl"
+    history_path.write_text(
+        '{"time":"2026-09-27 09:00:00","event":"daily_equity_baseline","total_equity":500000}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(main, "HISTORY_PATH", history_path)
+    monkeypatch.setattr(main, "datetime", SimpleNamespace(now=lambda: SimpleNamespace(strftime=lambda _: "2026-09-27")))
+    settings = TradingSettings(max_daily_loss_rate=0.015)
+
+    reason = _daily_loss_block_reason(493_000.0, settings, projected_loss_krw=1_080.0)
+
+    assert "하루 계좌 손실 제한" in reason
+
+
+def test_open_risk_gate_includes_existing_positions():
+    settings = TradingSettings(max_open_risk_rate=0.015)
+
+    reason = _open_risk_block_reason(
+        current_exposure_krw=220_000.0,
+        order_krw=40_000.0,
+        total_equity=450_000.0,
+        settings=settings,
+    )
+
+    assert "총 오픈 리스크 한도 초과" in reason
