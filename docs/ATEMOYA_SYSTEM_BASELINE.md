@@ -119,9 +119,9 @@ hourly, also local-only) from a new `vault_links` table
 to come from the `AtemoyaVaultLinker01` n8n workflow
 (`n8n/workflows/exports/AtemoyaVaultLinker01.json`) — imported but **not yet
 activated**, pending Owner review, per the recovery-order rule below. Until
-activated, `vault_links` stays empty and the Connections note says so. See
-`docs/OPEN_ITEMS.md`'s 2026-09-28 entry for the full design and its stated
-limits (it is a flat relationship list, not yet per-item wikilink notes).
+activated, `vault_links` stays empty and the Connections note says so. Full
+design, As-Is vs. improvement direction, and operating runbook:
+`docs/ATEMOYA_VAULT_LINKER_DESIGN.md`.
 
 ## AI provider routing
 

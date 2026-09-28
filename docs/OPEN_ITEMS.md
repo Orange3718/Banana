@@ -20,54 +20,22 @@
 
 기준일: 2026-08-23
 
-## 2026-09-28 옵시디언 연결고리 + n8n/Ollama 서브 에이전트 연구
+## 2026-09-28 옵시디언 연결고리 + n8n/Ollama 서브 에이전트
 
-Owner 요청: "옵시디언 연결고리 연관관계 찾고 서브 에이전트 돌리는법 연구해"에 대한
-결과. 실제 상태를 먼저 확인했다.
+Owner 요청("옵시디언 연결고리 연관관계 찾고 서브 에이전트 돌리는법 연구해")에
+따라 As-Is/개선 방향/운영 관점으로 설계문서를 만들었다. 전체 내용, 아키텍처,
+로드맵, 운영 절차는 `docs/ATEMOYA_VAULT_LINKER_DESIGN.md`를 본다.
 
-- **AtemoyaVault 실제 상태**: 노트 3개(`Atemoya Home`, `00 Inbox/Atemoya Inbox`,
-  `10 Operations/Inbox 수집 기준`)뿐이고 위키링크는 Home→나머지 2개, 총 2개뿐이다.
-  Inbox 노트 자체도 지금은 `business_ideas`·`approvals` 테이블이 비어 있어 전부
-  "없음"으로 나온다. 연결할 노트 자체가 거의 없는 상태였다.
-- **실제로 쌓여 있는 것**: `source_observations` 1,310건, `local_llm_runs` 545건,
-  `affiliate.publications` 11건, `affiliate.jobs` 10건 (`pg_stat_user_tables`의
-  `n_live_tup`은 통계가 갱신 안 돼 0으로 잘못 나왔다 — `COUNT(*)`로 재확인함).
-  즉 연결고리를 찾을 실제 재료는 충분히 있다.
-- **기존 서브 에이전트 구조 확인**: `n8n/workflows/exports/`의 기존 워크플로
-  (`AtemoyaOpsGuardian01`, `AtemoyaRevenueAutopilot01` 등)는 전부 같은 패턴이다
-  — `scheduleTrigger`+`webhook` 이중 진입 → `postgres`로 작업 조회/점유 →
-  `code`로 프롬프트 구성 → `httpRequest`로 로컬 Ollama(`http://host.docker.internal:11434/api/chat`)
-  호출 → `code`로 파싱·QA → `postgres`에 저장 → 필요시만 `telegram`. Postgres
-  credential은 `AtemoyaPostgresMemory01`. 이 패턴을 그대로 따라 새 워크플로를
-  만들었다.
-- **만든 것** (전부 비활성/검증만 된 상태, 아직 라이브 아님):
-  1. `db/migrations/016_vault_links.sql` — 범용 관계 테이블 `vault_links`
-     (from/to type+id, relation, reason, model). 이미 적용함(`apply-migrations.sh`
-     실행 확인).
-  2. `n8n/workflows/exports/AtemoyaVaultLinker01.json` — 매일 05:10 KST(+수동
-     웹훅)에 최근 14일 미연결 `source_observations`/`local_llm_runs`를 최대
-     50건 모아 로컬 Qwen에게 "확실한 관련 쌍만, 불확실하면 포함하지 마라"고
-     지시하고, 응답을 파싱해 **원래 후보 목록에 없는 항목을 참조하면 무조건
-     버리는** 안전 검증을 거쳐 `vault_links`에 저장한다. 두 코드 노드는
-     Node.js로 목업 입력을 만들어 직접 실행해 로직을 검증했다(정상 관계는
-     저장되고, 모델이 존재하지 않는 인덱스를 참조하면 버려지는 것까지 확인).
-     **아직 n8n에 import·활성화하지 않았다** — 기준 문서의 "review 후 Owner
-     승인 시에만 활성화" 원칙에 따라 Owner가 n8n UI에서 확인 후 활성화한다.
-  3. `ops/scripts/export-obsidian-links.sh` + LaunchAgent
-     `com.atemoya.obsidian-connections`(로컬 전용, 이 저장소엔 없음 — 기존
-     `obsidian-inbox`와 같은 이유로 머신별 경로라 Git 제외) — `vault_links`를
-     `10 Operations/Atemoya Connections.md`에 목록으로 렌더링한다. 1시간마다
-     실행, 이미 로드해 정상 동작 확인(현재는 링커가 비활성이라 "아직 없음"
-     출력).
-  4. `Atemoya Home.md`에 새 노트로 가는 위키링크 추가.
-- **정직하게 밝힐 한계**: 이건 아직 진짜 옵시디언 위키링크 그래프가 아니다.
-  `source_observations`/`local_llm_runs` 개별 항목이 각자 노트 파일로 없어서
-  `[[...]]`가 가리킬 대상이 없다 — 지금은 평문 목록이다. 항목별 노트를
-  실제로 만드는 건 2단계(아직 안 함)이고, 그래야 Obsidian 그래프 뷰에서 진짜
-  연결이 보인다.
-- **다음 단계 (Owner 결정 필요)**: n8n UI에서 `AtemoyaVaultLinker01`을
-  import·검토 후 활성화할지 결정. 활성화하면 다음 실행(05:10 KST)에 실제
-  로컬 Qwen 판단이 쌓이고 `Atemoya Connections.md`에 반영된다.
+요약: AtemoyaVault는 노트 3개·링크 2개뿐이라 연결할 게 거의 없었지만,
+`source_observations`(1,310건)·`local_llm_runs`(545건) 등 실제 재료는
+충분했다. 기존 n8n 워크플로 패턴을 그대로 따라 `vault_links` 테이블(적용됨),
+`AtemoyaVaultLinker01` 워크플로(import됨, **비활성 — Owner 승인 대기**),
+`export-obsidian-links.sh` + LaunchAgent(로드되어 매시간 실행 중)를 만들었다.
+아직 항목별 노트가 없어 진짜 위키링크 그래프는 아니며, 개선 방향 2단계로
+문서에 기록했다.
+
+다음 단계: n8n UI에서 `AtemoyaVaultLinker01` 검토 후 활성화 여부만 Owner
+결정하면 된다.
 
 ## 2026-09-13 Affiliate Business OS I01–I04
 
