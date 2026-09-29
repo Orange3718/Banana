@@ -20,13 +20,21 @@ class KiwoomClient:
     pattern. Defaults to the mock-trading domain; callers must opt into
     ``https://api.kiwoom.com`` explicitly once real keys exist.
 
-    The exact header name carrying ``api_id`` (here ``api-id``, matching the
-    KIS-style REST convention Kiwoom's REST API followed at design time) and
-    the token response's expiry field are NOT verified against a live account
-    or the official portal, since this was built without network access to
-    kiwoom.com and without an issued App Key/Secret. Confirm both against
-    https://openapi.kiwoom.com and a real (mock) token response before this
-    client is used for anything beyond DRY_RUN testing.
+    Verified 2026-09-29 against the real account/domain (api.kiwoom.com):
+    token issuance, kt00004 balance, ka10027/ka10030 rankings, ka10004 order
+    book, kt10000 buy, kt10001 sell. Header name ``api-id`` and the request
+    body shape (``dmst_stex_tp``/``stk_cd``/``ord_qty``/``trde_tp``/``ord_uv``/
+    ``cond_uv``, no account number field) match the official Kiwoom-Securities
+    GitHub sample (``buy_domestic_stock.py``) exactly.
+
+    Real-money order gotcha, confirmed live: a **market buy** (``trde_tp=3``,
+    empty ``ord_uv``) can be rejected with 매수증거금이 부족합니다 even when
+    cash covers the current price — Kiwoom appears to reserve margin against
+    the daily upper price limit (~+30%) for market buys, not the live price.
+    A **limit buy** (``trde_tp=0``, real ``ord_uv``) at or near the current
+    ask reserves margin at the specified price instead and fills normally.
+    Market **sell** has no equivalent issue (confirmed). Prefer ``limit_buy``
+    over ``market_buy`` unless the account holds ~1.3x the order's cash cost.
     """
 
     app_key: str
