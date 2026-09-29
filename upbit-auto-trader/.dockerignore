@@ -1,0 +1,15 @@
+**
+!neural/
+!neural/**
+!next_requirements.txt
+!apps/
+!apps/dashboard/
+!apps/dashboard/package.json
+!apps/dashboard/package-lock.json
+!apps/dashboard/tsconfig.json
+!apps/dashboard/vite.config.ts
+!apps/dashboard/index.html
+!apps/dashboard/src/
+!apps/dashboard/src/**
+!deploy/
+!deploy/Dockerfile

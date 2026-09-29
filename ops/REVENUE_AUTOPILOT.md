@@ -1,4 +1,6 @@
-# Atemoya Revenue Autopilot
+# Atemoya Revenue Autopilot — legacy compatibility route
+
+상태: **INACTIVE since 2026-09-14**. 이 문서는 과거 범용 커머스 뉴스 승인 경로의 복구 자료다. 쿠팡 직접 게시는 [direct publication 설계](../docs/affiliate-os/18-autonomous-volume-publication.md)와 `com.atemoya.affiliate-direct-publisher`가 담당한다. 이 workflow를 다시 publish하면 사용자에게 불필요한 승인 요청을 재생성하므로 별도 설계 결정 없이 활성화하지 않는다.
 
 ## 목적
 

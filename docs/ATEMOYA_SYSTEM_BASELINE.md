@@ -1,5 +1,13 @@
 # Atemoya system baseline
 
+## Current affiliate override — 2026-09-13
+
+Read [current execution status](affiliate-os/11-execution-status.md) before acting.
+The user explicitly authorized direct publication of owned affiliate content and relevant Git updates without routine GOOD/BAD requests. The older approval descriptions below remain historical/legacy workflow descriptions, not a new approval requirement for that scope. Payment, account security, platform requirements and unrelated trading are not broadened by this instruction.
+The dated infrastructure verification below is not proof of today's affiliate collector, report import or publisher success.
+
+Runtime update 2026-09-14: the reviewed Coupang direct queue is now implemented in `affiliate.jobs`/`affiliate.publications`. `com.atemoya.affiliate-direct-publisher` polls every 15 minutes and publishes at most three reviewed artifacts per KST day from a ten-item manifest. It does not call an LLM or create an approval request. The legacy `AtemoyaRevenueAutopilot01` is unpublished and must remain inactive because its generic commerce-news approval queue is not the Coupang publication queue. Current evidence and the next timestamp are in [18. direct volume publication](affiliate-os/18-autonomous-volume-publication.md).
+
 Verified: 2026-08-13 (Asia/Seoul)
 
 ## Authority and roles
@@ -79,6 +87,19 @@ keys are intentionally absent; the workflow remains inactive by default.
 7. Connect Gmail reporting, Calendar routines and finally Obsidian after the
    core workflow produces verified operational records.
 
+## Remote headless operation
+
+The iMac must be treated as a server. Screen lock must not stop Docker, n8n,
+PostgreSQL, Ollama, LaunchAgents, local status checks, workflow imports, draft
+generation, site file generation or approved publishing scripts.
+
+Mac unlock is required only for browser-only account login, OAuth consent, 2FA,
+password/recovery-code prompts, payment/legal consent, visual inspection that
+cannot be verified by HTTP/API, or final manual submission on a platform that
+has no approved API path.
+
+Operational details live in `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`.
+
 ## Obsidian Inbox bridge
 
 The first human-readable bridge is `ops/scripts/export-obsidian-inbox.sh`.
@@ -89,6 +110,18 @@ source of truth, and no credential or secret fields are exported.
 The iMac LaunchAgent `com.atemoya.obsidian-inbox` refreshes this dashboard
 every 15 minutes and once at login. Its configuration is local because the
 absolute Vault and worktree paths are machine-specific.
+
+A sibling bridge, `10 Operations/Atemoya Connections.md`, lists relationships
+between recent `source_observations`/`local_llm_runs` rows, written by
+`ops/scripts/export-obsidian-links.sh` (LaunchAgent `com.atemoya.obsidian-connections`,
+hourly, also local-only) from a new `vault_links` table
+(`db/migrations/016_vault_links.sql`). The relationships themselves are meant
+to come from the `AtemoyaVaultLinker01` n8n workflow
+(`n8n/workflows/exports/AtemoyaVaultLinker01.json`) — imported but **not yet
+activated**, pending Owner review, per the recovery-order rule below. Until
+activated, `vault_links` stays empty and the Connections note says so. Full
+design, As-Is vs. improvement direction, and operating runbook:
+`docs/ATEMOYA_VAULT_LINKER_DESIGN.md`.
 
 ## AI provider routing
 
@@ -134,7 +167,7 @@ must remain unloaded to prevent duplicate summaries.
 
 ## Revenue Autopilot
 
-`AtemoyaRevenueAutopilot01` runs every 30 minutes. It promotes fresh,
+`AtemoyaRevenueAutopilot01` is a retained legacy workflow and is currently inactive. It previously ran every 30 minutes and promoted fresh,
 evidence-backed `local_llm_runs` into a local-Qwen long-form draft, performs
 deterministic QA, stores the result in PostgreSQL, and sends at most one active
 Telegram publication approval request. No external model API is required.
@@ -153,3 +186,5 @@ business health includes publication throughput, not only infrastructure.
 Traffic, outbound clicks, affiliate clicks, conversions and revenue are stored
 in `revenue_channel_metrics` with evidence provenance; missing GA4 OAuth is
 reported as unavailable rather than silently interpreted as zero.
+
+The active Coupang route is `com.atemoya.affiliate-direct-publisher`. It uses an isolated detached worktree, immutable reviewed links and artifact hashes, a three-per-day cap and public HTTP verification. It writes no legacy approval rows and stops the batch on a permanent QA or policy failure.

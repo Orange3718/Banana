@@ -1,0 +1,130 @@
+[
+ {
+  "id": "AtemoyaVaultLinker01",
+  "name": "Atemoya Vault Linker",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+   {
+    "parameters": {
+     "rule": {
+      "interval": [
+       {
+        "field": "cronExpression",
+        "expression": "10 5 * * *"
+       }
+      ]
+     }
+    },
+    "id": "link-schedule",
+    "name": "매일 오전 5시 10분",
+    "type": "n8n-nodes-base.scheduleTrigger",
+    "typeVersion": 1.2,
+    "position": [200, 180]
+   },
+   {
+    "parameters": {
+     "httpMethod": "POST",
+     "path": "atemoya-vault-linker-run",
+     "responseMode": "onReceived",
+     "options": {}
+    },
+    "id": "link-manual-webhook",
+    "name": "수동 연결고리 찾기",
+    "type": "n8n-nodes-base.webhook",
+    "typeVersion": 2.1,
+    "position": [200, 360],
+    "webhookId": "atemoya-vault-linker-run"
+   },
+   {
+    "parameters": {
+     "operation": "executeQuery",
+     "query": "WITH recent_sources AS (SELECT 'source_observation'::text AS item_type, id::text AS item_id, item_title AS title, left(coalesce(item_url,''),200) AS ref, collected_at AS at FROM source_observations WHERE collected_at > now() - interval '14 days' AND id::text NOT IN (SELECT from_id FROM vault_links WHERE from_type='source_observation') ORDER BY collected_at DESC LIMIT 25), recent_runs AS (SELECT 'local_llm_run'::text AS item_type, run_key::text AS item_id, task_name AS title, left(coalesce(result_summary,''),200) AS ref, updated_at AS at FROM local_llm_runs WHERE status='complete' AND updated_at > now() - interval '14 days' AND run_key::text NOT IN (SELECT from_id FROM vault_links WHERE from_type='local_llm_run') ORDER BY updated_at DESC LIMIT 25) SELECT * FROM recent_sources UNION ALL SELECT * FROM recent_runs ORDER BY at DESC;",
+     "options": {}
+    },
+    "id": "link-fetch-recent",
+    "name": "최근 미연결 항목 조회",
+    "type": "n8n-nodes-base.postgres",
+    "typeVersion": 2.6,
+    "position": [460, 260],
+    "credentials": {
+     "postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}
+    }
+   },
+   {
+    "parameters": {
+     "jsCode": "const items = $input.all().map(x => x.json).filter(r => r.item_id && r.title);\nif (items.length < 2) {\n  return [{ json: { skip: true, reason: 'too_few_items', count: items.length } }];\n}\nconst catalog = items.map((r, i) => `${i}. [${r.item_type}#${r.item_id}] ${String(r.title).slice(0,120)}`).join('\\n');\nconst allowedIds = items.map(r => `${r.item_type}:${r.item_id}`);\nconst prompt = `아래는 최근 운영 기록 항목 목록이다. 서로 명확히 관련된 항목 쌍만 골라라 — 같은 주제, 같은 사업 아이디어, 하나가 다른 하나의 근거나 결과인 경우만 인정한다. 제목만 보고 억지로 추측하지 말고, 관련이 불확실하면 포함하지 마라. 최대 10쌍만 골라라.\\n\\n목록:\\n${catalog}\\n\\n각 항목은 번호로 표시했다. 출력은 JSON 배열만 반환하고 다른 텍스트는 쓰지 마라. 각 원소는 {\"from\":번호,\"to\":번호,\"relation\":\"same_topic|based_on|led_to\",\"reason\":\"15자 이내 한국어 이유\"} 형식이다. 관련 쌍이 없으면 빈 배열 []을 반환하라.`;\nconst body = { model: 'qwen3.5:4b', stream: false, think: false, options: { num_predict: 500, temperature: 0.1 }, messages: [ { role: 'system', content: '당신은 Atemoya 운영 기록 사이의 실제 관련성만 찾는 편집자다. 확실하지 않은 관련성은 절대 만들어내지 않는다. JSON 배열 외의 텍스트는 출력하지 않는다.' }, { role: 'user', content: prompt } ] };\nreturn [{ json: { skip: false, items, allowedIds, ollama_body: JSON.stringify(body) } }];"
+    },
+    "id": "link-prompt",
+    "name": "관련성 프롬프트 구성",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 2,
+    "position": [700, 260]
+   },
+   {
+    "parameters": {
+     "method": "POST",
+     "url": "http://host.docker.internal:11434/api/chat",
+     "sendBody": true,
+     "contentType": "raw",
+     "rawContentType": "application/json",
+     "body": "={{ $json.ollama_body }}",
+     "options": {"timeout": 180000}
+    },
+    "id": "link-ollama",
+    "name": "로컬 Qwen 관련성 판단",
+    "type": "n8n-nodes-base.httpRequest",
+    "typeVersion": 4.2,
+    "position": [940, 260],
+    "retryOnFail": true,
+    "maxTries": 2,
+    "waitBetweenTries": 5000,
+    "onError": "continueRegularOutput"
+    },
+   {
+    "parameters": {
+     "jsCode": "const prev = $('관련성 프롬프트 구성').first().json;\nif (prev.skip) return [{ json: { rows: [] } }];\nconst items = prev.items;\nconst allowed = new Set(prev.allowedIds);\nlet text = '';\ntry { text = $json.message.content; } catch (e) { text = ''; }\nconst match = text.match(/\\[[\\s\\S]*\\]/);\nlet parsed = [];\ntry { parsed = match ? JSON.parse(match[0]) : []; } catch (e) { parsed = []; }\nconst rows = [];\nfor (const p of parsed.slice(0, 10)) {\n  const a = items[p.from]; const b = items[p.to];\n  if (!a || !b) continue;\n  const fromKey = `${a.item_type}:${a.item_id}`; const toKey = `${b.item_type}:${b.item_id}`;\n  if (!allowed.has(fromKey) || !allowed.has(toKey) || fromKey === toKey) continue;\n  const relation = ['same_topic','based_on','led_to'].includes(p.relation) ? p.relation : 'same_topic';\n  const reason = String(p.reason || '').slice(0, 80);\n  if (!reason) continue;\n  rows.push({ from_type: a.item_type, from_id: a.item_id, to_type: b.item_type, to_id: b.item_id, relation, reason });\n}\nreturn rows.map(r => ({ json: r }));"
+    },
+    "id": "link-parse-qa",
+    "name": "결과 파싱과 안전 검증",
+    "type": "n8n-nodes-base.code",
+    "typeVersion": 2,
+    "position": [1180, 260]
+   },
+   {
+    "parameters": {
+     "operation": "executeQuery",
+     "query": "INSERT INTO vault_links(from_type, from_id, to_type, to_id, relation, reason, provider, model) VALUES ($1,$2,$3,$4,$5,$6,'ollama-local','qwen3.5:4b') ON CONFLICT (from_type, from_id, to_type, to_id, relation) DO NOTHING RETURNING id;",
+     "options": {
+      "queryReplacement": "={{ [$json.from_type, $json.from_id, $json.to_type, $json.to_id, $json.relation, $json.reason] }}"
+     }
+    },
+    "id": "link-save",
+    "name": "연결고리 저장",
+    "type": "n8n-nodes-base.postgres",
+    "typeVersion": 2.6,
+    "position": [1420, 260],
+    "credentials": {
+     "postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}
+    }
+   }
+  ],
+  "connections": {
+   "매일 오전 5시 10분": {"main": [[{"node": "최근 미연결 항목 조회", "type": "main", "index": 0}]]},
+   "수동 연결고리 찾기": {"main": [[{"node": "최근 미연결 항목 조회", "type": "main", "index": 0}]]},
+   "최근 미연결 항목 조회": {"main": [[{"node": "관련성 프롬프트 구성", "type": "main", "index": 0}]]},
+   "관련성 프롬프트 구성": {"main": [[{"node": "로컬 Qwen 관련성 판단", "type": "main", "index": 0}]]},
+   "로컬 Qwen 관련성 판단": {"main": [[{"node": "결과 파싱과 안전 검증", "type": "main", "index": 0}]]},
+   "결과 파싱과 안전 검증": {"main": [[{"node": "연결고리 저장", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+   "timezone": "Asia/Seoul",
+   "errorWorkflow": "AtemoyaErrorHandler01",
+   "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {},
+  "pinData": {},
+  "tags": []
+ }
+]

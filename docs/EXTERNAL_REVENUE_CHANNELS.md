@@ -26,15 +26,27 @@ committed to this repository.
 
 ## Activation gate
 
-External publishing must stay inactive until a test draft is created and its
-returned URL is recorded. A successful login screen is not evidence of an API
-connection. The acceptance test is:
+External publishing must stay inactive until a test post is created and its
+returned URL is recorded. A successful login screen alone is not evidence of a
+working publishing route.
+
+For channels with a supported API, the acceptance test is:
 
 1. create a draft through the channel API;
 2. persist the returned post ID and URL;
-3. collect a view/click report for that URL;
-4. show the evidence in the Atemoya dashboard;
-5. only then enable scheduled publishing.
+3. publish only through the channel's reviewed authorization path;
+4. collect a view/click report for that URL;
+5. show the evidence in the Atemoya dashboard;
+6. only then enable scheduled publishing.
+
+For Naver Blog's reviewed browser-only route, the acceptance test is:
+
+1. verify a current browser session without exporting passwords, cookies, QR values, or OTPs;
+2. enter a channel-specific draft with the disclosure before affiliate links;
+3. publish through the explicit browser workflow and persist the returned URL;
+4. verify public visibility, title, disclosure, links, and the idempotency key;
+5. report view/click data as `UNKNOWN` until real observations arrive;
+6. do not label the route unattended or enable background scheduling.
 
 This gate prevents the system from reporting "connected" merely because an
 account page was opened in a browser.
