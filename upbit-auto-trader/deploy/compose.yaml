@@ -1,0 +1,62 @@
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      LEGACY_DATA_DIR: /legacy
+      PUBLIC_BASE_URL: http://127.0.0.1:8765
+    secrets:
+      - database_url
+    volumes:
+      - ${LEGACY_DATA_DIR:?Set LEGACY_DATA_DIR}/runtime_state.json:/legacy/runtime_state.json:ro
+      - ${LEGACY_DATA_DIR}/trading_settings.json:/legacy/trading_settings.json:ro
+      - ${LEGACY_DATA_DIR}/recommendation_state.json:/legacy/recommendation_state.json:ro
+      - ${LEGACY_DATA_DIR}/coin_registry.json:/legacy/coin_registry.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+  upbit-collector:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    command: ["python", "-m", "neural.collector"]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      UPBIT_ENV_FILE: /run/secrets/upbit_env
+    secrets:
+      - database_url
+      - upbit_env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: neural
+      POSTGRES_DB: neural
+      POSTGRES_PASSWORD_FILE: /run/secrets/database_password
+    secrets:
+      - database_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neural -d neural"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+secrets:
+  database_url:
+    file: ${DATABASE_URL_SECRET:?Set DATABASE_URL_SECRET}
+  database_password:
+    file: ${DATABASE_PASSWORD_SECRET:?Set DATABASE_PASSWORD_SECRET}
+  upbit_env:
+    file: ${UPBIT_ENV_SECRET:?Set UPBIT_ENV_SECRET}
+volumes:
+  postgres_data:
