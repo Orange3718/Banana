@@ -63,9 +63,9 @@ class TradingSettings:
     max_entry_change_rate: float = 0.06
     max_recent_surge_rate: float = 0.03
     enable_trend_confirmation: bool = True
-    enable_trend_pullback: bool = True
-    enable_volatility_breakout: bool = True
-    enable_mean_reversion: bool = True
+    enable_trend_pullback: bool = False
+    enable_volatility_breakout: bool = False
+    enable_mean_reversion: bool = False
     trend_position_size_ratio: float = 1.0
     pullback_position_size_ratio: float = 0.75
     breakout_position_size_ratio: float = 0.50
