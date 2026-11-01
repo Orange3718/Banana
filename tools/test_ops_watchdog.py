@@ -74,17 +74,13 @@ class WatchdogTests(unittest.TestCase):
         self.assertEqual(statuses["collector:upbit"], "good")
         self.assertEqual(statuses["collector:binance_futures"], "bad")
 
-    def test_revenue_pipeline_is_review_when_nothing_published(self):
-        check = watchdog.revenue_pipeline_check({"queued": 4, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 0, "oldest_minutes": 60})
-        self.assertEqual(check.status, "review")
-
-    def test_revenue_pipeline_is_bad_when_stalled_three_days(self):
-        check = watchdog.revenue_pipeline_check({"queued": 4, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 0, "oldest_minutes": 4320})
-        self.assertEqual(check.status, "bad")
-
-    def test_revenue_pipeline_is_good_after_publication(self):
-        check = watchdog.revenue_pipeline_check({"queued": 2, "retry": 0, "awaiting_approval": 0, "approved": 0, "branch_ready": 0, "published_7d": 1, "oldest_minutes": 120})
+    def test_local_llm_idle_is_good_even_when_last_result_is_old(self):
+        check = watchdog.local_llm_freshness_check(10 * 3600, 0)
         self.assertEqual(check.status, "good")
+
+    def test_local_llm_pending_job_with_old_completion_needs_attention(self):
+        check = watchdog.local_llm_freshness_check(5 * 3600, 1)
+        self.assertEqual(check.status, "bad")
 
     def test_direct_publication_is_good_while_future_work_is_scheduled(self):
         check = watchdog.direct_publication_check({"total": 10, "queued": 9, "running": 0, "retry_wait": 0, "manual_review": 0, "failed": 0, "published": 1, "due": 0, "oldest_due_minutes": 0})

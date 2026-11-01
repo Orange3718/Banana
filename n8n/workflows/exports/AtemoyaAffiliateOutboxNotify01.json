@@ -1,0 +1,78 @@
+[
+  {
+    "id": "AtemoyaAffiliateOutboxNotify01",
+    "name": "Atemoya 제휴 게시 outbox Telegram 전달",
+    "active": true,
+    "settings": {
+      "timezone": "Asia/Seoul",
+      "errorWorkflow": "AtemoyaErrorHandler01",
+      "executionOrder": "v1"
+    },
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {"field": "cronExpression", "expression": "*/5 * * * *"}
+            ]
+          }
+        },
+        "id": "affiliate-outbox-schedule-01",
+        "name": "5분마다 outbox 확인",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [200, 300]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH owner AS (SELECT chat_id FROM public.telegram_owner_actors WHERE enabled ORDER BY added_at LIMIT 1), todo AS (SELECT o.id FROM affiliate.outbox o WHERE o.state='pending' AND o.kind='direct_affiliate_published' AND o.next_attempt_at<=now() AND o.attempts<5 AND EXISTS (SELECT 1 FROM owner) ORDER BY o.id LIMIT 20 FOR UPDATE SKIP LOCKED), claimed AS (UPDATE affiliate.outbox o SET attempts=o.attempts+1,next_attempt_at=now()+interval '30 minutes' FROM todo WHERE o.id=todo.id RETURNING o.id,o.event_key,o.payload) SELECT (SELECT chat_id FROM owner) AS chat_id, string_agg(id::text,',' ORDER BY id) AS ids_csv, count(*) AS event_count, left(string_agg('• '||COALESCE(payload->>'url',event_key),E'\\n' ORDER BY id),3500) AS links FROM claimed HAVING count(*)>0;",
+          "options": {}
+        },
+        "id": "affiliate-outbox-claim-01",
+        "name": "미전달 게시 알림 선점",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [440, 300],
+        "credentials": {
+          "postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $json.chat_id }}",
+          "text": "={{ 'Atemoya 제휴 게시 결과 ' + $json.event_count + '건\\n' + $json.links + '\\n\\n매출은 별도 공급자 보고서로만 확인합니다.' }}",
+          "additionalFields": {"disable_web_page_preview": true, "appendAttribution": false}
+        },
+        "id": "affiliate-outbox-telegram-01",
+        "name": "Owner에게 게시 결과 전송",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [680, 300],
+        "credentials": {
+          "telegramApi": {"id": "6WaLMIqUth2LtuDZ", "name": "Telegram account"}
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE affiliate.outbox SET state='sent',sent_at=now() WHERE state='pending' AND id=ANY(string_to_array($1::text,',')::bigint[]) RETURNING id,event_key,state,sent_at;",
+          "options": {"queryReplacement": "={{ [$('미전달 게시 알림 선점').first().json.ids_csv] }}"}
+        },
+        "id": "affiliate-outbox-sent-01",
+        "name": "전달된 event 완료",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [920, 300],
+        "credentials": {
+          "postgres": {"id": "AtemoyaPostgresMemory01", "name": "Atemoya PostgreSQL Memory"}
+        }
+      }
+    ],
+    "connections": {
+      "5분마다 outbox 확인": {"main": [[{"node": "미전달 게시 알림 선점", "type": "main", "index": 0}]]},
+      "미전달 게시 알림 선점": {"main": [[{"node": "Owner에게 게시 결과 전송", "type": "main", "index": 0}]]},
+      "Owner에게 게시 결과 전송": {"main": [[{"node": "전달된 event 완료", "type": "main", "index": 0}]]}
+    }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "decision_date": "2026-11-01",
+  "focus": "Measure the existing Coupang affiliate content batch before adding business lines or publication volume.",
+  "parked_workflows": [
+    "AtemoyaHardwareExecution01",
+    "AtemoyaPreauthAgents01",
+    "AtemoyaPortfolioReview01",
+    "AtemoyaCommerceScout01",
+    "AtemoyaDailyTrend01"
+  ],
+  "resume_condition": "Update this decision after a measured acquisition and provider-report loop, then deploy the chosen workflow explicitly."
+}

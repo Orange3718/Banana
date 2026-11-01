@@ -86,4 +86,4 @@ D05(데이터 소유권)는 A01/A02/A04/A05로 상세 설계상 해결했다. �
 
 쿠팡파트너스 포털에서 로그인·리포트·링크 생성 메뉴를 확인했지만 현재 수익 요약은 0이며 API 키 발급은 비활성화다. 기존 LED 마스크 후보 조사와 포털의 국내 상품 범위를 바탕으로 MVP를 재정렬한 추론이며, 실제 전환·수수료·지원 필드는 아직 입증하지 않았다. [공급자 조사](03-provider-contract.md).
 
-GitHub Pages의 상업 호스팅 제한은 [선행 리뷰](/Users/orange/Documents/Atemoya/ATEMOYA_AFFILIATE_BUSINESS_OS_DESIGN_REVIEW_AND_BUILD_PLAN.md)의 R03을 따른다. 신규 host 계약 검증 전 기존 호스트에서 상업 확장을 확정하지 않는다.
+GitHub Pages의 상업 호스팅 제한은 [선행 리뷰](../archive/affiliate-business-os-20260913/ATEMOYA_AFFILIATE_BUSINESS_OS_DESIGN_REVIEW_AND_BUILD_PLAN.md)의 R03을 따른다. 신규 host 계약 검증 전 기존 호스트에서 상업 확장을 확정하지 않는다.

@@ -41,8 +41,8 @@
 
 ## 근거
 
-- [원본 설계안](/Users/orange/Documents/Atemoya/ATEMOYA_AFFILIATE_BUSINESS_OS.md), SHA-256 `3553c08027f7c3acd9c227137a6828a8a9a89579f3e52e15b237699cbb14fd87`
-- [선행 리뷰](/Users/orange/Documents/Atemoya/ATEMOYA_AFFILIATE_BUSINESS_OS_DESIGN_REVIEW_AND_BUILD_PLAN.md), SHA-256 `0c4db1cac0500ea133289638990a20a61ad695421dfadc454b627925fe868f14`
+- [원본 설계안](../archive/affiliate-business-os-20260913/ATEMOYA_AFFILIATE_BUSINESS_OS.md), SHA-256 `3553c08027f7c3acd9c227137a6828a8a9a89579f3e52e15b237699cbb14fd87`
+- [선행 리뷰](../archive/affiliate-business-os-20260913/ATEMOYA_AFFILIATE_BUSINESS_OS_DESIGN_REVIEW_AND_BUILD_PLAN.md), SHA-256 `0c4db1cac0500ea133289638990a20a61ad695421dfadc454b627925fe868f14`
 - 조사 저장소: `Orange3718/Banana`, 기준 commit `916b182c2a45e3efbb6addf62498805856970f79`.
 - 현재 작업 브랜치: `feat/atemoya-publication-record`. 구현 기준 브랜치는 작업 시작 시 원격과 재대조한다.
 - 검토 원칙: [AI Review Charter](../../ai-framework/reviewer/review_charter.md).
