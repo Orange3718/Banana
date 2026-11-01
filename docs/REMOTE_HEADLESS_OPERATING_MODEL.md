@@ -8,9 +8,10 @@
 | --- | --- | --- |
 | 화면만 잠김 | 로그인한 사용자 세션은 유지된다. n8n·PostgreSQL 컨테이너, Watchdog, 대시보드 API, Ollama는 화면 입력 없이 동작한다. | `scripts/preflight.sh`, Docker/launchctl, HTTP, PostgreSQL로 점검한다. 잠금 해제를 요청하지 않는다. |
 | 사용자 로그아웃·재부팅 후 로그인 전 | 핵심 예약 작업은 `~/Library/LaunchAgents`의 사용자 세션에 있다. `com.atemoya.start-services`도 로그인 뒤 Docker Desktop을 여는 LaunchAgent다. Docker 컨테이너의 `restart: unless-stopped`는 Docker Desktop 자체를 시작하지 않는다. | 자동 복구가 보장되지 않는다. 재부팅·로그아웃은 화면 잠금과 별도 장애 경계로 감시한다. |
-| 네이버 글 편집·앱 GUI 시험 | 작성자 로그인과 화면이 필요한 작업이다. 현재 네이버 Chrome 세션은 비로그인 상태다. | 해당 작업의 인증 단계에서만 사용자 세션을 요청한다. 서버 상태 점검과 다른 작업은 계속 진행한다. |
+| Chrome 웹 편집 | 잠긴 상태에서도 Chrome 원격 탭은 접근됐다. 현재 네이버 탭은 작성자 비로그인 상태다. | 웹 편집은 실제 탭 접근성을 먼저 확인한다. 네이버는 작성자 인증 뒤 편집하며, 화면 잠금만으로 막혔다고 판단하지 않는다. |
+| 네이티브 앱 GUI | macOS 화면 잠금 중 네이티브 앱 제어는 접근 불가로 확인됐다. | 해당 GUI 시험이 필요한 순간에만 잠금 해제를 요청한다. |
 
-2026-11-02 실측: macOS GUI가 잠겼다고 확인된 바로 그 상태에서 n8n `/healthz`가 `{"status":"ok"}`, PostgreSQL `pg_isready`가 연결 수락, 대시보드 API가 `n8n.ok=true`로 응답했다. 세 컨테이너가 실행 중이고 Watchdog LaunchAgent는 예약 등록·최근 정상 종료 상태였다. iMac은 전원 연결 시 시스템 수면이 꺼져 있다. Telegram의 잠금 중 휴대폰 왕복과 재부팅 후 로그인 전 복구는 아직 시험하지 않았다.
+2026-11-02 실측: macOS 네이티브 GUI가 잠겼다고 확인된 바로 그 상태에서 Chrome 원격 탭은 접근됐고 n8n `/healthz`가 `{"status":"ok"}`, PostgreSQL `pg_isready`가 연결 수락, 대시보드 API가 `n8n.ok=true`로 응답했다. 세 컨테이너가 실행 중이고 Watchdog LaunchAgent는 예약 등록·최근 정상 종료 상태였다. iMac은 전원 연결 시 시스템 수면이 꺼져 있다. Telegram의 잠금 중 휴대폰 왕복과 재부팅 후 로그인 전 복구는 아직 시험하지 않았다.
 
 **단기 운영:** Telegram과 원격 Codex의 상태·진단·재시작은 기존 API/CLI 경로만 사용한다. GUI 실패를 서버 장애로 분류하지 않는다. 외부 네이버 글의 로그인·편집은 별도 미결 작업으로 남긴다. 잠금 상태에서 휴대폰 Telegram `상태` 명령의 실제 왕복을 추가 확인한다.
 

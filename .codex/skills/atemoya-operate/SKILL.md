@@ -16,7 +16,7 @@ description: Operate and extend the Atemoya AI-operated revenue system on the iM
 ## 화면 잠금과 원격 운영
 
 - iMac 화면 잠금을 서버 장애로 해석하지 않는다. 상태 조회, Docker/n8n/PostgreSQL/Ollama 점검, LaunchAgent 확인, 백업, 워크플로 CLI 적용, Git 작업은 화면을 열지 않고 실행한다. 먼저 `scripts/preflight.sh`와 실제 API/DB 응답을 확인한다.
-- 계정 로그인·2FA·브라우저 전용 편집·네이티브 앱 GUI 시험이 정확히 필요한 단계에서만 사용자에게 화면 세션을 요청한다. 그 경우에도 독립적인 서버 작업은 계속한다.
+- 잠긴 상태에서도 Chrome 원격 탭이 열리는지 먼저 확인하고, 인증된 웹 편집은 가능하면 그대로 진행한다. 계정 로그인·2FA 또는 잠금으로 실제 차단된 네이티브 앱 GUI 단계에서만 사용자 행동을 요청한다. 그 경우에도 독립적인 서버 작업은 계속한다.
 - 화면 잠금과 로그아웃·재부팅을 구별한다. 현재 Docker Desktop과 일부 LaunchAgent는 사용자 로그인 뒤 시작하므로 로그인 전 자동 복구를 검증한 것으로 말하지 않는다. 세부 경계는 `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`를 따른다.
 
 ## 기준
