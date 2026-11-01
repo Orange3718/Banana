@@ -9,6 +9,7 @@ for (const file of files.filter(name => /\.(?:html|js)$/.test(name))) {
   const content = readFileSync(resolve(root, file), 'utf8');
   if (/https?:\/\/(?:link\.coupang\.com|coupa\.ng)\b/i.test(content)) errors.push(`${file}: retired partner link`);
   if (/쿠팡 파트너스 활동의 일환|data-affiliate|id="affiliate-link"/.test(content)) errors.push(`${file}: retired affiliate UI`);
+  if (file.startsWith("offers/") && /상품 ID|링크 확인일|쿠팡/.test(content)) errors.push(`${file}: stale partner reference`);
 }
 const configText = readFileSync(resolve(root, 'config.js'), 'utf8');
 const config = JSON.parse(configText.match(/^window\.ATEMOYA_CONFIG=(.*);\s*$/s)?.[1] || 'null');
