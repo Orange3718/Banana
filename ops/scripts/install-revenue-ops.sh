@@ -5,6 +5,17 @@ repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 uid="$(id -u)"
 agent="$HOME/Library/LaunchAgents/com.atemoya.revenue-reconciler.plist"
 
+if python3 - "$repo_root/ops/business-scope-20261101.json" <<'PY'
+import json
+import sys
+decision = json.load(open(sys.argv[1]))
+sys.exit(0 if 'com.atemoya.revenue-reconciler' in decision.get('parked_launch_agents', []) else 1)
+PY
+then
+  echo "Refusing to install parked revenue reconciler; update the business scope before reactivation." >&2
+  exit 1
+fi
+
 test "$(git -C "$repo_root" branch --show-current)" != "main" || {
   echo "Refusing to install from main; use the reviewed feature branch." >&2
   exit 1

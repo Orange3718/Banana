@@ -27,7 +27,7 @@ v2.0 · 2026-09-13 · **계측 코드 배포 확인 / GA 수신·정산 자동 �
 
 | 지표 | 확인 위치 | 의미와 현재 한계 |
 |---|---|---|
-| 표준 조회수 | [Google Analytics](https://analytics.google.com/) → 보고서 → 참여도 → 페이지 및 화면, 경로별 Views | page_view 기반 표준 지표. content_view 맞춤 이벤트와 더하지 않는다. 실제 보고서 수신은 아직 미검증 |
+| 표준 조회수 | [Atemoya GA4 페이지 및 화면](https://analytics.google.com/analytics/web/?authuser=1#/a405596895p551097737/reports/explorer?ruid=all-pages-and-screens,business-objectives,raise-brand-awareness&collectionId=business-objectives&r=all-pages-and-screens) | page_view 기반 표준 지표. content_view 맞춤 이벤트와 더하지 않는다. 2026-10-04~31 CSV에 2회 수신 |
 | 콘텐츠 로드 진단 | GA4 content_view 이벤트 | 별도 맞춤 이벤트, 표준 Views나 순방문자와 동일하지 않음 |
 | 제휴 버튼 클릭 | GA4 affiliate_click, content_path, link_key, measurement_version=v2 | data-affiliate로 표시된 HTTPS link.coupang.com/coupa.ng만 집계. 수신 검증 전에는 ‘전송 코드 구현’ 상태 |
 | 내부 계산기 이동 | GA4 internal_cta_click | 내부 CTA. 제휴 클릭·구매로 계산하지 않음 |
@@ -37,14 +37,14 @@ v2.0 · 2026-09-13 · **계측 코드 배포 확인 / GA 수신·정산 자동 �
 
 메뉴 구성은 속성에 따라 다를 수 있다. [Google 공식 페이지 및 화면 보고서 안내](https://support.google.com/analytics/answer/12926732).
 
-`G-LKX74KWHLM`은 **측정 ID**이지 숫자형 GA4 속성 ID가 아니다. 기존 로그인으로 Atemoya Analytics 화면까지 접근했지만 이메일 수신 설정 창 때문에 상세 보고서를 확인하지 못했다. 숫자형 속성과 이 측정 ID의 매핑·수신, Data API 접근은 UNKNOWN이다. ‘새 계정이 필요’ 또는 ‘API 권한이 없다’로 단정하지 않는다.
+`G-LKX74KWHLM`은 **측정 ID**이고 숫자형 GA4 속성 ID는 `551097737`이다. 2026-11-01 GA4 관리 화면에서 Atemoya Web 스트림(스트림 ID `15479487856`)의 URL이 `https://orange3718.github.io/Banana/`, 측정 ID가 `G-LKX74KWHLM`인 것을 확인했다. 속성 UI의 데이터 수신과 CSV 내려받기는 성공했다. Data API용 무인 인증·일별 수입은 아직 미구축이다.
 
 ## 계측 검증의 단계
 
 1. 로컬: 8개 오프라인 이벤트 검사 PASS. 실제 GA 요청과 제휴 클릭을 발생시키지 않음.
 2. 배포: main 19ed415, Actions 34754415577 성공. 공개 analytics.js 본문이 로컬 수정본과 일치.
-3. 수신: 미검증. 브라우저에 코드가 존재해도 네트워크 차단·설정·동의 상태에 따라 이벤트가 수신되지 않을 수 있다.
-4. 보고·운영: 자동 보고서 회수와 원장 결합은 미완료. 현재 값을 알 수 없으면 UNKNOWN이지 0이 아니다.
+3. 수신: 2026-10-04~31 GA4 페이지 경로 CSV 2행·조회 2회, 이벤트 이름 CSV 6행·이벤트 13건 확인. 페이지는 `/Banana/guides/n8n-backup-restore-beginner.html`, `/Banana/stories/index.html`; 제휴 글 경로는 내보낸 행에 없다. 이벤트 이름 목록에도 `affiliate_click` 행은 없다. CSV 수신 ID 5·6, SHA-256은 `affiliate.intake_files`와 비공개 영수증에 저장했다.
+4. 보고·운영: CSV는 **기간 합계**라 일별 `revenue_channel_metrics`에 넣지 않았다. 대시보드에서 기간·행별 관찰을 분리해 표시한다. 공급자 보고서와 정산·현금, GA4 Data API 자동 회수는 미완료. GA4의 총수익 0은 쿠팡 제휴 매출 0 증거가 아니다.
 
 맞춤 이벤트 전송과 수신 확인은 [Google 공식 GA4 이벤트 문서](https://developers.google.com/analytics/devguides/collection/ga4/events)를 기준으로 한다. 수정 전 data-affiliate 내부 버튼이 affiliate_click으로 계산될 수 있었으므로 v1/v2를 같은 정의로 전후 비교하지 않는다.
 
@@ -59,4 +59,4 @@ v2.0 · 2026-09-13 · **계측 코드 배포 확인 / GA 수신·정산 자동 �
 
 ## 현재 판정
 
-공개 파일 수정은 검증 완료. **전체는 REVIEW**: 호스팅 적합성·GA 수신·공급자 수입·실제 전환·자동 게시/수집은 미완료다. 다음 행동과 차단 사유는 [11. 실행 상태](11-execution-status.md)에 이어서 기록한다.
+공개 파일과 GA4 속성/스트림 매핑, 기간 보고서 수신은 검증 완료. **전체는 REVIEW**: 호스팅 적합성·제휴 글 검색 발견/클릭·공급자 수입·실제 전환·일별 자동 수집은 미완료다. 2026-11-01 이후 실제 상태와 다음 행동은 [운영 구조와 검증 기록](../OPERATING_MAP_2026-11-01.md)을 우선한다.
