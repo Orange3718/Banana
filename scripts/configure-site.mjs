@@ -4,15 +4,10 @@ const legacyGaMeasurementId="G-S4JXX0NVBS";
 const productionGaMeasurementId="G-LKX74KWHLM";
 const configuredGaMeasurementId=process.env.ATEMOYA_GA_ID||"";
 const config={
-  affiliateUrl:process.env.ATEMOYA_AFFILIATE_URL||"",
-  affiliateUrls:{
-    humidifier:process.env.AFFILIATE_HUMIDIFIER||"",heating:process.env.AFFILIATE_HEATING||"",
-    purifier:process.env.AFFILIATE_PURIFIER||"",disposer:process.env.AFFILIATE_DISPOSER||"",
-    robot:process.env.AFFILIATE_ROBOT||"",beauty:process.env.AFFILIATE_BEAUTY||"",
-    feeder:process.env.AFFILIATE_FEEDER||"",llm:process.env.AFFILIATE_LLM||"",
-    travel:process.env.AFFILIATE_TRAVEL||"",blackfriday:process.env.AFFILIATE_BLACKFRIDAY||""
-  },
-  affiliateDisclosure:"이 포스팅은 제휴 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.",
+  // The former affiliate provider is retired. Ignore old repository variables.
+  affiliateUrl:"",
+  affiliateUrls:{},
+  affiliateDisclosure:"현재 제휴 구매 링크를 운영하지 않습니다.",
   // GitHub Pages previously held a stale repository variable. Preserve any
   // future replacement value, but never publish the retired stream ID again.
   gaMeasurementId:configuredGaMeasurementId===legacyGaMeasurementId?productionGaMeasurementId:(configuredGaMeasurementId||productionGaMeasurementId),
