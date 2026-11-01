@@ -13,6 +13,13 @@ if (process.argv[2]) {
   for (const file of walk(root)) if (!allowed.has(file)) errors.push(`Non-public artifact file: ${file}`);
 }
 const html = files.filter(file => file.endsWith('.html'));
+const sitemapBase = 'https://orange3718.github.io/Banana/';
+const expectedUrls = new Set(html.map(file => file === 'index.html' ? sitemapBase : `${sitemapBase}${file}`));
+const sitemap = readFileSync(resolve(root, 'sitemap.xml'), 'utf8');
+const listedUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+for (const url of listedUrls) if (!expectedUrls.has(url)) errors.push(`sitemap: non-public URL ${url}`);
+for (const url of expectedUrls) if (!listedUrls.includes(url)) errors.push(`sitemap: missing public URL ${url}`);
+if (listedUrls.length !== new Set(listedUrls).size) errors.push('sitemap: duplicate URL');
 for (const file of html) {
   const path = resolve(root, file), text = readFileSync(path, 'utf8');
   if (!/<title>[^<]+<\/title>/.test(text)) errors.push(`${file}: title missing`);
