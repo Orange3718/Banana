@@ -29,6 +29,8 @@ EXTERNAL_ENDPOINTS = (
 )
 DNS_HOSTS = ("api.upbit.com", "fapi.binance.com")
 TRADING_COLLECTORS = ("upbit", "binance_futures")
+SCOPE = json.loads((ROOT / "ops/business-scope-20261101.json").read_text())
+DIRECT_PUBLISHER_PARKED = "com.atemoya.affiliate-direct-publisher" in SCOPE.get("parked_launch_agents", [])
 
 
 @dataclass
@@ -229,8 +231,9 @@ def collect_checks():
         checks.append(local_llm_freshness_check(age, pending))
         errors = int(db_scalar("SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '2 hours';") or 0)
         checks.append(Check("n8n", "recent_errors", "bad" if errors >= 3 else "review" if errors else "good", f"최근 2시간 n8n 오류 {errors}건", details={"count": errors}))
-        direct_raw = db_scalar("SELECT json_build_object('total',count(*),'queued',count(*) FILTER(WHERE j.state='queued'),'running',count(*) FILTER(WHERE j.state='running'),'retry_wait',count(*) FILTER(WHERE j.state='retry_wait'),'manual_review',count(*) FILTER(WHERE j.state='manual_review'),'failed',count(*) FILTER(WHERE j.state='failed'),'published',count(*) FILTER(WHERE p.state='published'),'due',count(*) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now()),'oldest_due_minutes',COALESCE(EXTRACT(EPOCH FROM (now()-min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now())))/60,0)::int,'next_scheduled',min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait'))) FROM affiliate.jobs j JOIN affiliate.publications p ON p.idempotency_key=j.payload->>'publication_key' WHERE j.kind='direct_affiliate_publish';")
-        checks.append(direct_publication_check(json.loads(direct_raw or "{}")))
+        if not DIRECT_PUBLISHER_PARKED:
+            direct_raw = db_scalar("SELECT json_build_object('total',count(*),'queued',count(*) FILTER(WHERE j.state='queued'),'running',count(*) FILTER(WHERE j.state='running'),'retry_wait',count(*) FILTER(WHERE j.state='retry_wait'),'manual_review',count(*) FILTER(WHERE j.state='manual_review'),'failed',count(*) FILTER(WHERE j.state='failed'),'published',count(*) FILTER(WHERE p.state='published'),'due',count(*) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now()),'oldest_due_minutes',COALESCE(EXTRACT(EPOCH FROM (now()-min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now())))/60,0)::int,'next_scheduled',min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait'))) FROM affiliate.jobs j JOIN affiliate.publications p ON p.idempotency_key=j.payload->>'publication_key' WHERE j.kind='direct_affiliate_publish';")
+            checks.append(direct_publication_check(json.loads(direct_raw or "{}")))
     except Exception as exc:
         checks.append(Check("postgres", "query", "bad", "PostgreSQL 상태 조회 실패", details={"error": str(exc)[:300]}))
     checks.append(source_check())
@@ -274,7 +277,7 @@ def remediate(checks, state):
         elif check.component == "local-llm" and check.code == "stale_jobs" and check.details and check.details.get("count", 0):
             db_scalar("UPDATE local_llm_runs SET status='error',progress=100,current_step='Watchdog 정리',error_summary='정체 작업 자동 정리',updated_at=NOW() WHERE (status='running' AND updated_at<NOW()-interval '20 minutes') OR (status='queued' AND updated_at<NOW()-interval '70 minutes');")
             action = "stale local_llm_runs marked error"
-        elif check.component == "affiliate" and check.code == "direct_publication":
+        elif not DIRECT_PUBLISHER_PARKED and check.component == "affiliate" and check.code == "direct_publication":
             result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.affiliate-direct-publisher"], timeout=30)
             if result.returncode == 0:
                 action = "launchctl kickstart com.atemoya.affiliate-direct-publisher"

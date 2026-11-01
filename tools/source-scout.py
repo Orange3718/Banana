@@ -8,7 +8,7 @@ sources=[
   ('hackernews','https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=10'),
   ('reddit','https://www.reddit.com/r/BuyItForLife+ecommerce+Entrepreneur/hot.json?limit=15'),
   ('google-news','https://news.google.com/rss/search?q=(product+review+OR+shopping+trend+OR+affiliate+commerce)+when:2d&hl=en&gl=US&ceid=US:en'),
-  ('google-news','https://news.google.com/rss/search?q=(쇼핑+트렌드+OR+제품+비교+OR+쿠팡+OR+네이버쇼핑)+when:2d&hl=ko&gl=KR&ceid=KR:ko'),
+  ('google-news','https://news.google.com/rss/search?q=(쇼핑+트렌드+OR+제품+비교+OR+네이버쇼핑)+when:2d&hl=ko&gl=KR&ceid=KR:ko'),
   ('google-news','https://news.google.com/rss/search?q=(creator+commerce+OR+social+shopping+OR+tiktok+shop)+when:2d&hl=en&gl=US&ceid=US:en'),
 ]
 rows=[]
