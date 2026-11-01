@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent; PLISTS=Path.home()/'Library/LaunchAgents'
-JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','15분마다',900),('com.atemoya.revenue-reconciler','수익 파이프라인 복구','15분마다',900),('com.atemoya.affiliate-direct-publisher','쿠팡 직접 게시','15분마다',900),('com.atemoya.autopilot-publisher','레거시 승인 콘텐츠 Publisher','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
+JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','5분마다',300),('com.atemoya.revenue-reconciler','수익 파이프라인 복구','15분마다',900),('com.atemoya.affiliate-direct-publisher','쿠팡 직접 게시','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
 def run(c,t=4):
  try:return subprocess.run(c,text=True,capture_output=True,timeout=t).stdout.strip()
  except:return ''
@@ -26,7 +26,7 @@ def deref_n8n(value, root):
   break
  return value
 def n8n_failures():
- rows=db_json("select e.id as execution_id,w.name as workflow,e.status,e.\"startedAt\" as started_at,e.\"stoppedAt\" as stopped_at,ed.data as data from execution_entity e join workflow_entity w on w.id=e.\"workflowId\" left join execution_data ed on ed.\"executionId\"=e.id where e.status='error' order by e.id desc limit 10")
+ rows=db_json("select e.id as execution_id,w.name as workflow,e.status,e.\"startedAt\" as started_at,e.\"stoppedAt\" as stopped_at,ed.data as data from execution_entity e join workflow_entity w on w.id=e.\"workflowId\" left join execution_data ed on ed.\"executionId\"=e.id where e.status='error' and e.\"startedAt\">=now()-interval '24 hours' order by e.id desc limit 10")
  out=[]
  for row in rows:
   last_node=''; message=''
@@ -74,7 +74,11 @@ def snapshot():
  revenue_ops=db_json("select metric_date,channel,page_views,outbound_clicks,affiliate_clicks,conversions,revenue_amount,source from revenue_channel_metrics order by metric_date desc,collected_at desc limit 14")
  failures=n8n_failures()
  h=run(['curl','-fsS','--max-time','2','http://127.0.0.1:5678/healthz'])
- return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'direct_publications':direct_publications,'revenue_ops':revenue_ops,'affiliate_measurement':{'state':'no_provider_rows' if not revenue_ops else 'rows_present','interpretation':'UNKNOWN—not zero; GA4/Coupang receipt is not connected to this dashboard' if not revenue_ops else 'rows present; source and period still required'}}
+ telegram=(db_json("SELECT w.active AS router_active,(SELECT max(received_at) FROM telegram_update_receipts) AS last_received_at,(SELECT count(*) FROM telegram_update_receipts) AS accepted_updates,(SELECT status FROM execution_entity WHERE \"workflowId\"='AtemoyaTelegramMemory01' ORDER BY id DESC LIMIT 1) AS last_execution_status FROM workflow_entity w WHERE w.id='AtemoyaTelegramMemory01'") or [{}])[0]
+ delivery=(db_json("SELECT count(*) FILTER (WHERE state='pending') AS pending,count(*) FILTER (WHERE state='sent') AS sent,count(*) FILTER (WHERE state='failed') AS failed,max(sent_at) AS last_sent_at FROM affiliate.outbox WHERE kind='direct_affiliate_published'") or [{}])[0]
+ intake=(db_json("SELECT count(*) AS files,max(captured_at) AS last_received_at FROM affiliate.intake_files") or [{}])[0]
+ measures=(db_json("SELECT (SELECT count(*) FROM affiliate.click_events) AS click_rows,(SELECT count(*) FROM affiliate.import_batches) AS provider_batches,(SELECT count(*) FROM affiliate.journal_entries) AS journal_rows,(SELECT count(*) FROM affiliate.cash_movements) AS cash_rows,(SELECT count(*) FROM revenue_channel_metrics) AS metric_rows") or [{}])[0]
+ return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'direct_publications':direct_publications,'revenue_ops':revenue_ops,'telegram':telegram,'delivery':delivery,'intake':intake,'affiliate_measurement':{'owner_reported_revenue_krw':0,'owner_reported_as_of':'2026-11-01','state':'unmeasured' if not revenue_ops else 'rows_present','counts':measures,'interpretation':'Owner reported 0 KRW on 2026-11-01; missing provider and traffic rows are unknown, not verified zero.'}}
 class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?',1)[0]=='/api/status':

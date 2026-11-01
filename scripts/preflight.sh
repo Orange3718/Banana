@@ -7,9 +7,27 @@ echo "Atemoya preflight"
 echo "repo: $repo_root"
 git -C "$repo_root" status --short --branch
 
-if [ -f "$repo_root/docs/affiliate-os/11-execution-status.md" ]; then
-  sed -n '1,90p' "$repo_root/docs/affiliate-os/11-execution-status.md"
-fi
+echo "contract: $repo_root/docs/OPERATING_CONTRACT.md"
+
+echo
+echo "workflow scope"
+python3 - "$repo_root/ops/business-scope-20261101.json" <<'PY'
+import json
+import subprocess
+import sys
+
+scope = json.load(open(sys.argv[1]))
+ids = scope['parked_workflows']
+assert all(value.startswith('Atemoya') and value.endswith('01') and value.isalnum() for value in ids)
+literal = ','.join("'" + value + "'" for value in ids)
+sql = f"SELECT count(*) FROM workflow_entity WHERE active; SELECT id,active FROM workflow_entity WHERE id IN ({literal}) ORDER BY id;"
+result = subprocess.run(['docker','exec','atemoya-postgres','psql','-U','n8n','-d','n8n','-At','-c',sql],text=True,capture_output=True,check=True)
+rows = result.stdout.strip().splitlines()
+print('active n8n workflows:', rows[0])
+print('parked workflows:', ', '.join(rows[1:]))
+if any(row.endswith('|t') for row in rows[1:]):
+    raise SystemExit('Parked workflow is active')
+PY
 
 echo
 echo "docker containers"
@@ -52,6 +70,8 @@ done
 
 echo
 echo "direct affiliate publication"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT state,count(*) FROM affiliate.jobs WHERE kind='direct_affiliate_publish' GROUP BY state ORDER BY state;"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT state,count(*) FROM affiliate.publications GROUP BY state ORDER BY state;"
 docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "
 SELECT scheduled_at,category,title,publication_state,attempt,public_url,last_error
 FROM affiliate.v_direct_publication_status
@@ -60,7 +80,20 @@ docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "
 SELECT id,active,\"activeVersionId\" FROM workflow_entity WHERE id='AtemoyaRevenueAutopilot01';"
 
 echo
-echo "recent n8n failures"
+echo "measurement and delivery gaps"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "
+SELECT 'click_events' AS item,count(*) AS rows FROM affiliate.click_events
+UNION ALL SELECT 'import_batches',count(*) FROM affiliate.import_batches
+UNION ALL SELECT 'journal_entries',count(*) FROM affiliate.journal_entries
+UNION ALL SELECT 'cash_movements',count(*) FROM affiliate.cash_movements
+UNION ALL SELECT 'cost_entries',count(*) FROM affiliate.cost_entries
+UNION ALL SELECT 'time_entries',count(*) FROM affiliate.time_entries;"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT kind,state,count(*) FROM affiliate.outbox GROUP BY kind,state ORDER BY kind,state;"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT max(received_at) AS last_received,count(*) AS total FROM telegram_memory WHERE chat_id>0;"
+docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT id,active FROM workflow_entity WHERE nodes::text ILIKE '%telegramTrigger%';"
+
+echo
+echo "n8n failures in last 24 hours"
 python3 - <<'PY' || true
 import json
 import subprocess
@@ -70,7 +103,7 @@ select e.id as execution_id,w.name as workflow,e.status,e."startedAt" as started
 from execution_entity e
 join workflow_entity w on w.id=e."workflowId"
 left join execution_data ed on ed."executionId"=e.id
-where e.status='error'
+where e.status='error' and e."startedAt" >= now() - interval '24 hours'
 order by e.id desc
 limit 5
 ) x;"""
@@ -89,7 +122,10 @@ def deref(value, root):
         break
     return value
 
-for row in json.loads(raw or "[]"):
+rows = json.loads(raw or "[]")
+if not rows:
+    print("none")
+for row in rows:
     last_node = ""
     message = ""
     try:
@@ -102,7 +138,7 @@ for row in json.loads(raw or "[]"):
             message = str(deref(error.get("description"), root) or deref(error.get("message"), root) or deref(error.get("name"), root) or "")
     except Exception as exc:
         message = str(exc)
-    print(f"{row.get('execution_id')}\t{row.get('workflow')}\t{row.get('status')}\t{last_node}\t{message[:240]}")
+    print(f"{row.get('execution_id')}\t{row.get('started_at')}\t{row.get('workflow')}\t{last_node}\t{message[:240]}")
 PY
 
 echo

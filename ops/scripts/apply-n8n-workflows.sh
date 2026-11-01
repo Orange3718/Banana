@@ -31,10 +31,20 @@ for input in "$@"; do
   python3 -m json.tool "$source_path" >/dev/null
   base_name="$(basename "$source_path")"
   container_path="/tmp/atemoya-workflow-$base_name"
-  cp "$source_path" "$tmp_dir/$base_name"
-  docker cp "$tmp_dir/$base_name" "$container:$container_path"
   workflow_id="$(python3 -c 'import json,sys; data=json.load(open(sys.argv[1])); wf=data[0] if isinstance(data,list) else data; print(wf["id"])' "$source_path")"
   workflow_active="$(python3 -c 'import json,sys; data=json.load(open(sys.argv[1])); wf=data[0] if isinstance(data,list) else data; print("true" if wf.get("active") else "false")' "$source_path")"
+  if [[ "$workflow_active" == "true" ]] && python3 - "$repo_root/ops/business-scope-20261101.json" "$workflow_id" <<'PY'
+import json
+import sys
+decision = json.load(open(sys.argv[1]))
+sys.exit(0 if sys.argv[2] in decision['parked_workflows'] else 1)
+PY
+  then
+    echo "refusing to activate parked workflow $workflow_id; update ops/business-scope-20261101.json after reviewing the business scope" >&2
+    exit 1
+  fi
+  cp "$source_path" "$tmp_dir/$base_name"
+  docker cp "$tmp_dir/$base_name" "$container:$container_path"
   docker exec "$container" n8n import:workflow \
     --input="$container_path" \
     --projectId="$project_id"

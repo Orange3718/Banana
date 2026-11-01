@@ -176,21 +176,12 @@ def memory_pressure_check():
     return Check("host", "memory_pressure", status, f"메모리 여유 {free_percent}%", details={"free_percent": free_percent})
 
 
-def revenue_pipeline_check(facts):
-    queued = int(facts.get("queued", 0)) + int(facts.get("retry", 0))
-    pending = int(facts.get("awaiting_approval", 0))
-    approved = int(facts.get("approved", 0))
-    branch_ready = int(facts.get("branch_ready", 0))
-    published = int(facts.get("published_7d", 0))
-    oldest = int(facts.get("oldest_minutes", 0))
-    if (approved and oldest >= 45) or oldest >= 72 * 60:
-        status = "bad"
-    elif published == 0 or pending or branch_ready or oldest >= 24 * 60:
-        status = "review"
-    else:
-        status = "good"
-    message = f"7일 게시 {published}건 · 후보 {queued} · 승인대기 {pending} · 승인완료 {approved} · 병합대기 {branch_ready} · 최장 {oldest}분"
-    return Check("revenue", "pipeline_throughput", status, message, details=facts)
+def local_llm_freshness_check(age_seconds, pending):
+    if pending == 0:
+        return Check("local-llm", "freshness", "good", "대기 작업 없음 · 정상 idle", details={"pending": 0, "age_seconds": age_seconds})
+    status = "bad" if age_seconds < 0 or age_seconds > 4 * 3600 else "review" if age_seconds > 3 * 3600 else "good"
+    message = "최근 완료 없음" if age_seconds < 0 else f"최근 완료 {age_seconds // 60}분 전 · 대기 {pending}건"
+    return Check("local-llm", "freshness", status, message, details={"pending": pending, "age_seconds": age_seconds})
 
 
 def direct_publication_check(facts):
@@ -234,8 +225,8 @@ def collect_checks():
         stale = int(db_scalar("SELECT count(*) FROM local_llm_runs WHERE (status='running' AND updated_at<NOW()-interval '20 minutes') OR (status='queued' AND updated_at<NOW()-interval '70 minutes');") or 0)
         checks.append(Check("local-llm", "stale_jobs", "bad" if stale else "good", f"정체 작업 {stale}건", details={"count": stale}))
         age = int(db_scalar("SELECT COALESCE(EXTRACT(EPOCH FROM (NOW()-max(updated_at)))::bigint,-1) FROM local_llm_runs WHERE status='complete';") or -1)
-        status = "bad" if age < 0 or age > 4 * 3600 else "review" if age > 3 * 3600 else "good"
-        checks.append(Check("local-llm", "freshness", status, "최근 완료 없음" if age < 0 else f"최근 완료 {age // 60}분 전", details={"age_seconds": age}))
+        pending = int(db_scalar("SELECT count(*) FROM local_llm_runs WHERE status IN ('queued','running');") or 0)
+        checks.append(local_llm_freshness_check(age, pending))
         errors = int(db_scalar("SELECT count(*) FROM execution_entity WHERE status='error' AND \"startedAt\">NOW()-interval '2 hours';") or 0)
         checks.append(Check("n8n", "recent_errors", "bad" if errors >= 3 else "review" if errors else "good", f"최근 2시간 n8n 오류 {errors}건", details={"count": errors}))
         direct_raw = db_scalar("SELECT json_build_object('total',count(*),'queued',count(*) FILTER(WHERE j.state='queued'),'running',count(*) FILTER(WHERE j.state='running'),'retry_wait',count(*) FILTER(WHERE j.state='retry_wait'),'manual_review',count(*) FILTER(WHERE j.state='manual_review'),'failed',count(*) FILTER(WHERE j.state='failed'),'published',count(*) FILTER(WHERE p.state='published'),'due',count(*) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now()),'oldest_due_minutes',COALESCE(EXTRACT(EPOCH FROM (now()-min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait') AND j.next_attempt_at<=now())))/60,0)::int,'next_scheduled',min(j.next_attempt_at) FILTER(WHERE j.state IN ('queued','retry_wait'))) FROM affiliate.jobs j JOIN affiliate.publications p ON p.idempotency_key=j.payload->>'publication_key' WHERE j.kind='direct_affiliate_publish';")
@@ -283,10 +274,6 @@ def remediate(checks, state):
         elif check.component == "local-llm" and check.code == "stale_jobs" and check.details and check.details.get("count", 0):
             db_scalar("UPDATE local_llm_runs SET status='error',progress=100,current_step='Watchdog 정리',error_summary='정체 작업 자동 정리',updated_at=NOW() WHERE (status='running' AND updated_at<NOW()-interval '20 minutes') OR (status='queued' AND updated_at<NOW()-interval '70 minutes');")
             action = "stale local_llm_runs marked error"
-        elif check.component == "revenue" and check.code == "pipeline_throughput":
-            result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.revenue-reconciler"], timeout=30)
-            if result.returncode == 0:
-                action = "launchctl kickstart com.atemoya.revenue-reconciler"
         elif check.component == "affiliate" and check.code == "direct_publication":
             result = command(["/bin/launchctl", "kickstart", f"gui/{os.getuid()}/com.atemoya.affiliate-direct-publisher"], timeout=30)
             if result.returncode == 0:

@@ -1,5 +1,7 @@
 # Atemoya remote headless operating model
 
+> 2026-11-01 적용 상태와 인수 결과는 [운영 구조와 검증 기록](OPERATING_MAP_2026-11-01.md)을 우선한다. 아래는 설계 당시의 목표와 이전 상태를 보존한 문서다.
+
 Purpose: reduce repeated Mac unlock requests by moving Atemoya operations away
 from browser and desktop UI control. The iMac should run like a small server.
 

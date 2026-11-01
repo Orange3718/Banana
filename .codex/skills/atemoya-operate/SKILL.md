@@ -9,10 +9,7 @@ description: Operate and extend the Atemoya AI-operated revenue system on the iM
 
 1. 저장소를 `/Users/orange/Developer/Banana-atemoya-ops`로 고정한다.
 2. `scripts/preflight.sh`를 실행해 Git, Docker, n8n, Ollama, LaunchAgent, 최근 DB 상태를 짧게 확인한다.
-3. 반드시 다음 파일만 먼저 읽는다.
-   - `docs/ATEMOYA_SYSTEM_BASELINE.md`
-   - `docs/OPEN_ITEMS.md`
-   - `references/operating-contract.md`
+3. `AGENTS.md`, `docs/OPERATING_CONTRACT.md`, `docs/OPEN_ITEMS.md`를 읽고, 날짜가 있는 문서의 수치를 실측값으로 대체하지 않는다.
 4. 현재 요청과 직접 관련된 문서만 추가로 읽는다. 긴 대화 전체를 다시 요약하지 않는다.
 5. 미완료 작업을 `docs/OPEN_ITEMS.md`와 실제 시스템 상태로 대조하고, 안전하게 실행 가능한 다음 단계부터 바로 진행한다.
 
@@ -36,7 +33,7 @@ description: Operate and extend the Atemoya AI-operated revenue system on the iM
 - 예약 작업은 LaunchAgent/n8n 활성 상태와 최근 실행을 함께 확인한다.
 - 백그라운드 실행으로 등록하지 않은 일을 `진행 중`이라고 표현하지 않는다.
 - 계정 인증·2FA·결제·법적 동의가 유일한 차단점일 때만 사용자에게 요청한다.
-- 게시·결제·광고비는 명시된 승인 게이트를 통과해야 한다.
+- 이미 승인된 직접 제휴 게시 10건은 완료됐으며 매건 재승인하지 않는다. 새 게시 배치, 결제·광고비·계정 인증·법적 동의 및 다른 도메인은 현재 위임 범위를 확인한다.
 
 ## 결과 보고 계약
 
