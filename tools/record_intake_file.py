@@ -2,6 +2,7 @@
 """Save a Drive/local source file privately and record its hash without financial posting."""
 
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -59,6 +60,8 @@ def main():
     parser.add_argument("--mime", required=True)
     parser.add_argument("--provider", default="")
     parser.add_argument("--report-family", default="")
+    parser.add_argument("--ga4-property-id", default="")
+    parser.add_argument("--ga4-measurement-id", default="")
     args = parser.parse_args()
     if not args.source.is_file() or args.source.is_symlink():
         parser.error("Source must be a regular file, not a symlink")
@@ -83,6 +86,15 @@ def main():
             if inspection["report_inspection"]["state"] == "mapping_required":
                 state = "quarantined"
         except (ValueError, KeyError, OSError) as exc:
+            inspection["error"] = str(exc)[:400]
+            state = "quarantined"
+    elif args.provider == "ga4" and suffix == ".csv":
+        from inspect_ga4_report import inspect_report as inspect_ga4
+
+        try:
+            inspection["report_inspection"] = inspect_ga4(data, args.ga4_property_id, args.ga4_measurement_id)
+            state = "mapped" if inspection["report_inspection"]["state"] == "observed" else "received"
+        except (ValueError, csv.Error) as exc:
             inspection["error"] = str(exc)[:400]
             state = "quarantined"
     payload = {

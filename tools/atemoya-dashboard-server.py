@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent; PLISTS=Path.home()/'Library/LaunchAgents'
-JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','5분마다',300),('com.atemoya.revenue-reconciler','수익 파이프라인 복구','15분마다',900),('com.atemoya.affiliate-direct-publisher','쿠팡 직접 게시','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
+JOBS=[('com.atemoya.local-llm','로컬 LLM 추론','매시간',3600),('com.atemoya.source-scout','소스 수집·분석','매시간',3600),('com.atemoya.ops-watchdog','운영 Watchdog','5분마다',300),('com.atemoya.affiliate-direct-publisher','쿠팡 직접 게시','15분마다',900),('com.atemoya.obsidian-inbox','Obsidian Inbox 갱신','15분마다',900)]
 def run(c,t=4):
  try:return subprocess.run(c,text=True,capture_output=True,timeout=t).stdout.strip()
  except:return ''
@@ -47,7 +47,7 @@ def state(label):
  return bool(t),('running' if 'state = running' in t else 'idle'),runs
 def jobs():
  out=[]
- logs={'com.atemoya.local-llm':'/tmp/atemoya-local-llm-supervisor.log','com.atemoya.source-scout':'/tmp/atemoya-source-scout.out','com.atemoya.ops-watchdog':'/tmp/atemoya-ops-watchdog.out','com.atemoya.revenue-reconciler':'/tmp/atemoya-revenue-reconciler.out','com.atemoya.affiliate-direct-publisher':'/tmp/atemoya-affiliate-direct-publisher.out','com.atemoya.autopilot-publisher':'/tmp/atemoya-autopilot-publisher.out','com.atemoya.obsidian-inbox':'/tmp/atemoya-obsidian-inbox.out'}
+ logs={'com.atemoya.local-llm':'/tmp/atemoya-local-llm-supervisor.log','com.atemoya.source-scout':'/tmp/atemoya-source-scout.out','com.atemoya.ops-watchdog':'/tmp/atemoya-ops-watchdog.out','com.atemoya.affiliate-direct-publisher':'/tmp/atemoya-affiliate-direct-publisher.out','com.atemoya.obsidian-inbox':'/tmp/atemoya-obsidian-inbox.out'}
  for label,name,schedule,seconds in JOBS:
   log_path=logs.get(label,'/dev/null'); raw=run(['tail','-1',log_path]); last_log=raw[-500:]
   age_raw=run(['stat','-f','%m',log_path]); age_seconds=None
@@ -77,8 +77,9 @@ def snapshot():
  telegram=(db_json("SELECT w.active AS router_active,(SELECT max(received_at) FROM telegram_update_receipts) AS last_received_at,(SELECT count(*) FROM telegram_update_receipts) AS accepted_updates,(SELECT status FROM execution_entity WHERE \"workflowId\"='AtemoyaTelegramMemory01' ORDER BY id DESC LIMIT 1) AS last_execution_status FROM workflow_entity w WHERE w.id='AtemoyaTelegramMemory01'") or [{}])[0]
  delivery=(db_json("SELECT count(*) FILTER (WHERE state='pending') AS pending,count(*) FILTER (WHERE state='sent') AS sent,count(*) FILTER (WHERE state='failed') AS failed,max(sent_at) AS last_sent_at FROM affiliate.outbox WHERE kind='direct_affiliate_published'") or [{}])[0]
  intake=(db_json("SELECT count(*) AS files,max(captured_at) AS last_received_at FROM affiliate.intake_files") or [{}])[0]
+ ga4_reports=db_json("SELECT id,captured_at,inspection->'report_inspection' AS report FROM affiliate.intake_files WHERE provider='ga4' AND state='mapped' ORDER BY captured_at DESC,id DESC LIMIT 4")
  measures=(db_json("SELECT (SELECT count(*) FROM affiliate.click_events) AS click_rows,(SELECT count(*) FROM affiliate.import_batches) AS provider_batches,(SELECT count(*) FROM affiliate.journal_entries) AS journal_rows,(SELECT count(*) FROM affiliate.cash_movements) AS cash_rows,(SELECT count(*) FROM revenue_channel_metrics) AS metric_rows") or [{}])[0]
- return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'direct_publications':direct_publications,'revenue_ops':revenue_ops,'telegram':telegram,'delivery':delivery,'intake':intake,'affiliate_measurement':{'owner_reported_revenue_krw':0,'owner_reported_as_of':'2026-11-01','state':'unmeasured' if not revenue_ops else 'rows_present','counts':measures,'interpretation':'Owner reported 0 KRW on 2026-11-01; missing provider and traffic rows are unknown, not verified zero.'}}
+ return {'updated_at':datetime.now(timezone.utc).isoformat(),'memory':mem(),'ollama':ollama(),'n8n':{'ok':h=='{"status":"ok"}','recent_failures':failures},'jobs':jobs(),'runs':runs,'sources':sources,'autopilot':autopilot,'direct_publications':direct_publications,'revenue_ops':revenue_ops,'telegram':telegram,'delivery':delivery,'intake':intake,'ga4_reports':ga4_reports,'affiliate_measurement':{'owner_reported_revenue_krw':0,'owner_reported_as_of':'2026-11-01','state':'unmeasured' if not revenue_ops else 'rows_present','counts':measures,'interpretation':'Owner reported 0 KRW on 2026-11-01; GA4 period CSV receipts are distinct from daily metrics and provider cash.'}}
 class Handler(SimpleHTTPRequestHandler):
  def do_GET(self):
   if self.path.split('?',1)[0]=='/api/status':

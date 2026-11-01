@@ -9,5 +9,8 @@
     "AtemoyaDailyTrend01",
     "AtemoyaDailyOwnerBrief01"
   ],
+  "parked_launch_agents": [
+    "com.atemoya.revenue-reconciler"
+  ],
   "resume_condition": "Update this decision after a measured acquisition and provider-report loop, then deploy the chosen workflow explicitly."
 }

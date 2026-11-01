@@ -68,6 +68,19 @@ do
   fi
 done
 
+python3 - "$repo_root/ops/business-scope-20261101.json" <<'PY'
+import json
+import os
+import subprocess
+import sys
+scope = json.load(open(sys.argv[1]))
+for label in scope.get('parked_launch_agents', []):
+    result = subprocess.run(['launchctl', 'print', f'gui/{os.getuid()}/{label}'], capture_output=True)
+    print(f'parked launch agent: {label} registered={result.returncode == 0}')
+    if result.returncode == 0:
+        raise SystemExit(f'Parked launch agent is active: {label}')
+PY
+
 echo
 echo "direct affiliate publication"
 docker exec atemoya-postgres psql -U n8n -d n8n -P pager=off -c "SELECT state,count(*) FROM affiliate.jobs WHERE kind='direct_affiliate_publish' GROUP BY state ORDER BY state;"
