@@ -10,9 +10,9 @@
 | 사용자 로그아웃·재부팅 후 로그인 전 | 핵심 예약 작업은 `~/Library/LaunchAgents`의 사용자 세션에 있다. `com.atemoya.start-services`도 로그인 뒤 Docker Desktop을 여는 LaunchAgent다. Docker 컨테이너의 `restart: unless-stopped`는 Docker Desktop 자체를 시작하지 않는다. | 자동 복구가 보장되지 않는다. 재부팅·로그아웃은 화면 잠금과 별도 장애 경계로 감시한다. |
 | 네이버 글 편집·앱 GUI 시험 | 작성자 로그인과 화면이 필요한 작업이다. 현재 네이버 Chrome 세션은 비로그인 상태다. | 해당 작업의 인증 단계에서만 사용자 세션을 요청한다. 서버 상태 점검과 다른 작업은 계속 진행한다. |
 
-2026-11-02 실측: n8n·PostgreSQL 컨테이너와 대시보드 API가 정상 응답했고 Watchdog LaunchAgent는 예약 등록·최근 정상 종료 상태였다. iMac은 전원 연결 시 시스템 수면이 꺼져 있다. 이는 화면 잠금 중의 실제 왕복 시험이나 재부팅 후 자동 복구 시험을 대신하지 않는다.
+2026-11-02 실측: macOS GUI가 잠겼다고 확인된 바로 그 상태에서 n8n `/healthz`가 `{"status":"ok"}`, PostgreSQL `pg_isready`가 연결 수락, 대시보드 API가 `n8n.ok=true`로 응답했다. 세 컨테이너가 실행 중이고 Watchdog LaunchAgent는 예약 등록·최근 정상 종료 상태였다. iMac은 전원 연결 시 시스템 수면이 꺼져 있다. Telegram의 잠금 중 휴대폰 왕복과 재부팅 후 로그인 전 복구는 아직 시험하지 않았다.
 
-**단기 운영:** Telegram과 원격 Codex의 상태·진단·재시작은 기존 API/CLI 경로만 사용한다. GUI 실패를 서버 장애로 분류하지 않는다. 외부 네이버 글의 로그인·편집은 별도 미결 작업으로 남긴다. 잠금 상태에서 휴대폰 `상태` 왕복과 대시보드 API를 시험해 화면 의존성이 없는지 확인한다.
+**단기 운영:** Telegram과 원격 Codex의 상태·진단·재시작은 기존 API/CLI 경로만 사용한다. GUI 실패를 서버 장애로 분류하지 않는다. 외부 네이버 글의 로그인·편집은 별도 미결 작업으로 남긴다. 잠금 상태에서 휴대폰 Telegram `상태` 명령의 실제 왕복을 추가 확인한다.
 
 **상시 서버로 전환할 때:** 사용자 로그인 전에도 필요한 PostgreSQL·n8n·모니터링을 시스템 서비스로 기동할 수 있는 Linux VM 또는 별도 Linux 호스트로 옮기고, Tailscale과 외부 heartbeat를 별도로 검증한다. 기존 Mac LaunchAgent만 LaunchDaemon으로 바꿔도 Docker Desktop의 로그인 의존성은 사라지지 않는다. 백업·복원·재부팅 시험 후 단계적으로 이전한다. 현재 이 전환은 설계이며 배포 완료 상태가 아니다.
 
