@@ -93,10 +93,11 @@ The iMac must be treated as a server. Screen lock must not stop Docker, n8n,
 PostgreSQL, Ollama, LaunchAgents, local status checks, workflow imports, draft
 generation, site file generation or approved publishing scripts.
 
-Mac unlock is required only for browser-only account login, OAuth consent, 2FA,
-password/recovery-code prompts, payment/legal consent, visual inspection that
-cannot be verified by HTTP/API, or final manual submission on a platform that
-has no approved API path.
+Owner action may be required for account login, OAuth consent, 2FA,
+password/recovery-code prompts, and payment/legal consent. An authenticated
+remote browser tab can sometimes handle visual inspection and manual web edits
+while the Mac is locked. Request Mac unlock only when the required native app
+GUI is actually inaccessible.
 
 Operational details live in `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`.
 

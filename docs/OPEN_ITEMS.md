@@ -419,5 +419,5 @@ Owner 요청("옵시디언 연결고리 연관관계 찾고 서브 에이전트 
 - 목표: 원격 작업 때마다 iMac 화면 잠금 해제를 요구하지 않는 운영 구조로 전환한다.
 - 기준 문서: `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`
 - 원칙: Docker, n8n, PostgreSQL, Ollama, LaunchAgent, Git 작업은 잠금 화면과 무관하게 CLI/API로 수행한다.
-- 화면 잠금 해제가 필요한 작업은 계정 로그인, OAuth, 2FA, 결제, 법적 동의, 브라우저 전용 게시처럼 보안·외부 권한 단계로 제한한다.
+- 2026-11-02 정정: 계정 로그인·OAuth·2FA·결제·법적 동의는 필요한 순간에 소유자 행동을 요청한다. 웹 게시와 화면 검토는 잠긴 상태의 원격 브라우저 접근을 먼저 확인한다. 맥 잠금 해제는 실제로 차단된 네이티브 GUI 작업에만 요청한다.
 - 구현 범위: `scripts/preflight.sh` 복구, n8n workflow CLI 적용 경로, Daily Trend Gemini 실패 시 Ollama fallback, Telegram 자연어 라우터, dashboard API의 실패 노드·예약 상태 표시.
