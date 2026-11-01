@@ -36,31 +36,21 @@ jobs:
           node scripts/audit-content-quality.mjs
           node scripts/test-channel-drafts.mjs
           node scripts/test-site.mjs
-          node scripts/test-affiliate-batch.mjs
+          node scripts/test-no-coupang.mjs
           node --test scripts/test-analytics.mjs scripts/test-public-package.mjs
-      - name: Connect revenue and analytics accounts
+      - name: Connect analytics accounts
         env:
-          ATEMOYA_AFFILIATE_URL: ${{ vars.ATEMOYA_AFFILIATE_URL }}
           ATEMOYA_GA_ID: ${{ vars.ATEMOYA_GA_ID }}
           ATEMOYA_ADSENSE_CLIENT: ${{ vars.ATEMOYA_ADSENSE_CLIENT }}
           ATEMOYA_CONTACT_EMAIL: ${{ vars.ATEMOYA_CONTACT_EMAIL }}
           ATEMOYA_GOOGLE_VERIFY: ${{ vars.ATEMOYA_GOOGLE_VERIFY }}
           ATEMOYA_NAVER_VERIFY: ${{ vars.ATEMOYA_NAVER_VERIFY }}
-          AFFILIATE_HUMIDIFIER: ${{ vars.AFFILIATE_HUMIDIFIER }}
-          AFFILIATE_HEATING: ${{ vars.AFFILIATE_HEATING }}
-          AFFILIATE_PURIFIER: ${{ vars.AFFILIATE_PURIFIER }}
-          AFFILIATE_DISPOSER: ${{ vars.AFFILIATE_DISPOSER }}
-          AFFILIATE_ROBOT: ${{ vars.AFFILIATE_ROBOT }}
-          AFFILIATE_BEAUTY: ${{ vars.AFFILIATE_BEAUTY }}
-          AFFILIATE_FEEDER: ${{ vars.AFFILIATE_FEEDER }}
-          AFFILIATE_LLM: ${{ vars.AFFILIATE_LLM }}
-          AFFILIATE_TRAVEL: ${{ vars.AFFILIATE_TRAVEL }}
-          AFFILIATE_BLACKFRIDAY: ${{ vars.AFFILIATE_BLACKFRIDAY }}
         run: node scripts/configure-site.mjs
       - name: Package and verify public-only release
         run: |
           node scripts/build-public.mjs
           node scripts/test-site.mjs dist-public
+          node scripts/test-no-coupang.mjs dist-public
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
