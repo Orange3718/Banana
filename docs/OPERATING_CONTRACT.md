@@ -2,7 +2,7 @@
 
 ## Purpose and boundaries
 
-Atemoya tests one affiliate-content business loop: demand → useful content → disclosed offer → visit/click → provider report → confirmed commission → cash received → keep/update/stop decision. The owner reports 0 KRW revenue as of 2026-11-01. Do not scale article volume or add providers until traffic, provider data, costs, and attribution are measurable. Personal trading and company work have separate data, schedules, and approval scopes.
+Atemoya is an evidence-led business system. The owner retired Coupang Partners on 2026-11-02 after reporting 0 KRW revenue as of 2026-11-01. The old direct publisher, outbox notification, and affiliate links are parked; historical publications and financial records remain auditable. The next revenue model is undecided. Do not restart affiliate publication or add a provider without a new owner decision and a measured demand → offer → revenue → cash loop. Personal trading and company work have separate data, schedules, and approval scopes.
 
 ## Durable sources
 
@@ -21,14 +21,14 @@ Codex, Claude Code, and Antigravity should open this repository root and use thi
 
 Every state-changing request needs `source`, `request_id`, `actor`, `domain`, `target_id`, `action`, `authorization_scope`, `idempotency_key`, `status`, and `evidence_refs`. Telegram natural language may identify intent; a deterministic gate decides allowed actions. Unknown sender, repeated update ID, missing target, and ambiguous instruction stop before mutation. The owner-authorized direct affiliate publication queue does not require per-item GOOD/BAD. New spending, account security steps, legal terms, and trading changes use their own explicit scope.
 
-Secrets stay in local credential stores and never enter Git, Drive, Telegram, or LifeOS. A Telegram chat ID is a routing identifier, not authentication by itself; webhook transport must also be checked before treating the route as fully trusted.
+Secrets stay in local credential stores and never enter Git, Drive, Telegram, or LifeOS. A Telegram chat ID is a routing identifier, not authentication by itself; webhook transport must also be checked before treating the route as fully trusted. The old direct affiliate publication authorization ended with the 2026-11-02 business decision.
 
 ## Operating loop
 
-1. `scripts/preflight.sh` reports live service, publication, measurement, and Telegram delivery status.
+1. `scripts/preflight.sh` reports live service, parked components, historical publication, measurement, and Telegram delivery status.
 2. Repair the first broken dependency, then run the applicable end-to-end test.
 3. Write execution results in PostgreSQL, publish a concise owner result through the outbox, and link durable decisions in LifeOS.
-4. Weekly: inspect visits, verified clicks, provider reports, confirmed commission, cash, direct cost, owner time, and each unknown value. At 0 KRW, stop volume expansion and work on measurement and one acquisition experiment.
+4. Weekly: inspect demand, visits, direct cost, owner time, any realized revenue, and each unknown value. Choose at most one new acquisition and offer experiment after an explicit business decision. Treat former Coupang records as history.
 
 ## Verification and rollback
 

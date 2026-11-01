@@ -1,16 +1,21 @@
 {
-  "decision_date": "2026-11-01",
-  "focus": "Measure the existing Coupang affiliate content batch before adding business lines or publication volume.",
+  "decision_date": "2026-11-02",
+  "focus": "Coupang Partners retired. Preserve past publication and financial records; stop partner links, direct publishing, and related alerts while evaluating the next revenue model from measured demand.",
   "parked_workflows": [
     "AtemoyaHardwareExecution01",
     "AtemoyaPreauthAgents01",
     "AtemoyaPortfolioReview01",
     "AtemoyaCommerceScout01",
     "AtemoyaDailyTrend01",
-    "AtemoyaDailyOwnerBrief01"
+    "AtemoyaDailyOwnerBrief01",
+    "AtemoyaAffiliateOutboxNotify01"
   ],
   "parked_launch_agents": [
-    "com.atemoya.revenue-reconciler"
+    "com.atemoya.revenue-reconciler",
+    "com.atemoya.affiliate-direct-publisher"
   ],
-  "resume_condition": "Update this decision after a measured acquisition and provider-report loop, then deploy the chosen workflow explicitly."
+  "resume_condition": "Explicit owner decision on a new business and provider, reviewed content and disclosure rules, and an end-to-end measured acquisition-to-cash test before any publisher is enabled.",
+  "retired_providers": [
+    "coupang_partners"
+  ]
 }

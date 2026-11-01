@@ -2,7 +2,7 @@
   {
     "id": "AtemoyaAffiliateOutboxNotify01",
     "name": "Atemoya 제휴 게시 outbox Telegram 전달",
-    "active": true,
+    "active": false,
     "settings": {
       "timezone": "Asia/Seoul",
       "errorWorkflow": "AtemoyaErrorHandler01",

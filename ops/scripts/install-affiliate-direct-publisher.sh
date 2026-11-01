@@ -11,6 +11,17 @@ agent_target="$HOME/Library/LaunchAgents/$label.plist"
 dashboard_label="com.atemoya.local-llm-status"
 dashboard_target="$HOME/Library/LaunchAgents/$dashboard_label.plist"
 
+if python3 - "$repo_root/ops/business-scope-20261101.json" <<'PY_SCOPE'
+import json
+import sys
+scope = json.load(open(sys.argv[1]))
+sys.exit(0 if 'com.atemoya.affiliate-direct-publisher' in scope.get('parked_launch_agents', []) else 1)
+PY_SCOPE
+then
+  echo "Refusing to install parked direct publisher; update the business scope before reactivation." >&2
+  exit 1
+fi
+
 test "$(git -C "$repo_root" branch --show-current)" != "main" || {
   echo "Refusing to install an unreviewed publisher from main." >&2
   exit 1

@@ -610,6 +610,10 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--verify-timeout", type=int, default=240)
     args = parser.parse_args()
+    scope = json.loads((ROOT / "ops/business-scope-20261101.json").read_text())
+    if not args.validate_all and "com.atemoya.affiliate-direct-publisher" in scope.get("parked_launch_agents", []):
+        print(json.dumps({"status": "parked", "reason": "Coupang Partners retired"}, ensure_ascii=False))
+        return 2
     manifest = load_manifest(args.manifest)
     if args.validate_all:
         print(json.dumps(validate_all(manifest), ensure_ascii=False, indent=2))
