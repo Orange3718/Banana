@@ -6,7 +6,8 @@
     "AtemoyaPreauthAgents01",
     "AtemoyaPortfolioReview01",
     "AtemoyaCommerceScout01",
-    "AtemoyaDailyTrend01"
+    "AtemoyaDailyTrend01",
+    "AtemoyaDailyOwnerBrief01"
   ],
   "resume_condition": "Update this decision after a measured acquisition and provider-report loop, then deploy the chosen workflow explicitly."
 }
