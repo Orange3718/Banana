@@ -26,10 +26,11 @@ from browser and desktop UI control. The iMac should run like a small server.
 
 The Mac screen lock must not stop normal Atemoya operation.
 
-Screen unlock is required only for account authentication, 2FA, payment,
-browser-only login sessions, and one-time permission prompts. Everything else
-must be runnable through CLI, local HTTP APIs, n8n webhooks, PostgreSQL, Git,
-and LaunchAgents.
+Owner action may be needed for account authentication, 2FA, payment,
+and one-time permission prompts. A remotely accessible browser tab may still
+work while the Mac is locked. Screen unlock is needed only when the required
+native GUI is actually blocked. Server work must run through CLI, local HTTP
+APIs, n8n webhooks, PostgreSQL, Git, and LaunchAgents.
 
 ## Operating layers
 
@@ -129,13 +130,11 @@ Do not request Mac unlock for:
 - restarting existing containers within watchdog limits.
 - generating drafts, local LLM runs, reports, or site files.
 
-Request Mac unlock only for:
-
-- browser-only account login.
-- OAuth consent screens.
-- 2FA, password, recovery code or security prompt.
-- visual inspection of a page that cannot be checked by HTTP/API.
-- manual public post submission when no approved API exists.
+Request owner action only at the actual login, OAuth, 2FA, password,
+recovery-code, payment, or legal-consent step. First check whether an authenticated
+remote browser tab can perform visual inspection or manual web editing while
+the Mac is locked. Request Mac unlock only for a required native app GUI that
+is actually inaccessible while locked.
 
 ## Failure handling
 
