@@ -13,6 +13,12 @@ description: Operate and extend the Atemoya AI-operated revenue system on the iM
 4. 현재 요청과 직접 관련된 문서만 추가로 읽는다. 긴 대화 전체를 다시 요약하지 않는다.
 5. 미완료 작업을 `docs/OPEN_ITEMS.md`와 실제 시스템 상태로 대조하고, 안전하게 실행 가능한 다음 단계부터 바로 진행한다.
 
+## 화면 잠금과 원격 운영
+
+- iMac 화면 잠금을 서버 장애로 해석하지 않는다. 상태 조회, Docker/n8n/PostgreSQL/Ollama 점검, LaunchAgent 확인, 백업, 워크플로 CLI 적용, Git 작업은 화면을 열지 않고 실행한다. 먼저 `scripts/preflight.sh`와 실제 API/DB 응답을 확인한다.
+- 계정 로그인·2FA·브라우저 전용 편집·네이티브 앱 GUI 시험이 정확히 필요한 단계에서만 사용자에게 화면 세션을 요청한다. 그 경우에도 독립적인 서버 작업은 계속한다.
+- 화면 잠금과 로그아웃·재부팅을 구별한다. 현재 Docker Desktop과 일부 LaunchAgent는 사용자 로그인 뒤 시작하므로 로그인 전 자동 복구를 검증한 것으로 말하지 않는다. 세부 경계는 `docs/REMOTE_HEADLESS_OPERATING_MODEL.md`를 따른다.
+
 ## 기준
 
 - 최우선 목표는 수익과 순현금흐름이다.
@@ -33,7 +39,7 @@ description: Operate and extend the Atemoya AI-operated revenue system on the iM
 - 예약 작업은 LaunchAgent/n8n 활성 상태와 최근 실행을 함께 확인한다.
 - 백그라운드 실행으로 등록하지 않은 일을 `진행 중`이라고 표현하지 않는다.
 - 계정 인증·2FA·결제·법적 동의가 유일한 차단점일 때만 사용자에게 요청한다.
-- 이미 승인된 직접 제휴 게시 10건은 완료됐으며 매건 재승인하지 않는다. 새 게시 배치, 결제·광고비·계정 인증·법적 동의 및 다른 도메인은 현재 위임 범위를 확인한다.
+- 쿠팡 파트너스는 2026-11-02 운영 종료됐다. 직접 게시 10건은 과거 이력이며 게시기·알림을 다시 켜지 않는다. 새 사업·게시 배치, 결제·광고비·계정 인증·법적 동의 및 다른 도메인은 현재 위임 범위를 확인한다.
 
 ## 결과 보고 계약
 
